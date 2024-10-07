@@ -49,18 +49,21 @@ def simulate_near_field_dipole(antenna_size, wavelength, plane_size, x_distance,
     
 
     # Limit the far-field data to the valid angular range (based on antenna size and plane)
-    theta_max = np.arctan(plane_size / (2 * z_distance))  # Maximum valid angle from the plane
-    valid_indices = np.where(np.abs(np.linspace(-np.pi/2, np.pi/2, num_points)) <= theta_max)[0]
+    inner_angle = np.arctan2((plane_size / 2), z_distance)  # Maximum valid angle from the plane
+    angle_min = np.pi/2 - inner_angle
+    angle_max = np.pi/2 + inner_angle
+
+    #valid_indices = np.where(np.abs(np.linspace(-np.pi/2, np.pi/2, num_points)) <= theta_max)[0]
     
     # Define angle ranges
-    theta_range = np.linspace(-np.pi/2, np.pi/2, num_points)  # Elevation angle range
-    phi_range = np.linspace(0, 2*np.pi, num_points)  # Azimuth angle range
+    angle_range = np.linspace(angle_min, angle_max, num_points)  # Elevation angle range
+    #phi_range = np.linspace(0, 2*np.pi, num_points)  # Azimuth angle range
     
     # E-plane: when phi = 0 (azimuth is constant)
-    theta_limited = theta_range[valid_indices]  # Corresponding limited angles for plotting
-    phi_limited = phi_range[valid_indices]  # Corresponding limited angles for plotting
+    #theta_limited = theta_range[valid_indices]  # Corresponding limited angles for plotting
+    #phi_limited = phi_range[valid_indices]  # Corresponding limited angles for plotting
 
-    return near_field, theta_limited, phi_limited, valid_indices
+    return near_field, angle_range
 
 
 def far_field_pattern_limited(near_field):
@@ -148,6 +151,37 @@ def plot_far_field(far_field_amplitude, theta_limited, phi_limited, valid_indice
     plt.show()
 
 
+def save_near_field_data_with_angles(near_field, filename, angle_range):
+    """
+    Save near-field data using the precomputed theta and phi angles from the simulation.
+    
+    Parameters:
+    - near_field: The simulated near-field data (complex values, amplitude and phase).
+    - filename: The name of the file to save the data.
+    - theta: Array of theta (elevation) angles in radians.
+    - phi: Array of phi (azimuthal) angles in radians.
+    
+    Format:
+    theta (rad)   phi (rad)   Eabs (V/m)   Ethetaabs (V/m)   Ephiabs (V/m)
+    """
+
+    with open(filename, 'w') as f:
+        # Iterate over the grid points and save the data
+        for i in range(near_field.shape[0]):
+            for j in range(near_field.shape[1]):
+                # Get theta and phi directly from the provided arrays
+                theta_val = angle_range[i]
+                phi_val = angle_range[j]
+                
+                # Extract the near-field amplitude and components (split complex field)
+                Eabs = np.abs(near_field[i, j])  # Field magnitude
+                Ethetaabs = np.real(near_field[i, j])  # Simplified: assuming Etheta is the real part
+                Ephiabs = np.imag(near_field[i, j])    # Simplified: assuming Ephi is the imaginary part
+                
+                # Save the values in the file (space-separated)
+                f.write(f"{theta_val:.6f} {phi_val:.6f} {Eabs:.6f} {Ethetaabs:.6f} {Ephiabs:.6f}\n")
+
+
 # Define parameters
 antenna_size = 5   # Largest dimension of the antenna in meters
 wavelength = 10     # Wavelength in meters
@@ -156,15 +190,18 @@ num_points = 100     # Number of point along each axis
 z_distance = 3.5     # Distance from the antenna to the measurement plane
 
 # Step 1: Simulate Near-Field Data
-near_field, theta_limited, phi_limited, valid_indices = simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points)
+near_field, angle_range = simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points)
+
+filename = "./NF-data.txt"
+save_near_field_data_with_angles(near_field, filename, angle_range)
 
 # Step 2: Transform the near-field to far-field data
-far_field_amplitude = far_field_pattern_limited(near_field)
+#far_field_amplitude = far_field_pattern_limited(near_field)
 
 # Step 3: Plot the far-field radiation pattern with the plane's center aligned to 0 degrees
-# plot_far_field_image(far_field_amplitude)
+#plot_far_field_image(far_field_amplitude)
 
-plot_far_field(far_field_amplitude, theta_limited, phi_limited, valid_indices)
+#plot_far_field(far_field_amplitude, theta_limited, phi_limited, valid_indices)
 
 
 
