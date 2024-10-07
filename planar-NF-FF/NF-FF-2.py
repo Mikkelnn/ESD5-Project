@@ -44,7 +44,11 @@ def nf_ff_transform(near_field, wavelength, plane_size):
 
     # Normalize the far-field pattern
     far_field_pattern = np.abs(far_field_2D) / np.max(np.abs(far_field_2D))
-    
+
+    far_field_pattern = (1j((k * np.exp(-1j * k * theta_far)) / (2 * np.pi * theta_far)) * np.cos(theta_far) * far_field_pattern)    
+
+    print(f"FF-trans: {far_field_pattern}")
+
     return far_field_pattern, theta_far, ky, kz
 
 def plot_far_field_heatmap(far_field_pattern, theta_far, ky, kz):

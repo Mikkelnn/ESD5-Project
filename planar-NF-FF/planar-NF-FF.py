@@ -192,14 +192,14 @@ z_distance = 3.5     # Distance from the antenna to the measurement plane
 # Step 1: Simulate Near-Field Data
 near_field, angle_range = simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points)
 
-filename = "./NF-data.txt"
-save_near_field_data_with_angles(near_field, filename, angle_range)
+#filename = "./NF-data.txt"
+#save_near_field_data_with_angles(near_field, filename, angle_range)
 
 # Step 2: Transform the near-field to far-field data
-#far_field_amplitude = far_field_pattern_limited(near_field)
+far_field_amplitude = far_field_pattern_limited(near_field)
 
 # Step 3: Plot the far-field radiation pattern with the plane's center aligned to 0 degrees
-#plot_far_field_image(far_field_amplitude)
+plot_far_field_image(far_field_amplitude)
 
 #plot_far_field(far_field_amplitude, theta_limited, phi_limited, valid_indices)
 
