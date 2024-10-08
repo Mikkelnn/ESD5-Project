@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm  # Importing tqdm for progress bar
+import os  # For checking file existence
 
 def simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points=500):
     k = 2 * np.pi / wavelength  # Wavenumber
@@ -145,11 +146,11 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     - theta_far: The corresponding angles for the far-field pattern.
     """
 
-    e_plane_magnitude = far_field_amplitude[:, num_points // 2]  # Cut at phi = 0
+    e_plane_magnitude = np.log(far_field_amplitude[:, num_points // 2])  # Cut at phi = 0
     #e_plane_magnitude_limited = e_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # H-plane: when theta = 0 (elevation is constant)
-    h_plane_magnitude = far_field_amplitude[num_points // 2 , :]  # Cut at theta = 0
+    h_plane_magnitude = np.log(far_field_amplitude[num_points // 2 , :])  # Cut at theta = 0
     #h_plane_magnitude_limited = h_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # Create the figure and the gridspec
@@ -160,7 +161,7 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     ax1 = fig.add_subplot(grid[0, 0], projection='polar')
     ax1.plot(angles, e_plane_magnitude)
     ax1.set_title('E-Plane (Limited Angle Range)')
- 
+
     # H-plane polar plot (Top Right)
     ax2 = fig.add_subplot(grid[0, 1], projection='polar')
     ax2.plot(angles, h_plane_magnitude)
@@ -190,6 +191,14 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     plt.show()
 
 
+def save_simulation_data(data, filename):
+    """Save the simulation data to a .npy file."""
+    np.save(filename, data)
+
+def load_simulation_data(filename):
+    """Load the simulation data from a .npy file."""
+    return np.load(filename, allow_pickle=True)
+
 
 # Constants
 c = 3e8  # Speed of light in vacuum (m/s)
@@ -213,14 +222,28 @@ num_aperture_points = 200  # High-resolution aperture sampling
 
 # Step 1: Simulate the near-field data
 #near_field, Y, Z = simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points)
-near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
+#near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
+
+# Filename to save/load simulation data
+filename = "./near_field_simulation_data.npy"
+
+# Check if the simulation data file exists
+if os.path.exists(filename):
+    user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
+    if user_input in ['yes', 'y']:
+        near_field = load_simulation_data(filename)
+        print("Loaded saved simulation data.")
+else:
+    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
+    save_simulation_data(near_field, filename)
+    print("New simulation completed and data saved.")
+
 
 #plot_field_heatmap(near_field)
-
 # Step 2: Perform the near-field to far-field transformation
 far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
 
-print(f"Angle_min: {np.min(theta_far)} Angle_max: {np.max(theta_far)}")
+#print(f"Angle_min: {np.min(theta_far)} Angle_max: {np.max(theta_far)}")
 
 # Step 3: Plot the far-field radiation pattern heatmap
 #plot_far_field_heatmap(far_field_pattern, theta_far, ky, kz)
