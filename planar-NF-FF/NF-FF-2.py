@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm  # Importing tqdm for progress bar
 import os  # For checking file existence
+import random
 
 def simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance, num_points=500):
     k = 2 * np.pi / wavelength  # Wavenumber
@@ -51,19 +52,27 @@ def horn_near_field_precise(wavelength, aperture_width, aperture_height, distanc
     
     # Loop over points on the aperture to calculate contribution at each observation point
     for i in tqdm(range(num_aperture_points), desc="Simulating Aperture Points"):
-        for j in range(num_aperture_points):
+        for j in range(num_aperture_points):           
+            #Introduce noise to distance
+            mu = 0
+            sigma = 1
+            distance_noisy = distance * (1 - random.gauss(mu, sigma) * 0.01)
+            #print(f"distance_noisy: {distance_noisy}")
+
             # Position of current aperture point
-            x_a = X_aperture[i, j]
-            y_a = Y_aperture[i, j]
-            
+            x_a = X_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
+            y_a = Y_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
+
             # Distance from aperture point to each point on the observation plane
-            R = np.sqrt((X_plane - x_a)**2 + (Y_plane - y_a)**2 + distance**2)
+            R = np.sqrt((X_plane - x_a)**2 + (Y_plane - y_a)**2 + distance_noisy**2)
             
             # Fresnel Diffraction Approximation: Contribution from this aperture point
             E_field_plane += E_aperture[i, j] * np.exp(-1j * k * R) / R * (1j / wavelength) * np.exp(-1j * k * distance)
 
     # Normalize by the number of aperture points to ensure reasonable magnitude
     E_field_plane /= num_aperture_points**2
+
+    #E_field_plane = np.abs(E_field_plane) / np.max(np.abs(E_field_plane))
 
     return E_field_plane
 
@@ -107,6 +116,8 @@ def nf_ff_transform(near_field, wavelength, plane_size):
     #far_field_pattern = (1j((k * np.exp(-1j * k * theta_far)) / (2 * np.pi * theta_far)) * np.cos(theta_far) * far_field_pattern)    
 
     far_field_pattern = np.abs(far_field_2D) / np.max(np.abs(far_field_2D))
+    
+    #far_field_pattern = np.abs(far_field_2D)
 
     #print(f"FF-trans: {far_field_pattern}")
 
@@ -146,11 +157,11 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     - theta_far: The corresponding angles for the far-field pattern.
     """
 
-    e_plane_magnitude = np.log(far_field_amplitude[:, num_points // 2])  # Cut at phi = 0
+    e_plane_magnitude = 10 * np.log(far_field_amplitude[:, num_points // 2])  # Cut at phi = 0
     #e_plane_magnitude_limited = e_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # H-plane: when theta = 0 (elevation is constant)
-    h_plane_magnitude = np.log(far_field_amplitude[num_points // 2 , :])  # Cut at theta = 0
+    h_plane_magnitude = 10 * np.log(far_field_amplitude[num_points // 2 , :])  # Cut at theta = 0
     #h_plane_magnitude_limited = h_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # Create the figure and the gridspec
@@ -169,7 +180,7 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
 
     # Heatmap (Bottom, centered across both columns)
     ax3 = fig.add_subplot(grid[1, :])
-    cax = ax3.imshow(far_field_amplitude, extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
+    cax = ax3.imshow(10 * np.log(far_field_amplitude), extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
     fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
     ax3.set_title('Far-Field Radiation Pattern Heatmap')
     ax3.set_xlabel('K_Y (1/m)')
@@ -179,7 +190,7 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     near_field_amplitude = np.abs(near_field) / np.max(np.abs(near_field))
     # Fourth plot (Third Row, centered across both columns)
     ax4 = fig.add_subplot(grid[2, :])
-    cax2 = ax4.imshow(near_field_amplitude, extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
+    cax2 = ax4.imshow(10 * np.log(near_field_amplitude), extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
     fig.colorbar(cax2, ax=ax4, label='Near-field amplitude (normalized)')
     ax4.set_title('Near-Field Radiation Pattern Heatmap')
     ax4.set_xlabel('K_Y (1/m)')
@@ -228,12 +239,15 @@ num_aperture_points = 200  # High-resolution aperture sampling
 filename = "./near_field_simulation_data.npy"
 
 # Check if the simulation data file exists
+generate = True
 if os.path.exists(filename):
     user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
     if user_input in ['yes', 'y']:
+        generate = False
         near_field = load_simulation_data(filename)
         print("Loaded saved simulation data.")
-else:
+
+if (generate):
     near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
     save_simulation_data(near_field, filename)
     print("New simulation completed and data saved.")
