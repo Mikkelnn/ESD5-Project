@@ -29,7 +29,7 @@ def simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance,
     
     return near_field, Y, Z
 
-def horn_near_field_precise(wavelength, aperture_width, aperture_height, distance, plane_width, plane_height, num_points_w, num_points_h, num_aperture_points=200):
+def horn_near_field_precise(wavelength, aperture_width, aperture_height, distance, plane_width, plane_height, num_points_w, num_points_h, num_aperture_points=200, sigma=0):
     # Derived parameters
     k = 2 * np.pi / wavelength  # Wavenumber
 
@@ -55,13 +55,16 @@ def horn_near_field_precise(wavelength, aperture_width, aperture_height, distanc
         for j in range(num_aperture_points):           
             #Introduce noise to distance
             mu = 0
-            sigma = 1
-            distance_noisy = distance * (1 - random.gauss(mu, sigma) * 0.01)
+            distance_noisy = distance + (np.random.normal(mu, sigma * 0.5) * 0.01)
+            # distance_noisy = distance * (1 - np.random.normal(mu, sigma) * 0.01)
+            #distance_noisy = distance * (1 - random.gauss(mu, sigma) * 0.01)
             #print(f"distance_noisy: {distance_noisy}")
 
             # Position of current aperture point
-            x_a = X_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
-            y_a = Y_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
+            #x_a = X_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
+            #y_a = Y_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
+            x_a = X_aperture[i, j] + (random.gauss(mu, sigma * 0.5) * 0.01)
+            y_a = Y_aperture[i, j] + (random.gauss(mu, sigma * 0.5) * 0.01)
 
             # Distance from aperture point to each point on the observation plane
             R = np.sqrt((X_plane - x_a)**2 + (Y_plane - y_a)**2 + distance_noisy**2)
@@ -73,55 +76,6 @@ def horn_near_field_precise(wavelength, aperture_width, aperture_height, distanc
     E_field_plane /= num_aperture_points**2
 
     #E_field_plane = np.abs(E_field_plane) / np.max(np.abs(E_field_plane))
-
-    return E_field_plane
-
-def horn_near_field_precise_fast(wavelength, aperture_width, aperture_height, distance, plane_width, plane_height, num_points_w, num_points_h, num_aperture_points=200):
-    # Derived parameters
-    k = 2 * np.pi / wavelength  # Wavenumber
-    k_distance_term = np.exp(-1j * k * distance)  # Precompute phase term for the distance
-    wavelength_term = 1j / wavelength  # Precompute the wavelength term
-
-    # Create grid for the observation plane
-    x_plane = np.linspace(-plane_width / 2, plane_width / 2, num_points_w)
-    y_plane = np.linspace(-plane_height / 2, plane_height / 2, num_points_h)
-    X_plane, Y_plane = np.meshgrid(x_plane, y_plane)
-
-    # Create grid for the aperture (higher resolution for precision)
-    x_aperture = np.linspace(-aperture_width / 2, aperture_width / 2, num_aperture_points)
-    y_aperture = np.linspace(-aperture_height / 2, aperture_height / 2, num_aperture_points)
-    X_aperture, Y_aperture = np.meshgrid(x_aperture, y_aperture)
-
-    # Gaussian noise parameters
-    mu = 0
-    sigma = 0.01  # 1% noise
-
-    # Add Gaussian noise to aperture points (vectorized)
-    X_aperture_noisy = X_aperture * (1 + np.random.normal(mu, sigma, X_aperture.shape))
-    Y_aperture_noisy = Y_aperture * (1 + np.random.normal(mu, sigma, Y_aperture.shape))
-
-    # Introduce noise to the distance
-    distance_noisy = distance * (1 + np.random.normal(mu, sigma))
-
-    # Define the aperture field distribution (e.g., a cosine distribution for TE10 mode)
-    E_aperture = np.cos(np.pi * X_aperture / aperture_width) * np.cos(np.pi * Y_aperture / aperture_height)
-
-    # Calculate the distance from all aperture points to all observation points
-    R = np.sqrt((X_plane[:, :, np.newaxis, np.newaxis] - X_aperture_noisy[np.newaxis, np.newaxis, :, :])**2 +
-                (Y_plane[:, :, np.newaxis, np.newaxis] - Y_aperture_noisy[np.newaxis, np.newaxis, :, :])**2 +
-                distance_noisy**2)
-
-    # Contribution from each aperture point to the field (vectorized Fresnel diffraction)
-    E_contributions = E_aperture[np.newaxis, np.newaxis, :, :] * np.exp(-1j * k * R) / R
-
-    # Sum over aperture points to get the total field
-    E_field_plane = np.sum(E_contributions, axis=(2, 3))
-
-    # Apply the wavelength and distance phase shift terms
-    E_field_plane *= wavelength_term * k_distance_term
-
-    # Normalize by the number of aperture points to ensure reasonable magnitude
-    E_field_plane /= num_aperture_points**2
 
     return E_field_plane
 
@@ -257,7 +211,7 @@ def save_simulation_data(data, filename):
 
 def load_simulation_data(filename):
     """Load the simulation data from a .npy file."""
-    return np.load(filename, allow_pickle=True)
+    return np.load(filename + ".npy", allow_pickle=True)
 
 
 # Constants
@@ -288,26 +242,92 @@ num_aperture_points = 200  # High-resolution aperture sampling
 filename = "./near_field_simulation_data.npy"
 
 # Check if the simulation data file exists
-generate = True
-if os.path.exists(filename):
-    user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
-    if user_input in ['yes', 'y']:
-        generate = False
-        near_field = load_simulation_data(filename)
-        print("Loaded saved simulation data.")
+#generate = True
+#if os.path.exists(filename):
+#    user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
+#    if user_input in ['yes', 'y']:
+#        generate = False
+#        near_field = load_simulation_data(filename)
+#        print("Loaded saved simulation data.")
 
-if (generate):
-    near_field = horn_near_field_precise_fast(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
-    save_simulation_data(near_field, filename)
-    print("New simulation completed and data saved.")
+#if (generate):
+#    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, sigma)
+#    save_simulation_data(near_field, filename)
+#    print("New simulation completed and data saved.")
 
 
 #plot_field_heatmap(near_field)
 # Step 2: Perform the near-field to far-field transformation
-far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
+#far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
 
 #print(f"Angle_min: {np.min(theta_far)} Angle_max: {np.max(theta_far)}")
 
 # Step 3: Plot the far-field radiation pattern heatmap
 #plot_far_field_heatmap(far_field_pattern, theta_far, ky, kz)
-plot_far_field(near_field, far_field_pattern, theta_far, num_points)
+#plot_far_field(near_field, far_field_pattern, theta_far, num_points)
+
+
+# Load ideal near field and calculate the corresponding far field (the reference)
+vals = [0, 0.5, 1, 2, 3, 4, 5, 10]
+far_fields = []
+reference_far_field = None
+
+# generate NF
+#for i in vals:
+#    print(f"Sigma: {i}")
+#    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, i)
+#    save_simulation_data(near_field, f"./data/NF-data-{i}")
+
+for i in range(len(vals)):
+    near_field = load_simulation_data(f"./data/NF-data-{vals[i]}")
+    far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
+    far_fields.append(far_field_pattern)
+
+    if i == 0:
+        reference_far_field = far_field_pattern  # Set the first far field as the ideal reference
+
+# Function to compute mean squared error (MSE)
+def calculate_mse(field1, field2):
+    return np.mean(np.abs(field1 - field2)**2)
+
+# Function to calculate normalized cross-correlation
+def calculate_correlation(field1, field2):
+    numerator = np.sum(np.abs(field1 * np.conjugate(field2)))
+    denominator = np.sqrt(np.sum(np.abs(field1)**2) * np.sum(np.abs(field2)**2))
+    return np.abs(numerator / denominator)
+
+# Initialize arrays to store the results
+mse_results = []
+correlation_results = []
+
+# Compare each far field to the ideal one
+for i in range(1, len(far_fields)):  # Start from index 1 to compare with the reference
+    mse = calculate_mse(reference_far_field, far_fields[i])
+    correlation = calculate_correlation(reference_far_field, far_fields[i])
+
+    mse_results.append(mse)
+    correlation_results.append(correlation)
+
+    print(f"Far Field {i}: MSE = {mse}, Correlation = {correlation}")
+
+# Plotting the MSE and Correlation results
+x_labels = [str(v) for v in vals[1:]]  # Exclude the ideal case (vals[0])
+
+plt.figure(figsize=(10, 5))
+
+# Plot MSE
+plt.subplot(1, 2, 1)
+plt.bar(x_labels, mse_results)
+plt.xlabel('Maximum error in cm (+-)')
+plt.ylabel('Mean Squared Error (MSE)')
+plt.title('MSE vs Ideal Far Field')
+
+# Plot Correlation
+plt.subplot(1, 2, 2)
+plt.bar(x_labels, correlation_results)
+plt.xlabel('Maximum error in cm (+-)')
+plt.ylabel('Correlation')
+plt.title('Correlation vs Ideal Far Field')
+
+plt.tight_layout()
+plt.show()
