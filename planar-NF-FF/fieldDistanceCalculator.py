@@ -15,7 +15,7 @@ def calculate_field_regions(antenna_size, wavelength):
     reactive_near_field = 0.62 * math.sqrt((antenna_size ** 3) / wavelength)
     
     # Fresnel (radiating near-field) boundary
-    fresnel_region_upper = (2 * antenna_size**2) / wavelength
+    fresnel_region_upper = 2 * ((antenna_size**2) / wavelength)
     
     # Far-field boundary (Fraunhofer region)
     far_field_start = fresnel_region_upper
@@ -27,8 +27,8 @@ def calculate_field_regions(antenna_size, wavelength):
     }
 
 # Example usage:
-antenna_size = 5  # Largest dimension of the antenna (D) in meters
-wavelength = 10    # Wavelength in meters
+antenna_size = 0.09  # Largest dimension of the antenna (D) in meters
+wavelength = 0.36   # Wavelength in meters
 
 regions = calculate_field_regions(antenna_size, wavelength)
 print(f"Reactive Near Field boundary: {regions['reactive_near_field']:.2f} meters")
