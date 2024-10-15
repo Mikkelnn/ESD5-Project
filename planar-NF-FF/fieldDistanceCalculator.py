@@ -27,8 +27,8 @@ def calculate_field_regions(antenna_size, wavelength):
     }
 
 # Example usage:
-antenna_size = 0.09  # Largest dimension of the antenna (D) in meters
-wavelength = 0.36   # Wavelength in meters
+antenna_size = 20  # Largest dimension of the antenna (D) in meters
+wavelength = 0.03   # Wavelength in meters
 
 regions = calculate_field_regions(antenna_size, wavelength)
 print(f"Reactive Near Field boundary: {regions['reactive_near_field']:.2f} meters")

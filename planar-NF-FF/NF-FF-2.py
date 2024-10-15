@@ -29,7 +29,27 @@ def simulate_near_field_dipole(antenna_size, wavelength, plane_size, z_distance,
     
     return near_field, Y, Z
 
-def horn_near_field_precise(wavelength, aperture_width, aperture_height, distance, plane_width, plane_height, num_points_w, num_points_h, num_aperture_points=200, sigma=0):
+def horn_near_field_precise(wavelength, aperture_width, aperture_height, distance, plane_width, plane_height, num_points_w, num_points_h, num_aperture_points=200, placement_noise=0, amp_noise=0, phase_noise=0):
+    """
+    Simulates the near field of a horn antenna with noise in the measurement plane.
+
+    Parameters:
+    wavelength: float - Wavelength of the wave.
+    aperture_width: float - Width of the aperture.
+    aperture_height: float - Height of the aperture.
+    distance: float - Distance from the aperture to the measurement plane.
+    plane_width: float - Width of the measurement plane.
+    plane_height: float - Height of the measurement plane.
+    num_points_w: int - Number of points along the width of the observation plane.
+    num_points_h: int - Number of points along the height of the observation plane.
+    num_aperture_points: int - Number of points along the aperture (resolution).
+    placement_noise: float - Standard deviation for Gaussian noise in aperture position and distance.
+    amp_noise: float - Standard deviation for amplitude noise on the observation plane.
+    phase_noise: float - Standard deviation for phase noise on the observation plane.
+
+    Returns:
+    E_field_plane: complex np.array - The resulting electric field on the measurement plane.
+    """
     # Derived parameters
     k = 2 * np.pi / wavelength  # Wavenumber
 
@@ -55,22 +75,49 @@ def horn_near_field_precise(wavelength, aperture_width, aperture_height, distanc
         for j in range(num_aperture_points):           
             #Introduce noise to distance
             mu = 0
-            distance_noisy = distance + (np.random.normal(mu, sigma * 0.5) * 0.01)
-            # distance_noisy = distance * (1 - np.random.normal(mu, sigma) * 0.01)
-            #distance_noisy = distance * (1 - random.gauss(mu, sigma) * 0.01)
+            distance_noisy = distance
+            
+            # distance_noisy = distance * (1 - np.random.normal(mu, placement_noise) * 0.01)
+            #distance_noisy = distance * (1 - random.gauss(mu, placement_noise) * 0.01)
             #print(f"distance_noisy: {distance_noisy}")
 
             # Position of current aperture point
-            #x_a = X_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
-            #y_a = Y_aperture[i, j] * (1 - random.gauss(mu, sigma) * 0.01)
-            x_a = X_aperture[i, j] + (random.gauss(mu, sigma * 0.5) * 0.01)
-            y_a = Y_aperture[i, j] + (random.gauss(mu, sigma * 0.5) * 0.01)
+            x_a = X_aperture[i, j]
+            y_a = Y_aperture[i, j]
+            #x_a = X_aperture[i, j] * (1 - random.gauss(mu, placement_noise) * 0.01)
+            #y_a = Y_aperture[i, j] * (1 - random.gauss(mu, placement_noise) * 0.01)
+            #x_a = X_aperture[i, j] + (random.gauss(mu, placement_noise * 0.5) * 0.01)
+            #y_a = Y_aperture[i, j] + (random.gauss(mu, placement_noise * 0.5) * 0.01)
+
+            # add noise to placement
+            if (placement_noise > 0.0):
+                distance_noisy += (np.random.normal(mu, placement_noise * 0.5) * 0.01)
+                x_a += (random.gauss(mu, placement_noise * 0.5) * 0.01)
+                y_a += (random.gauss(mu, placement_noise * 0.5) * 0.01)
+
 
             # Distance from aperture point to each point on the observation plane
             R = np.sqrt((X_plane - x_a)**2 + (Y_plane - y_a)**2 + distance_noisy**2)
             
             # Fresnel Diffraction Approximation: Contribution from this aperture point
-            E_field_plane += E_aperture[i, j] * np.exp(-1j * k * R) / R * (1j / wavelength) * np.exp(-1j * k * distance)
+            # E_field_plane += E_aperture[i, j] * np.exp(-1j * k * R) / R * (1j / wavelength) * np.exp(-1j * k * distance)
+            
+            # Fresnel Diffraction Approximation: Contribution from this aperture point
+            E_contrib = E_aperture[i, j] * np.exp(-1j * k * R) / R * (1j / wavelength) * np.exp(-1j * k * distance)
+            
+            # Add noise to amplitude and phase in the measurement plane
+            # Amplitude noise: multiplicative Gaussian noise (centered at 1)
+            if (amp_noise > 0.0):
+                amplitude_noise_factor = 1 + np.random.normal(0, amp_noise, E_contrib.shape)
+                E_contrib *= amplitude_noise_factor
+
+            # Phase noise: Additive Gaussian noise to phase
+            if (phase_noise > 0.0):
+                phase_noise_factor = np.exp(1j * np.random.normal(0, phase_noise, E_contrib.shape))
+                E_contrib *= phase_noise_factor
+
+            # Accumulate the contribution into the total electric field on the measurement plane
+            E_field_plane += E_contrib
 
     # Normalize by the number of aperture points to ensure reasonable magnitude
     E_field_plane /= num_aperture_points**2
@@ -268,18 +315,24 @@ filename = "./near_field_simulation_data.npy"
 
 
 # Load ideal near field and calculate the corresponding far field (the reference)
-vals = [0, 0.5, 1, 2, 3, 4, 5, 10]
+vals = [0, 0.01, 0.1, 0.5, 1] #[0, 0.5, 1, 2, 3, 4, 5, 10]
 far_fields = []
 reference_far_field = None
 
 # generate NF
-#for i in vals:
-#    print(f"Sigma: {i}")
-#    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, i)
-#    save_simulation_data(near_field, f"./data/NF-data-{i}")
+'''
+for i in vals:
+    print(f"Sigma: {i}")
+    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, placement_noise=(0 if i == 0 else 2), amp_noise=i, phase_noise=i)
+    save_simulation_data(near_field, f"./data/noisy_placement_measurement/NF-data-amp-phase-2-{i}")
+    #near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, placement_noise=0, amp_noise=0, phase_noise=i)
+    #save_simulation_data(near_field, f"./data/noisy_placement_measurement/NF-data-phase-{i}")
+
+exit()
+'''
 
 for i in range(len(vals)):
-    near_field = load_simulation_data(f"./data/NF-data-{vals[i]}")
+    near_field = load_simulation_data(f"./data/noisy_placement_measurement/NF-data-amp-phase-2-{vals[i]}")
     far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
     far_fields.append(far_field_pattern)
 
