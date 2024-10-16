@@ -23,9 +23,9 @@ el_1d = el(:,1);
 az_L = length(az_1d);
 el_L = length(el_1d);
 
-if 1
-    ant = reflectorParabolic;
-    design(reflectorParabolic,f);
+if 0
+    ant = horn;
+    design(horn,f);
     
 
     [bw, angles] = beamwidth(ant, f, 0, 1:1:360);
