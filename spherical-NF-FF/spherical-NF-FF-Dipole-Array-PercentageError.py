@@ -4,16 +4,16 @@ from scipy.special import sph_harm
 import random
 
 # Constants
-errorPercent = 0.01
+errorPercent = 0.0
 frequency = 8e9  # Frequency in Hz (8 GHz)
 wavelength = 3e8 / frequency  # Wavelength in meters
 k = 2 * np.pi / wavelength  # Wave number
-radius_nf = 0.1  # Radius in meters for near field (20 cm)
+radius_nf = 34*wavelength  # Radius in meters for near field (20 cm)
 
 # Parameters
-num_dipoles = 4  # Number of dipoles in the array
-spacing = wavelength/2  # Spacing between dipoles in meters
-num_samples_theta = 100  # Number of samples for theta (0 to π)
+num_dipoles = 30  # Number of dipoles in the array
+spacing = wavelength  # Spacing between dipoles in meters
+num_samples_theta = 200  # Number of samples for theta (0 to π)
 num_samples_phi = num_samples_theta  # Number of samples for phi (0 to 2π)
 
 # Centering the dipoles around the origin on the x-axis
