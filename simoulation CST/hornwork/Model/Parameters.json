@@ -1,0 +1,40 @@
+{
+    "parameters": [
+        {
+            "expr": "1",
+            "name": "Guide_W",
+            "value": "1"
+        },
+        {
+            "expr": "0.5",
+            "name": "Guide_V",
+            "value": "0.5"
+        },
+        {
+            "expr": "0.5",
+            "name": "Guide_D",
+            "value": "0.5"
+        },
+        {
+            "expr": "2",
+            "name": "Horn_L",
+            "value": "2"
+        },
+        {
+            "expr": "1",
+            "name": "Horn_R",
+            "value": "1"
+        },
+        {
+            "expr": "0.25",
+            "name": "Horn_D",
+            "value": "0.25"
+        },
+        {
+            "expr": "0.01",
+            "name": "Horn_T",
+            "value": "0.01"
+        }
+    ],
+    "version": 1
+}
