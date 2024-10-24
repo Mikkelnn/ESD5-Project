@@ -21,13 +21,10 @@ false
 3
 [end]block_index
 [start]command
-
 '@ activate global coordinates
-
 [end]command
 [start]content
 WCS.ActivateWCS "global"
-
 [end]content
 [start]recover_picks
 0
@@ -43,9 +40,7 @@ WCS.ActivateWCS "global"
 [start]command
 [end]command
 [start]content
-
 Solid.Delete "component1:Guide"
-
 [end]content
 [start]recover_picks
 1
@@ -91,9 +86,7 @@ Solid.Delete "component1:Guide"
 [start]command
 [end]command
 [start]content
-
 Solid.Delete "component1:Horn"
-
 [end]content
 [start]recover_picks
 1
@@ -197,7 +190,6 @@ Solid.Delete "component1:Horn"
 20
 [end]block_index
 [start]command
-
 '@ define port: 1
  (undo)
 [end]command

@@ -1,0 +1,15 @@
+FeatureKeywords:string:modeler:history:header_not_parsed, monitor:farfield:single freq, modeler:load:fullloading, meshloading:problem_class_only, mesh::background::boolean, mesh:workflow:cadsurf, mesh:workflow:nru, mesh:workflow:boolean, mesh:workflow:boolean:advanced, mesh:workflow:cad2srf, acceleration:cpu:8, acceleration:cpudevices:1, block:type:saved:MWSSCHEM, meshline:hex:check_after_loading:default, meshline:hex:handling_legacy:no
+LastWorkflowState:string:tetmesh:success
+solver_hf_int_fd/InitialFreePhysicalInMB:int:4480
+solver_hf_int_fd/MaxResidentSizeInMB:int:27
+solver_hf_int_fd/MaxResidentSizeMiB:int:5
+solver_hf_int_fd/MinFreePhysicalInMB:int:4478
+solver_pp/InitialFreePhysicalInMB:int:4466
+solver_pp/MaxResidentSizeInMB:int:23
+solver_pp/MaxResidentSizeMiB:int:5
+solver_pp/MinFreePhysicalInMB:int:4466
+tetmesh/InitialFreePhysicalInMB:int:4472
+tetmesh/MaxResidentSizeInMB:int:45
+tetmesh/MaxResidentSizeMiB:int:24
+tetmesh/MinFreePhysicalInMB:int:4471
+---

@@ -6,7 +6,7 @@
    "Last Solver Type Abb": "t",
    "Mesh Cells": "191,664",
    "Mesh Type": "Hexahedral",
-   "Modeler Unique ID": "5:hornwork.cst?28b41a8d0e772e7c8b89c64f980795e0?12495:numberofparameters=7:port=1>mode=1>zre=0>zim=0:::horn_t?horn_d?horn_r?horn_l?guide_d?guide_v?guide_w",
+   "Modeler Unique ID": "5:hornwork.cst?5f4bb4337904aa2e031ab4dffedc0b38?12494:numberofparameters=7:port=1>mode=1>zre=0>zim=0:::guide_d?guide_v?guide_w?horn_d?horn_l?horn_r?horn_t",
    "ProjectVersion": "'# MWS Version: Version 2024.0 - Sep 01 2023 - ACIS 33.0.1 -",
    "Results": "Time Domain: S-Parameter",
    "Version": "3"

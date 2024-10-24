@@ -1,0 +1,57 @@
+2024-10-24 13:50:06   Surface mesh settings: 5.000000 cells per wavelength => {"maxMeshSize":
+                      0.599585} cm
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   In order to get an optimal performance, hyperthreading is ignored for parallel
+                      computations.
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   *** Warning ***
+
+                      This software is licensed for non-commercial use only.
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   Units settings: 
+
+                        Dimensions: cm
+                        Frequency:  GHz
+                        Time:       ns
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   Boundary conditions: 
+
+                        YZsymmetry: none
+                        XZsymmetry: none
+                        XYsymmetry: none
+
+                        Xmin: expanded open
+                        Xmax: expanded open
+
+                        Ymin: expanded open
+                        Ymax: expanded open
+
+                        Zmin: expanded open
+                        Zmax: expanded open
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   Starting characteristic mode analysis.
+                      Automatic mode tracking is enabled.
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07   *** Error ***
+
+2024-10-24 13:50:07   The frequency for mode sorting (characteristic mode analysis) is outside the simulation frequency range.
+
+                      ------------------------------------------------------------------------------
+2024-10-24 13:50:07     ----------------------------------------------------------------------------
+                                            Peak memory used (kB)         Free physical memory (kB) 
+                                                                          At begin     Minimum      
+                        ----------------------------------------------------------------------------
+                        Solver start        22068                         4375288      4374368      
+                        Solver run total    26076                         4375288      4373268      
+
+                        Computer name       RasmusCh
+                        ----------------------------------------------------------------------------
+
+
+                      ------------------------------------------------------------------------------

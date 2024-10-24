@@ -1,0 +1,20 @@
+Post-processing Logfile 
+
+----------------------------------------------------------------------------------------
+Units settings: 
+
+  Dimensions: in
+  Frequency:  GHz
+  Time:       ns
+
+----------------------------------------------------------------------------------------
+
+Template based post-processing started at: 2024-10-24 13:34:15
+
+  Evaluating 'Max Gain at selected Frequency': 0.806 s
+  Evaluating 'Max Gain over Frequency': 7.671 s
+
+  Total time: 8 s  ( = 0 h, 0 m, 8 s )
+
+Template based post-processing finished at: 2024-10-24 13:34:24
+----------------------------------------------------------------------------------------

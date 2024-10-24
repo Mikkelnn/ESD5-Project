@@ -1,0 +1,103 @@
+[13:50:06] -------- TetMesher Log --------
+[13:50:06] Build Number: 20230901; ID: 2024.0 Release from 2023-09-01 (change 1164796); Date: 2023-09-01; ACIS version: 33.0.1, SPAresabs & SPAresnor: 1e-06, 1e-10; Problem class: High Frequency
+[13:50:06] - Reading information
+[13:50:06] - Building single body
+[13:50:06] Found 7 faces.
+[13:50:06] Choosing Advanced Boolean Loop...
+[13:50:06] Volume Attributes enabled
+[13:50:06] Attaching Volume Attributes
+[13:50:06] Sorted out 1 special bodies.
+[13:50:06] Added sheet antenna:reflector (ID: 28) to model
+[13:50:06] Added background material (ID: 1) to model
+[13:50:06] - Storing model cells
+[13:50:06] - OK
+[13:50:06] Temporary directory: "C:\Repositeries\ESD 5\ESD5-Project\simoulation CST\parabolicwork\Temp\1-temp.tet"
+[13:50:06] [CADSurf] - Mesh sizes: global mesh size near to model = 5.9958489599999998e-01
+              min requested = 5.9958489599999998e-01
+              max requested = 9.9930816000000000e-01
+[13:50:06] [CADSurf] MeshGems Version: MeshGems-Core 2.15-1
+[13:50:06] [CADSurf] === Begin: PreCAD-related parameters ===
+[13:50:06] [CADSurf] == CADSurf Parameters == 
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "use_precad",  "yes")
+[13:50:06] [CADSurf] Bounding box diagonal = 7.1053874675627313e+01
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "remove_nano_edges",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "discard_input_topology",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "process_3d_topology",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "discard_input_2d_topology",  "0")
+[13:50:06] [CADSurf] Default periodic tolerance (1e-4*diag) = 7.1053874675627319e-03
+[13:50:06] [CADSurf] Minimum periodic tolerance = 1.0000000000000001e-05
+[13:50:06] [CADSurf] Setting it to max( 1.0000000000000001e-05, 7.1053874675627319e-03 )
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "periodic_tolerance",  "0.0071053874675627319")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "remove_duplicate_cad_faces",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "remove_tiny_uv_edges",  "0")
+[13:50:06] [CADSurf] === End: PreCAD-related parameters ===
+[13:50:06] [CADSurf] ==
+[13:50:06] [CADSurf] == CADSurf Parameters == 
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "verbose",  "3")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "geometric_size_mode",  "local")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "physical_size_mode",  "local")
+[13:50:06] [CADSurf] 	 Max user size    = 9.9930816000000000e-01
+[13:50:06] [CADSurf] 	 Global size near = 5.9958489599999998e-01
+[13:50:06] [CADSurf] 	 Global size far  = 9.9930816000000000e-01
+[13:50:06] [CADSurf] 	 Upper size bound = 9.9930816000000000e-01
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "max_size",  "0.99930816")
+[13:50:06] [CADSurf] 	Calculating min. mesh size for CADSurf...
+[13:50:06] [CADSurf] 	Diagonal of model + background box: 7.1053874675627313e+01
+[13:50:06] [CADSurf] 	Min. mesh size by diagonal (1e-3 x diagonal): 7.1053874675627307e-02
+[13:50:06] [CADSurf] 	Diagonal of model: 7.1050864235714783e+01
+[13:50:06] [CADSurf] 	Min. mesh size of model: 5.9958489599999998e-01
+[13:50:06] [CADSurf] 	Max. cell defined by user (near to model): 5.9958489599999998e-01
+[13:50:06] [CADSurf] 	Min. cell defined by user: 0.0000000000000000e+00
+[13:50:06] [CADSurf] 	Min. cell used for calculation: 5.9958489600000003e-03
+[13:50:06] [CADSurf] 	Note: min. mesh size by diagonal is too large, consider using (0.01 x max. cell = 5.9958489599999994e-03)
+[13:50:06] [CADSurf] Geometric refinement uses "min_size" setting.
+[13:50:06] [CADSurf] CADSurf "min_size" is set to min. cell: 5.9958489600000003e-03
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "min_size",  "0.0059958489600000003")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "max_number_of_points_per_patch",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "element_generation",  "local")
+[13:50:06] [CADSurf] Setting Triangle as default element type
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "gradation",  "2")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "volume_gradation",  "2")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "patch_independent",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "remove_tiny_edges",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "optimise_tiny_edges",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "tiny_edge_respect_geometry",  "1")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "CheckWellDefined",  "8")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "anisotropic",  "1")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "anisotropic_ratio",  "5")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "correct_surface_intersections",  "0")
+[13:50:06] [CADSurf] meshgems_cadsurf_set_param(css, "intersection_processing_max_cost",  "15")
+[13:50:06] [CADSurf] ==
+[13:50:07] [CADSurf] Status: OK
+[13:50:07] [CADSurf] Number of intersecting edges: 0, total edge count: 306
+[13:50:07] [CADSurf] Number of intersecting faces: 0
+[13:50:07] [CADSurf] - Mesh stats: N=7515, E=306, T=14766, Q=0
+[13:50:07] Checking for duplicate edges.
+[13:50:07] Done.
+[13:50:07] Checking for duplicate faces.
+[13:50:07] Done.
+[13:50:07] Writing 3d file
+[13:50:07] Surface Mesh Output: DetectTouchingClosedPECs
+[13:50:07] =====================
+[13:50:07] Done
+[13:50:07] Done
+[13:50:07] Writing BC file
+[13:50:07] Done
+[13:50:07] Writing ObjectId file
+[13:50:07] Done
+[13:50:07] Writing surface mesh to slim mesh file
+[13:50:07] Running model geometry simplification... 
+[13:50:07] Model geometry simplification: 0 seconds
+[13:50:07] Writing topot.tet...
+[13:50:07] Done (topot.tet)
+[13:50:07] Writing moegeom.tet ...
+[13:50:07] Done (moegeom.tet) 
+[13:50:07] Writing gex file for srf mesh
+[13:50:07] Mesh curving:
+[13:50:07]     available cores:   8
+[13:50:07]     number of threads: 8
+[13:50:07] 
+#### Feedback Report Begins ####
+#### Feedback Report Ends ####
+
+[13:50:07] Done
