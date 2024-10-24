@@ -1,0 +1,34 @@
+{
+   "execution": {
+      "classname": "SMAPowerByEmagHPCFrame",
+      "libname": "SMAPowerByEmagUI"
+   },
+   "inputVariables": [
+      {
+         "name": "dishD",
+         "type": "float",
+         "value": 50.0
+      },
+      {
+         "name": "dishF",
+         "type": "float",
+         "value": 0.45
+      },
+      {
+         "name": "D",
+         "type": "float",
+         "value": 50.0
+      },
+      {
+         "name": "th_true",
+         "type": "float",
+         "value": 0.0
+      },
+      {
+         "name": "th_dish",
+         "type": "float",
+         "value": 0.2
+      }
+   ],
+   "outputVariables": []
+}

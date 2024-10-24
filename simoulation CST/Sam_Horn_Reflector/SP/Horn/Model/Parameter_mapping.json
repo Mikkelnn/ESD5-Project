@@ -1,0 +1,14 @@
+{
+    "mapping": [
+        {
+            "master": "dishfocus",
+            "sp": "dishfocus"
+        },
+        {
+            "master": "horn_radius",
+            "sp": "horn_radius"
+        }
+    ],
+    "pending_renames": null,
+    "version": 2
+}

@@ -1,0 +1,11 @@
+3300 0 1 0           
+20 CST MICROWAVE STUDIO 14 ACIS 33.0.1 NT 24 Wed Oct 23 13:09:48 2024 
+10 9.9999999999999995e-07 1e-10 
+T @77 BSTDKX6FVX98S7W78GCV8Z6CE24VXA74HBTMFE6D3DU3G8QWXCS3GGP3UCTKREN3QAMKJ87CKAD4R 
+vertex $1 -1 -1 $-1 $-1 $2 #
+name_attrib-gen-attrib $-1 -1 $3 $-1 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 nantenna:reflector #
+point $-1 -1 -1 $-1 0 0 0 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $4 $1 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $5 $3 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 2 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $4 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 1 #
+End-of-ACIS-data 

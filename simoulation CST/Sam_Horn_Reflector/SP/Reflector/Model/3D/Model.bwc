@@ -1,0 +1,59 @@
+3300 0 9 0           
+20 CST MICROWAVE STUDIO 14 ACIS 33.0.1 NT 24 Wed Oct 23 12:52:21 2024 
+10 9.9999999999999995e-07 1e-10 
+T @77 XBVB_RHS7VETXPWWVFPUSR4KH4TMTE73_DM4M8QWTC74QJ7AYCSMQE6AQCNMPAN73BP3R66DBA_MP 
+vertex $9 -1 -1 $-1 $-1 $10 #
+vertex $11 -1 -1 $-1 $-1 $12 #
+vertex $13 -1 -1 $-1 $-1 $14 #
+vertex $15 -1 -1 $-1 $-1 $16 #
+vertex $17 -1 -1 $-1 $-1 $18 #
+vertex $19 -1 -1 $-1 $-1 $20 #
+vertex $21 -1 -1 $-1 $-1 $22 #
+vertex $23 -1 -1 $-1 $-1 $24 #
+vertex $25 -1 -1 $-1 $-1 $26 #
+name_attrib-gen-attrib $-1 -1 $27 $-1 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $28 $-1 $1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 -2.715296229000002 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $29 $-1 $2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $30 $-1 $3 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 2.7152969327230729 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $31 $-1 $4 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $32 $-1 $5 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 -2.7152969112049083 22.365103771000001 #
+name_attrib-gen-attrib $-1 -1 $33 $-1 $6 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $34 $-1 $7 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 -2.715296229000002 -2.7152969112049083 29.649896228999999 #
+name_attrib-gen-attrib $-1 -1 $35 $-1 $8 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @24 nfieldsource$fs1_(Horn)1 #
+point $-1 -1 -1 $-1 2.7152962289999971 2.7152969327230729 29.649896228999999 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $36 $9 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $37 $11 $1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 2 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $38 $13 $2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 3 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $39 $15 $3 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 4 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $40 $17 $4 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 5 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $41 $19 $5 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 6 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $42 $21 $6 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 7 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $43 $23 $7 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 8 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $44 $25 $8 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @17 backwd_pickNumber 9 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $45 $27 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $46 $28 $1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $47 $29 $2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $48 $30 $3 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $49 $31 $4 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $50 $32 $5 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $51 $33 $6 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $52 $34 $7 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $53 $35 $8 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @18 backwd_blockNumber 18 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $36 $0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $37 $1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 2 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $38 $2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $39 $3 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 4 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $40 $4 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $41 $5 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 5 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $42 $6 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 1 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $43 $7 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 2 #
+integer_attrib-name_attrib-gen-attrib $-1 -1 $-1 $44 $8 2 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 @9 backwd_id 4 #
+End-of-ACIS-data 

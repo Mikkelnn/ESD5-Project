@@ -1,0 +1,39 @@
+{
+    "parameters": [
+        {
+            "expr": "50",
+            "name": "dishD",
+            "value": "50"
+        },
+        {
+            "expr": "0.45",
+            "name": "dishF",
+            "value": "0.45"
+        },
+        {
+            "descr": "Diameter of the reflector",
+            "expr": "50",
+            "name": "D",
+            "value": "50"
+        },
+        {
+            "descr": "Focal length of the reflector",
+            "expr": "dishF*D",
+            "name": "focus",
+            "value": "22.5"
+        },
+        {
+            "descr": "th_true=1. Please specify in th_dish the thickness of the reflector. th_true=0. The reflector has no thickness",
+            "expr": "0",
+            "name": "th_true",
+            "value": "0"
+        },
+        {
+            "descr": "Thickness of the reflector. Must be greater than 0",
+            "expr": "0.2",
+            "name": "th_dish",
+            "value": "0.2"
+        }
+    ],
+    "version": 1
+}

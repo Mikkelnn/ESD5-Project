@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SchematicTopology Version="2.5" Seed="2" Grid="25">
+    <Block Id="1" ForeignId="2029407574" Class="MWSPARA" ImageIndex="1">
+        <Size Height="150" Width="150"/>
+        <Image IconPosition="TopRight" FileName="Block/0/B2029407574/parabolicwork/Model/3D/Model.dib" Scale="AutoFit">
+            <Size Height="392" Width="512"/>
+        </Image>
+        <Pos X="100" Y="0"/>
+        <ToolTip>CST MICROWAVE STUDIO block parabolicwork_1</ToolTip>
+    </Block>
+    <Block Id="2" ForeignId="777257269" Class="MWSPARA" ImageIndex="1">
+        <Size Height="150" Width="150"/>
+        <Pins Distribution="Custom">
+            <Pin Index="0" Port="0" BlockPosition="Left">
+                <Label>1<LabelAppearance VerticalMargin="0" RightMargin="0" Color="#000000" LeftMargin="0" Placement="Inside" HorizontalMargin="0" Flags="Right Top">
+                        <Font PointSize="16"/>
+                    </LabelAppearance>
+                </Label>
+            </Pin>
+            <Ports>
+                <Port Name="1" Label=""/>
+            </Ports>
+        </Pins>
+        <Image IconPosition="TopRight" FileName="Block/0/B777257269/hornwork/Model/3D/Model.dib" Scale="AutoFit">
+            <Size Height="392" Width="512"/>
+        </Image>
+        <Pos X="300" Y="0"/>
+        <ToolTip>CST MICROWAVE STUDIO block hornwork_1</ToolTip>
+    </Block>
+</SchematicTopology>

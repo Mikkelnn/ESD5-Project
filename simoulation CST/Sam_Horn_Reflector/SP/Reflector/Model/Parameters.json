@@ -1,0 +1,15 @@
+{
+    "parameters": [
+        {
+            "expr": "22.5",
+            "name": "dishFocus",
+            "value": "22.5"
+        },
+        {
+            "expr": "1",
+            "name": "Horn_Radius",
+            "value": "1"
+        }
+    ],
+    "version": 1
+}

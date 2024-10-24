@@ -1,0 +1,19 @@
+{
+   "execution": {
+      "classname": "SMAPowerByEmagHPCFrame",
+      "libname": "SMAPowerByEmagUI"
+   },
+   "inputVariables": [
+      {
+         "name": "dishFocus",
+         "type": "float",
+         "value": 22.5
+      },
+      {
+         "name": "Horn_Radius",
+         "type": "float",
+         "value": 1.0
+      }
+   ],
+   "outputVariables": []
+}

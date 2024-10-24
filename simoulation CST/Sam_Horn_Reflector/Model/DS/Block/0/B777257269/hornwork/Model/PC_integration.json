@@ -1,0 +1,51 @@
+{
+   "execution": {
+      "classname": "SMAPowerByEmagHPCFrame",
+      "libname": "SMAPowerByEmagUI"
+   },
+   "inputVariables": [
+      {
+         "name": "Guide_W",
+         "type": "float",
+         "value": 1.0
+      },
+      {
+         "name": "Guide_V",
+         "type": "float",
+         "value": 0.5
+      },
+      {
+         "name": "Guide_D",
+         "type": "float",
+         "value": 0.5
+      },
+      {
+         "name": "Horn_L",
+         "type": "float",
+         "value": 2.0
+      },
+      {
+         "name": "Horn_R",
+         "type": "float",
+         "value": 1.0
+      },
+      {
+         "name": "Horn_D",
+         "type": "float",
+         "value": 0.25
+      },
+      {
+         "name": "Horn_T",
+         "type": "float",
+         "value": 0.01
+      }
+   ],
+   "outputVariables": [
+      {
+         "len": 1,
+         "name": "3D\\Max Gain at selected Frequency",
+         "type": "float",
+         "value": 13.9803528691847
+      }
+   ]
+}

@@ -1,0 +1,13 @@
+{
+   "Author": "rasm2",
+   "Comment": "",
+   "Last Problem Type": "High Frequency",
+   "Last Solver Type": "HF Time Domain",
+   "Last Solver Type Abb": "t",
+   "Mesh Cells": "703,824",
+   "Mesh Type": "Hexahedral",
+   "Modeler Unique ID": "5:horn.cst?2f903983dab29e12f51c8546111066f1?22567:numberofparameters=1:port=1>mode=1>zre=0>zim=0::parabolicwork.sab>6345a2514eb2fbcbe052d9d534507529>5070?hornwork.sab>488ded9360392c45da0f6d4489526c00>78822:horn_radius",
+   "ProjectVersion": "'# MWS Version: Version 2024.0 - Sep 01 2023 - ACIS 33.0.1 -",
+   "Results": "Time Domain: S-Parameter",
+   "Version": "3"
+}
