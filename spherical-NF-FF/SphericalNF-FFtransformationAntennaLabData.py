@@ -14,17 +14,17 @@ def isqrt(n):
     return x
 
 # Load the data, skipping the row with dashes (assumed to be the second row)
-file_path = 'C:/Users/Valdemar/Desktop/datasetNF.txt'
-nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=2, header = None)
+file_path = 'C:/Users/Valdemar/Desktop/datasetFF30.txt'
+nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header = None)
 
 # Display the loaded dataframe
 #print(nfData)
 
-thetaSize = int(isqrt(nfData.shape[0]/2))
-phiSize = thetaSize * 2
+thetaSize = int(isqrt(nfData.shape[0]/(4 * 2.5)))
+phiSize = int(thetaSize * 2 * 2.5)
 
 # Define theta and phi ranges for spherical coordinates
-theta = np.linspace(0, np.pi, int(thetaSize))  # Polar angle
+theta = np.linspace(0, 15/18*np.pi, int(thetaSize))  # Polar angle
 phi = np.linspace(0, 2 * np.pi, int(phiSize))  # Azimuthal angle
 
 # Create meshgrid for spherical coordinates
@@ -38,8 +38,8 @@ E_phi_total_nf = np.zeros_like(theta_grid, dtype=np.complex_)
 k = 0
 for i in range(thetaSize):
     for j in range(phiSize):
-            E_theta_total_nf[i, j] += nfData.iloc[k, 3]*np.cos(nfData.iloc[k, 4]*2*np.pi/360)+1j*nfData.iloc[k, 3]*np.sin(nfData.iloc[k, 4]*2*np.pi/360)
-            E_phi_total_nf[i, j] += nfData.iloc[k, 5]*np.cos(nfData.iloc[k, 6]*2*np.pi/360)+1j*nfData.iloc[k, 5]*np.sin(nfData.iloc[k, 6]*2*np.pi/360)
+            E_theta_total_nf[i, j] += nfData.iloc[k, 3]+1j*nfData.iloc[k, 4]
+            E_phi_total_nf[i, j] += nfData.iloc[k+int(nfData.shape[0]/2), 3]+1j*nfData.iloc[k+int(nfData.shape[0]/2), 4]
             k += 1
 
 # Convert complex fields to magnitude (near field)
@@ -51,7 +51,7 @@ E_theta_mag_nf /= np.max(E_theta_mag_nf)
 E_phi_mag_nf /= np.max(E_phi_mag_nf)
 
 # Set parameters for far-field computation
-max_l = 50  # Maximum order of spherical harmonics
+max_l = 36  # Maximum order of spherical harmonics
 theta_f = np.linspace(0, np.pi, thetaSize)  # Far-field theta (0 to π)
 phi_f = np.linspace(0, 2*np.pi, phiSize)  # Far-field phi (0 to 2π) azimuth
 
