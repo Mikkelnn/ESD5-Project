@@ -4,15 +4,6 @@ from scipy.special import sph_harm
 import random
 import pandas as pd
 
-#Newtons method for square root, used to get the square root of integers.
-def isqrt(n):
-    x = n
-    y = (x + 1) // 2
-    while y < x:
-        x = y
-        y = (x + n // x) // 2
-    return x
-
 # Load the data, skipping the row with dashes (assumed to be the second row)
 file_path = 'C:/Users/Valdemar/Desktop/datasetFF30.txt'
 nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header = None)
@@ -20,7 +11,7 @@ nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header = Non
 # Display the loaded dataframe
 #print(nfData)
 
-thetaSize = int(isqrt(nfData.shape[0]/(4 * 2.5)))
+thetaSize = int(np.sqrt(nfData.shape[0]/(4 * 2.5)))
 phiSize = int(thetaSize * 2 * 2.5)
 
 # Define theta and phi ranges for spherical coordinates
