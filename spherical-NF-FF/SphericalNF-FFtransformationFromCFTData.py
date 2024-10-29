@@ -51,7 +51,7 @@ E_theta_mag_nf /= np.max(E_theta_mag_nf)
 E_phi_mag_nf /= np.max(E_phi_mag_nf)
 
 # Set parameters for far-field computation
-max_l = 50  # Maximum order of spherical harmonics
+max_l = 25  # Maximum order of spherical harmonics
 theta_f = np.linspace(0, np.pi, thetaSize)  # Far-field theta (0 to π)
 phi_f = np.linspace(0, 2*np.pi, phiSize)  # Far-field phi (0 to 2π) azimuth
 
@@ -101,8 +101,8 @@ E_far_mod /= np.max(E_far_mod)  # Normalize E_theta
 
 # Plot the far-field patterns using the averaged data
 ax1 = plt.subplot(1, 1, 1, projection='polar')
-ax1.plot(phi_f, np.log10(E_far_mod[0, :]), label='E_phi (Far Field)', alpha=0.7)
-ax1.plot(theta_f, np.log10(E_far_mod[:, 0]), label='E_theta (Far Field)', alpha=0.7)
+ax1.plot(phi_f, np.log10(E_far_mod[89, :]), label='E_phi (Far Field)', alpha=0.7)
+ax1.plot(theta_f, np.log10(E_far_mod[:, 180]), label='E_theta (Far Field)', alpha=0.7)
 ax1.set_title('Normalized Far-field Pattern')
 ax1.legend()
 plt.tight_layout()
