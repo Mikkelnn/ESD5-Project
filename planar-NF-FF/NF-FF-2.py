@@ -206,12 +206,15 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
     - far_field_amplitude: The far-field amplitude data.
     - theta_far: The corresponding angles for the far-field pattern.
     """
+    # Convert far-field amplitude to dBi (normalizing by the maximum value)
+    far_field_amplitude_normalized = far_field_amplitude / np.max(far_field_amplitude)
+    far_field_dbi = 10 * np.log10(far_field_amplitude_normalized)
 
-    e_plane_magnitude = 10 * np.log(far_field_amplitude[:, num_points // 2])  # Cut at phi = 0
+    e_plane_magnitude = far_field_dbi[:, num_points // 2]  # Cut at phi = 0
     #e_plane_magnitude_limited = e_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # H-plane: when theta = 0 (elevation is constant)
-    h_plane_magnitude = 10 * np.log(far_field_amplitude[num_points // 2 , :])  # Cut at theta = 0
+    h_plane_magnitude = far_field_dbi[num_points // 2 , :]  # Cut at theta = 0
     #h_plane_magnitude_limited = h_plane_magnitude[valid_indices]  # Limit to valid angular range
     
     # Create the figure and the gridspec
@@ -230,7 +233,7 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
 
     # Heatmap (Bottom, centered across both columns)
     ax3 = fig.add_subplot(grid[1, :])
-    cax = ax3.imshow(10 * np.log(far_field_amplitude), extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
+    cax = ax3.imshow(far_field_dbi, extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
     fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
     ax3.set_title('Far-Field Radiation Pattern Heatmap')
     ax3.set_xlabel('K_Y (1/m)')
@@ -238,9 +241,11 @@ def plot_far_field(near_field, far_field_amplitude, angles, num_points):
 
 
     near_field_amplitude = np.abs(near_field) / np.max(np.abs(near_field))
+    near_field_dbi = 10 * np.log10(near_field_amplitude)
+
     # Fourth plot (Third Row, centered across both columns)
     ax4 = fig.add_subplot(grid[2, :])
-    cax2 = ax4.imshow(10 * np.log(near_field_amplitude), extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
+    cax2 = ax4.imshow(near_field_dbi, extent=[-1, 1, -1, 1], cmap='hot', aspect='auto')
     fig.colorbar(cax2, ax=ax4, label='Near-field amplitude (normalized)')
     ax4.set_title('Near-Field Radiation Pattern Heatmap')
     ax4.set_xlabel('K_Y (1/m)')
@@ -286,33 +291,34 @@ num_aperture_points = 200  # High-resolution aperture sampling
 #near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points)
 
 # Filename to save/load simulation data
-filename = "./near_field_simulation_data.npy"
+filename = "./data/near_field_simulation_data"
 
 # Check if the simulation data file exists
-#generate = True
-#if os.path.exists(filename):
-#    user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
-#    if user_input in ['yes', 'y']:
-#        generate = False
-#        near_field = load_simulation_data(filename)
-#        print("Loaded saved simulation data.")
+generate = True
+if os.path.exists(filename + ".npy"):
+    user_input = input("Simulation data found. Do you want to use the saved data? (yes/no): ").strip().lower()
+    if user_input in ['yes', 'y']:
+        generate = False
+        near_field = load_simulation_data(filename)
+        print("Loaded saved simulation data.")
 
-#if (generate):
-#    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, sigma)
-#    save_simulation_data(near_field, filename)
-#    print("New simulation completed and data saved.")
+if (generate):
+    near_field = horn_near_field_precise(wavelength, aperture_width, aperture_height, z_distance, plane_size, plane_size, num_points, num_points, num_aperture_points, 0, 0, 0)
+    save_simulation_data(near_field, filename)
+    print("New simulation completed and data saved.")
 
 
 #plot_field_heatmap(near_field)
 # Step 2: Perform the near-field to far-field transformation
-#far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
+far_field_pattern, theta_far, ky, kz = nf_ff_transform(near_field, wavelength, plane_size)
 
 #print(f"Angle_min: {np.min(theta_far)} Angle_max: {np.max(theta_far)}")
 
 # Step 3: Plot the far-field radiation pattern heatmap
 #plot_far_field_heatmap(far_field_pattern, theta_far, ky, kz)
-#plot_far_field(near_field, far_field_pattern, theta_far, num_points)
+plot_far_field(near_field, far_field_pattern, theta_far, num_points)
 
+exit()
 
 # Load ideal near field and calculate the corresponding far field (the reference)
 vals = [0, 0.01, 0.1, 0.5, 1] #[0, 0.5, 1, 2, 3, 4, 5, 10]

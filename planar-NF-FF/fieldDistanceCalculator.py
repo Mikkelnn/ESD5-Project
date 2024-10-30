@@ -27,10 +27,11 @@ def calculate_field_regions(antenna_size, wavelength):
     }
 
 # Example usage:
-antenna_size = 20  # Largest dimension of the antenna (D) in meters
+antenna_size = 10  # Largest dimension of the antenna (D) in meters
 wavelength = 0.03   # Wavelength in meters
 
 regions = calculate_field_regions(antenna_size, wavelength)
+print(f"Size: {antenna_size}m; lamba: {wavelength}m")
 print(f"Reactive Near Field boundary: {regions['reactive_near_field']:.2f} meters")
 print(f"Fresnel Region upper boundary: {regions['fresnel_region_upper']:.2f} meters")
 print(f"Far Field starts at: {regions['far_field_start']:.2f} meters")

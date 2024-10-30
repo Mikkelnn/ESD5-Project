@@ -6,7 +6,8 @@ import pandas as pd
 
 standardDeviation = 0.1 # multiplies each value 1 + a random value from normal distribution with center 0.
 # Load the data, skipping the non data rows
-file_path = 'C:/Users/Valdemar/Desktop/datasetFF30.txt'
+# file_path = 'C:/Users/Valdemar/Desktop/datasetFF30.txt'
+file_path = './NF-FF-data/SH800_CBC_008000.CSV' # Do this, now it is a relative path! i.e. universal :)
 nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header = None)
 
 # Display the loaded dataframe
