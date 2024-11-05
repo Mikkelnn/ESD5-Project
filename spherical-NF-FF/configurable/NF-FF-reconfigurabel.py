@@ -53,7 +53,11 @@ ffData = spherical_far_field_transform(nfData, theta_f, phi_f, max_l)
 
 # Select data at 0 degrees and smooth it with Savitzky-Golay filter
 
-n1 = ffData[:, 0]
+# plot_heatmap(ffData)
+# exit()
+
+#n1 = ffData[ffData.shape[0] // 2, :]
+n1 = ffData[0, :]
 n1 = np.roll(n1, int(len(n1) / 2)) # roll data to center when plotting
 
 # Apply Savitzky-Golay filter for smoothing

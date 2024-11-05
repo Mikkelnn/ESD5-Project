@@ -10,12 +10,7 @@ def load_data_lab_measurements(file_path):
     # Calculate theta and phi sizes
     theta_size = int(np.sqrt(nf_data.shape[0] / (4 * 2.5)))
     phi_size = int(theta_size * 2 * 2.5)
-    
-    # Create meshgrid for spherical coordinates
-    theta = np.linspace(0, np.pi, theta_size)
-    phi = np.linspace(0, 2 * np.pi, phi_size)
-    theta_grid, phi_grid = np.meshgrid(theta, phi, indexing='ij')
-    
+   
     # Initialize the total electric fields in the near field as a single array
     complex_field_data = np.zeros((theta_size, phi_size, 2), dtype=np.complex_)
 
@@ -24,12 +19,9 @@ def load_data_lab_measurements(file_path):
     for i in range(theta_size):
         for j in range(phi_size):
             # E_theta component
-            complex_field_data[i, j, 0] = nf_data.iloc[k, 3] + 1j * nf_data.iloc[k, 4]
+            complex_field_data[i, j, 0] += nf_data.iloc[k, 3] + 1j * nf_data.iloc[k, 4]
             # E_phi component
-            complex_field_data[i, j, 1] = (
-                nf_data.iloc[k + int(nf_data.shape[0] / 2), 3] +
-                1j * nf_data.iloc[k + int(nf_data.shape[0] / 2), 4]
-            )
+            complex_field_data[i, j, 1] += nf_data.iloc[k + int(nf_data.shape[0] / 2), 3] + 1j * nf_data.iloc[k + int(nf_data.shape[0] / 2), 4]
             k += 1
 
     return complex_field_data

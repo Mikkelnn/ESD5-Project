@@ -52,16 +52,11 @@ nf_data[:, 1] = phi_grid.flatten()  # phi
 nf_data[:, 2] = E_theta_mag_nf.flatten()  # E_theta
 nf_data[:, 3] = E_phi_mag_nf.flatten()  # E_phi
 
-print(theta_grid.flatten().shape)
-print(f"thetaSize, phiSize; {thetaSize} {phiSize}")
-print(f"nd_data: {nf_data.shape}")
-exit()
-
-for i in range(len(nf_data)):
-    e1 = (1+np.random.normal(0, standardDeviation))
-    e2 = (1+np.random.normal(0, standardDeviation))
-    nf_data[i,2] = abs(nf_data[i,2] * e1)
-    nf_data[i,3] = abs(nf_data[i,2] * e2)
+# for i in range(len(nf_data)):
+#     e1 = (1+np.random.normal(0, standardDeviation))
+#     e2 = (1+np.random.normal(0, standardDeviation))
+#     nf_data[i,2] = abs(nf_data[i,2] * e1)
+#     nf_data[i,3] = abs(nf_data[i,2] * e2)
 
 # Compute spherical harmonic coefficients from near-field data
 def compute_far_field(nf_data, max_l):
@@ -98,6 +93,19 @@ E_far_real = far_field_pattern(a_lm, theta_f, phi_f, max_l)
 # Normalize the far-field electric field magnitudes
 E_far_mod = np.abs(E_far_real) 
 E_far_mod /= np.max(E_far_mod)  # Normalize E_theta
+
+
+# Heatmap (Bottom, centered across both columns)
+#ax3 = fig.add_subplot(grid[1, :])
+# ax3 = plt.subplot(1, 1, 1)
+# cax = ax3.imshow(E_far_mod, cmap='hot', aspect='auto') #extent=[-1, 1, -1, 1],
+# #fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
+# ax3.set_title('Far-Field Radiation Pattern Heatmap')
+# #ax3.set_xlabel('K_Y (1/m)')
+# #ax3.set_ylabel('K_Z (1/m)')
+# plt.tight_layout()
+# plt.show()
+# exit()
 
 # Select data at 0 degrees and smooth it with Savitzky-Golay filter
 n1 = E_far_mod[0, :]
