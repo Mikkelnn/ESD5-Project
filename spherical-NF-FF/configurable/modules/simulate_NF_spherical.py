@@ -56,5 +56,6 @@ def simulate_NF_dipole_array(frequency = 8e9, radius_nf = 0.2, wavelength_spacin
     # Convert complex fields to magnitude (near field)
     E_theta_mag_nf = np.abs(E_theta_total_nf)
     E_phi_mag_nf = np.abs(E_phi_total_nf)
-    
+
     return (E_theta_mag_nf, E_phi_mag_nf)
+

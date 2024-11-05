@@ -1,7 +1,8 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
-def plot_ff_at(smoothed_ff, original_ff):
+def plot_ff_at(smoothed_ff, original_ff, theta_f, phi_f):
+    print(f"{smoothed_ff.shape} {theta_f.shape}")
     # Plot the far-field patterns
     ax1 = plt.subplot(1, 1, 1)
     ax1.plot(phi_f, 20 * np.log10(smoothed_ff), label='E_phi (Far Field) 0 degrees phi, copolar, with Savitzky-Golay filter', alpha=0.7)
