@@ -20,8 +20,8 @@ nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=2, header = None
 # Display the loaded dataframe
 #print(nfData)
 
-thetaSize = int(isqrt(nfData.shape[0]/2))
-phiSize = thetaSize * 2
+thetaSize = int(isqrt(nfData.shape[0]/2)*0.5)
+phiSize = thetaSize * 2*0.5
 
 # Define theta and phi ranges for spherical coordinates
 theta = np.linspace(0, np.pi, int(thetaSize))  # Polar angle

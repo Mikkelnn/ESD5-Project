@@ -16,6 +16,9 @@ nfData = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header = Non
 thetaSize = int(np.sqrt(nfData.shape[0]/(4 * 2.5)))
 phiSize = int(thetaSize * 2 * 2.5)
 
+print(thetaSize)
+print(phiSize)
+
 # Define theta and phi ranges for spherical coordinates
 theta = np.linspace(0, np.pi, int(thetaSize))  # Polar angle
 phi = np.linspace(0, 2 * np.pi, int(phiSize))  # Azimuthal angle
@@ -24,8 +27,8 @@ phi = np.linspace(0, 2 * np.pi, int(phiSize))  # Azimuthal angle
 theta_grid, phi_grid = np.meshgrid(theta, phi, indexing='ij')
 
 # Initialize the total electric fields in the near field
-E_theta_total_nf = np.zeros_like(theta_grid, dtype=np.complex_)
-E_phi_total_nf = np.zeros_like(theta_grid, dtype=np.complex_)
+E_theta_total_nf = np.zeros_like(theta_grid, dtype=np.complex128)
+E_phi_total_nf = np.zeros_like(theta_grid, dtype=np.complex128)
 
 # Gets the data in the two grids so that we can do the transform.
 k = 0
