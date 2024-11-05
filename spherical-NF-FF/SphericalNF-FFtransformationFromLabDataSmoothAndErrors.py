@@ -55,6 +55,11 @@ nf_data[:, 1] = phi_grid.flatten()  # phi
 nf_data[:, 2] = E_theta_mag_nf.flatten()  # E_theta
 nf_data[:, 3] = E_phi_mag_nf.flatten()  # E_phi
 
+print(theta_grid.flatten().shape)
+print(f"thetaSize, phiSize; {thetaSize} {phiSize}")
+print(f"nd_data: {nf_data.shape}")
+exit()
+
 for i in range(len(nf_data)):
     e1 = (1+np.random.normal(0, standardDeviation))
     e2 = (1+np.random.normal(0, standardDeviation))
@@ -67,7 +72,7 @@ def compute_far_field(nf_data, max_l):
     phi = nf_data[:, 1]
     E_theta = nf_data[:, 2]
     E_phi = nf_data[:, 3]
-    
+
     a_lm = np.zeros((max_l + 1, 2 * max_l + 1), dtype=complex)
     
     for l in range(max_l + 1):
