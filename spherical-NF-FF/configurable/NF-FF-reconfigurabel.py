@@ -22,7 +22,7 @@ from scipy.signal import savgol_filter  # Savitzky-Golay filter
 #nfData = load_data_cst(file_path)
 
 # data from lab-measurements:
-file_path = './NF-FF-data/SH800_CBC_008000.CSV' # use relative path! i.e. universal :)
+file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 nfData = load_data_lab_measurements(file_path)
 
 
@@ -57,11 +57,11 @@ ffData = spherical_far_field_transform(nfData, theta_f, phi_f, max_l)
 #exit()
 
 #n1 = ffData[ffData.shape[0] // 2, :]
-n1 = ffData[0, :]
+n1 = ffData[27, :]
 n1 = np.roll(n1, int(len(n1) / 2)) # roll data to center when plotting
 
 # Apply Savitzky-Golay filter for smoothing
-window_size = 11 # Choose an odd window size
+window_size = 13 # Choose an odd window size
 poly_order = 2    # Polynomial order for smoothing
 ffData_smooth = savgol_filter(n1, window_size, poly_order)
 
