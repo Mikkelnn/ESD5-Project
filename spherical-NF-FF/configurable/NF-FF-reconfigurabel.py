@@ -39,7 +39,7 @@ nfData = load_data_lab_measurements(file_path)
 
 # Determine theta and phi sizes from the nf_data shape
 # Define theta and phi ranges for far-field computation
-theta_f = np.linspace(0, np.pi, nfData.shape[0])  # Far-field theta range
+theta_f = np.linspace(0, (5/6)*np.pi, nfData.shape[0])  # Far-field theta range
 phi_f = np.linspace(0, 2 * np.pi, nfData.shape[1])  # Far-field phi range
 
 # 3. Transform data - most likely static...
@@ -53,8 +53,8 @@ ffData = spherical_far_field_transform(nfData, theta_f, phi_f, max_l)
 
 # Select data at 0 degrees and smooth it with Savitzky-Golay filter
 
-# plot_heatmap(ffData)
-# exit()
+#plot_heatmap(ffData)
+#exit()
 
 #n1 = ffData[ffData.shape[0] // 2, :]
 n1 = ffData[0, :]
@@ -67,4 +67,5 @@ ffData_smooth = savgol_filter(n1, window_size, poly_order)
 
 
 # 5. Output FF - plot or write to file
-plot_ff_at(ffData_smooth, n1, theta_f, phi_f)
+#plot_ff_at(ffData_smooth, n1, theta_f, phi_f)
+plot_polar(ffData, theta_f, phi_f)

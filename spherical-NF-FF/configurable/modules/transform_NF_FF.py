@@ -28,11 +28,11 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
 
     # Normalize the near-field data first
     #nf_data = normalize_near_field_data(nf_data)    
-    nf_data = np.abs(np.real(nf_data))
+    #nf_data = np.abs(np.real(nf_data))
 
     # Create a meshgrid for the far-field angles
-    phi_f_grid, theta_f_grid = np.meshgrid(phi_f, theta_f, indexing='ij')
-    phi_f_grid_2, theta_f_grid_2 = np.meshgrid(theta_f, phi_f, indexing='ij')
+    #phi_f_grid, theta_f_grid = np.meshgrid(phi_f, theta_f, indexing='ij')
+    phi_f_grid, theta_f_grid = np.meshgrid(theta_f, phi_f, indexing='ij')
 
     # Extract theta, phi, and electric field components
     E_theta = nf_data[:, :, 0].flatten()
@@ -43,8 +43,8 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     
     for l in range(max_l + 1):
         for m in range(-l, l + 1):
-            Y_lm = sph_harm(m, l, phi_f_grid.flatten(), theta_f_grid.flatten())
-            a_lm[l, m + l] = np.sum(E_theta * Y_lm)  # Use E_theta only for simplicity
+            Y_lm = sph_harm(m, l, theta_f_grid.flatten(), phi_f_grid.flatten())
+            a_lm[l, m + l] = np.sum(E_theta * np.conjugate(Y_lm))  # Use E_theta only for simplicity
 
     # Calculate the far-field pattern from coefficients
     theta_size = len(theta_f)
@@ -53,7 +53,7 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
 
     for l in range(max_l + 1):
         for m in range(-l, l + 1):
-            Y_lm_f = sph_harm(m, l, phi_f_grid_2, theta_f_grid_2)
+            Y_lm_f = sph_harm(m, l, phi_f_grid, theta_f_grid)
             E_far += a_lm[l, m + l] * Y_lm_f
 
     # Normalize the far-field electric field magnitudes

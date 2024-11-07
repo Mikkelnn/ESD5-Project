@@ -100,15 +100,15 @@ E_far_mod /= np.max(E_far_mod)  # Normalize E_theta
 
 # Heatmap (Bottom, centered across both columns)
 #ax3 = fig.add_subplot(grid[1, :])
-# ax3 = plt.subplot(1, 1, 1)
-# cax = ax3.imshow(E_far_mod, cmap='hot', aspect='auto') #extent=[-1, 1, -1, 1],
-# #fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
-# ax3.set_title('Far-Field Radiation Pattern Heatmap')
-# #ax3.set_xlabel('K_Y (1/m)')
-# #ax3.set_ylabel('K_Z (1/m)')
-# plt.tight_layout()
-# plt.show()
-# exit()
+ax3 = plt.subplot(1, 1, 1)
+cax = ax3.imshow(E_far_mod, cmap='hot', aspect='auto') #extent=[-1, 1, -1, 1],
+#fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
+ax3.set_title('Far-Field Radiation Pattern Heatmap')
+#ax3.set_xlabel('K_Y (1/m)')
+#ax3.set_ylabel('K_Z (1/m)')
+plt.tight_layout()
+plt.show()
+exit()
 
 # Select data at 0 degrees and smooth it with Savitzky-Golay filter
 n1 = E_far_mod[0, :]
