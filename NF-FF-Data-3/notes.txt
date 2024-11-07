@@ -1,0 +1,5 @@
+2.4Ghz_CBC_002350  rå måling, CBC: corrected for kanal unbalance på proben, horisontal og vertikal polarisation
+2.4Ghz_CBC_FF_dir_80_002350 NF til FF transformeret til 80cm, dir: data normaliseret til directivity
+2.4Ghz_CBC_FF_dir_002350 NF til FF transformeret til fjern felt
+
+
