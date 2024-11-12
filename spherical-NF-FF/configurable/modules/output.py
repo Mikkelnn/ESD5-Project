@@ -1,34 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_ff_at(smoothed_ff, original_ff, theta_f, phi_f):
-
-    shifted_phi = (phi_f * 180 / np.pi) #np.roll(, int(len(phi_f) / 2))
+def plot_ff_at(smoothed_ff, original_ff, angles_f, axisName, title='0 degrees phi'):
+   
+    log_smo_data = 20 * np.log10(smoothed_ff)
+    log_ori_data = 20 * np.log10(original_ff)
+    
     # Plot the far-field patterns
     ax1 = plt.subplot(1, 1, 1)
-    ax1.plot(shifted_phi, 20 * np.log10(smoothed_ff), label='E_phi (Far Field) 0 degrees phi, copolar, with Savitzky-Golay filter', alpha=0.7)
-    ax1.plot(shifted_phi, 20 * np.log10(original_ff), label='E_phi (Far Field) 0 degrees phi, copolar', alpha=0.7)
-    # ax1.plot(phi_f, 20 * np.log10(E_far_mod[17, :]), label='E_phi (Far Field) 90 degrees phi', alpha=0.7)
-    # ax1.plot(theta_f, np.log10(E_far_mod[:, 0]), label='E_theta (Far Field)', alpha=0.7)
+    ax1.plot(angles_f, log_smo_data , label=f'E_phi (Far Field) {title}, copolar, with Savitzky-Golay filter', alpha=0.7)
+    ax1.plot(angles_f, log_ori_data, label=f'E_phi (Far Field) {title}, copolar', alpha=0.7)
+
     ax1.set_title('Normalized Far-field Pattern')
+    ax1.set_xlabel(axisName)
     ax1.grid()
     ax1.legend()
     plt.tight_layout()
     plt.show()
 
 
-def plot_heatmap(ff):
-    # change to dbi
-    # far_field_dbi = 20 * np.log10(ff)
+def plot_heatmap(fData, theta_f_deg, phi_f_deg):
 
     # Heatmap (Bottom, centered across both columns)
-    #ax3 = fig.add_subplot(grid[1, :])
     ax3 = plt.subplot(1, 1, 1)
-    cax = ax3.imshow(ff, cmap='hot', aspect='auto') #extent=[-1, 1, -1, 1],
-    #fig.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
+    cax = ax3.imshow(fData, cmap='hot', aspect='auto')
     ax3.set_title('Far-Field Radiation Pattern Heatmap')
-    #ax3.set_xlabel('K_Y (1/m)')
-    #ax3.set_ylabel('K_Z (1/m)')
+
+    plt.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
+
+    ax3.set_xlabel('Phi degree')
+    ax3.set_ylabel('Theta degree')
+    
+    ax3.set_xticks(np.arange(len(phi_f_deg)), labels=phi_f_deg)
+    #ax3.set_yticks(len(theta_f_deg), theta_f_deg)
+
     plt.tight_layout()
     plt.show()
 
@@ -58,3 +63,49 @@ def plot_polar(ffData, theta, phi):
 
     plt.tight_layout()
     plt.show()
+
+
+
+import numpy as np
+
+def calculate_hpbw(data, angles):
+    """
+    Calculate the Half-Power Beamwidth (HPBW) of a signal.
+
+    Parameters:
+    - data: Array of far-field data points (e.g., power or intensity values).
+    - angles: Array of corresponding angles in degrees.
+
+    Returns:
+    - hpbw: The calculated HPBW in degrees.
+    """
+
+    # Ensure data and angles have the same length
+    if len(data) != len(angles):
+        raise ValueError("Data and angles arrays must have the same length")
+
+    # Find the index of the maximum value in the data array
+    max_index = np.argmax(data)
+    max_value = data[max_index]
+
+    # Calculate the half-power level (-3 dB point)
+    half_power_level = max_value / 2.0
+
+    # Find the indices where data crosses the half-power level on both sides of max
+    left_index = np.where(data[:max_index] <= half_power_level)[0]
+    right_index = np.where(data[max_index:] <= half_power_level)[0] + max_index
+
+    if len(left_index) == 0 or len(right_index) == 0:
+        raise ValueError("Cannot find -3 dB points on both sides of the main lobe")
+
+    # Get the angle values for the -3 dB points
+    left_angle = angles[left_index[-1]]
+    right_angle = angles[right_index[0]]
+
+    # Calculate the HPBW
+    hpbw = np.abs(right_angle - left_angle)
+
+    if (hpbw > 180):
+        hpbw = 360 - hpbw
+    
+    return hpbw

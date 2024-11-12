@@ -44,7 +44,8 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     for l in range(max_l + 1):
         for m in range(-l, l + 1):
             Y_lm = sph_harm(m, l, theta_f_grid.flatten(), phi_f_grid.flatten())
-            a_lm[l, m + l] = np.sum(E_theta * np.conjugate(Y_lm))  # Use E_theta only for simplicity
+            Y_lm_conj = np.conjugate(Y_lm)
+            a_lm[l, m + l] = np.sum(E_theta * Y_lm_conj)  # Use E_theta only for simplicity
 
     # Calculate the far-field pattern from coefficients
     theta_size = len(theta_f)
@@ -60,4 +61,7 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     E_far_magnitude = np.abs(E_far)
     E_far_magnitude /= np.max(E_far_magnitude)  # Normalize to the maximum value
 
-    return E_far_magnitude
+    E_far_roll = np.roll(E_far_magnitude, int(E_far_magnitude.shape[1] // 2), axis=1)
+    E_far_roll = np.roll(E_far_roll, int(E_far_roll.shape[0] // 2), axis=0)
+
+    return E_far_roll
