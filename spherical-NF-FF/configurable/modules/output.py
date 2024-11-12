@@ -48,16 +48,22 @@ def plot_heatmap(ffData, theta_f_deg, phi_f_deg):
 
     plt.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
 
-    ax3.set_xlabel('Phi degree')
-    ax3.set_ylabel('Theta degree')
+    ax3.set_xlabel('Phi')
+    ax3.set_ylabel('Theta °')
     
-    ax3.set_xticks(np.arange(len(phi_f_deg)), labels=phi_f_deg)
-    ax3.set_yticks(np.arange(len(theta_f_deg)), labels=theta_f_deg)
+    # Set x-ticks and y-ticks with a reduced number of labels
+    xtick_step = max(1, len(phi_f_deg) // 13)  # Show every nth phi label
+    ytick_step = max(1, len(theta_f_deg) // 10)  # Show every nth theta label
 
+    ax3.set_xticks(np.arange(0, len(phi_f_deg), xtick_step))
+    ax3.set_xticklabels(phi_f_deg[::xtick_step])
 
+    ax3.set_yticks(np.arange(0, len(theta_f_deg), ytick_step))
+    ax3.set_yticklabels(theta_f_deg[::ytick_step])
+    
 
 def plot_polar(data, theta_f, phi_f):
-
+    # select data and roll back, roll ensures center of main lobe is at 0 deg
     theta_plot_angle = data.theta_plot_angle
     h_plane_magnitude = 20 * np.log10(data.theta_angle_data_smooth)
     h_plane_magnitude = np.roll(h_plane_magnitude, len(h_plane_magnitude) // 2)
