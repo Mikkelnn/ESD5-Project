@@ -1,59 +1,83 @@
-% MATLAB Script to calculate far-field gain pattern of a rectangular horn antenna
-% Frequency and aperture dimensions are adjustable
+% Standard Gain Horn Antenna Simulation at 10 GHz
+% Model: 16240-20
 
-% Constants
-c = 3e8;                % Speed of light (m/s)
+% Define single simulation frequency
+frequency = 10e9;   % Frequency in Hz (10 GHz)
 
-% Parameters (adjust these as needed)
-frequency = 10e9;       % Frequency in Hz (e.g., 10 GHz)
-lambda = c / frequency; % Wavelength in meters
-a = 270e-3;                % Aperture width (along y-axis) in meters (e.g., 0.1 m)
-b = 146.2e-3;               % Aperture height (along z-axis) in meters (e.g., 0.08 m)
-eta = 0.7;              % Antenna efficiency (0.5 to 0.8 typical)
+% Define Horn Antenna dimensions directly
+apertureWidth = 109.25e-3;   % Aperture Width (B) in meters
+apertureHeight = 79.00e-3;   % Aperture Height (C) in meters
+flareLength = 232.50e-3; % Flare Length (F) in meters
+waveguideWidth = 22.86e-3;
+waveguideHeight = 10.16e-3;
+waveguideLength = 14.1e-3;
 
-% Derived parameters
-A = a * b;              % Aperture area
-D = (4 * pi * A) / lambda^2; % Directivity
-G0 = eta * D;           % Maximum gain
+% Create Horn Antenna using simplified horn aperture parameters
+AUT = horn(FlareWidth = apertureWidth, ...
+                   FlareHeight = apertureHeight, ...
+                   FlareLength = flareLength, ...
+                   Width = waveguideWidth, ...
+                   Height = waveguideHeight, ...
+                   Length = waveguideLength, ...
+                   FeedOffset = [-5e-3 0]);
 
-% Define theta and phi (in radians)
-theta = linspace(-pi/2, pi/2, 1000);  % Angle range for pattern
-phi_e_plane = 0;        % Phi for E-plane (y-axis)
-phi_h_plane = pi/2;     % Phi for H-plane (z-axis)
-
-% Far-field gain pattern (in terms of theta)
-% E-plane (phi = 0)
-E_theta_e = cos(pi * a * sin(theta) / lambda) .* sinc(b * sin(theta) / lambda);
-G_e_plane = G0 * abs(E_theta_e).^2;
-
-% H-plane (phi = pi/2)
-E_theta_h = sinc(a * sin(theta) / lambda) .* sinc(b * sin(theta) / lambda);
-G_h_plane = G0 * abs(E_theta_h).^2;
-
-% Convert gain to dB
-G_e_plane_dB = 10 * log10(G_e_plane);
-G_h_plane_dB = 10 * log10(G_h_plane);
-
-% Plotting the results
+% Plot the antenna structure
 figure;
-subplot(2,1,1);
-plot(theta * 180/pi, G_e_plane_dB, 'LineWidth', 2);
-title('Far-Field Gain Pattern - E-plane');
-xlabel('Theta (degrees)');
-ylabel('Gain (dB)');
-grid on;
-xlim([-30 30]);
+show(AUT);
+title('Standard Gain Horn Antenna Model');
+axis equal;
 
-subplot(2,1,2);
-plot(theta * 180/pi, G_h_plane_dB, 'LineWidth', 2);
-title('Far-Field Gain Pattern - H-plane');
-xlabel('Theta (degrees)');
-ylabel('Gain (dB)');
-grid on;
-xlim([-30 30]);
+% Compute and normalize the azimuth gain pattern
+azimuthGain = patternAzimuth(AUT, frequency, azimuthAngles, 'Elevation', 0);
 
-% Display maximum gain
-fprintf('Antenna Parameters:\n');
-fprintf('Frequency: %.2f GHz\n', frequency/1e9);
-fprintf('Aperture Dimensions: %.2f m x %.2f m\n', a, b);
-fprintf('Max Gain (dB): %.2f dB\n', 10*log10(G0));
+% Find the index of the maximum value in the azimuth gain
+[maxGain, maxIndexAzimuth] = max(azimuthGain);
+
+% Shift the azimuth angles so that the max gain is at 0 degrees
+azimuthGainShifted = circshift(azimuthGain, -maxIndexAzimuth + find(azimuthAngles == 0));
+
+% Normalize the shifted gain pattern to the peak value
+azimuthGainShiftedNormalized = azimuthGainShifted - max(azimuthGainShifted);
+
+% Compute and normalize the elevation gain pattern
+elevationGain = patternElevation(AUT, frequency, elevationAngles, 'Azimuth', 0);
+
+% Find the index of the maximum value in the elevation gain
+[maxGain, maxIndexElevation] = max(elevationGain);
+
+% Shift the elevation angles so that the max gain is at 0 degrees
+elevationGainShifted = circshift(elevationGain, -maxIndexElevation + find(elevationAngles == 0));
+
+% Normalize the shifted gain pattern to the peak value
+elevationGainShiftedNormalized = elevationGainShifted - max(elevationGainShifted);
+
+% Plot both patterns on the same figure
+figure;
+hold on;
+plot(azimuthAngles, azimuthGainShiftedNormalized, 'b-', 'LineWidth', 1.5);
+plot(elevationAngles, elevationGainShiftedNormalized, 'r-', 'LineWidth', 1.5);
+hold off;
+
+% Customize the plot
+grid on;
+title('Normalized Far-field Gain Pattern');
+xlabel('Angle (degrees)');
+ylabel('Gain (dB)');
+legend('Azimuth Gain (Elevation = 0°)', 'Elevation Gain (Azimuth = 0°)', 'Location', 'best');
+
+% Analyze and visualize radiation pattern at 10 GHz
+figure;
+pattern(AUT, frequency);
+title('3D Radiation Pattern at 10 GHz');
+
+% Plot Gain in Azimuth at 10 GHz
+figure;
+patternAzimuth(AUT, frequency, 0, 'Elevation', 0);  % Elevation = 0 degrees
+title('Azimuth Gain Pattern at 10 GHz (Elevation = 0°)');
+
+% Plot Gain in Elevation at 10 GHz
+figure;
+patternElevation(AUT, frequency, 0, 'Azimuth', 0);  % Azimuth = 0 degrees
+title('Elevation Gain Pattern at 10 GHz (Azimuth = 0°)');
+
+
