@@ -4,6 +4,43 @@ from modules.errors import *
 from modules.transform_NF_FF import spherical_far_field_transform
 from modules.output import *
 from scipy.signal import savgol_filter  # Savitzky-Golay filter
+from collections import namedtuple
+
+
+def select_data_at_angle(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, phi_select_angle=0):
+  # variabels used for smoothing
+  window_size = 13 # Choose an odd window size
+  poly_order = 2    # Polynomial order for smoothing
+
+  # deterimne sample number corresponding to plot angles
+  theta_index = np.absolute(theta_f_deg - theta_select_angle).argmin()
+  theta_plot_angle = theta_f_deg[theta_index]
+
+  phi_index = np.absolute(phi_f_deg - phi_select_angle).argmin()
+  phi_plot_angle = phi_f_deg[phi_index]
+
+  # Select data at theta degrees and smooth it with Savitzky-Golay filter
+  theta_angle_data_original = ffData[theta_index, :]
+
+  # Select data at phi degrees and smooth it with Savitzky-Golay filter
+  phi_angle_data_original = ffData[:, phi_index]
+
+  # Apply Savitzky-Golay filter for smoothing
+  theta_angle_data_smooth = savgol_filter(theta_angle_data_original, window_size, poly_order)
+
+  # Apply Savitzky-Golay filter for smoothing    
+  phi_angle_data_smooth = savgol_filter(phi_angle_data_original, window_size, poly_order)
+
+  Desc = namedtuple("Desc", ["theta_plot_angle", "theta_angle_data_original", "theta_angle_data_smooth", "phi_plot_angle", "phi_angle_data_original", "phi_angle_data_smooth"])
+  return Desc(
+      theta_plot_angle,
+      theta_angle_data_original,
+      theta_angle_data_smooth,
+
+      phi_plot_angle,
+      phi_angle_data_original,
+      phi_angle_data_smooth
+  )
 
 # The idea of this script is to make it easy to configure different scenarios
 # The heavy lifting will be done in multiple sub-files
@@ -48,55 +85,32 @@ phi_f_deg = (phi_f * 180 / np.pi)
 theta_f_deg = (theta_f * 180 / np.pi)
 
 # get zero in center
-phi_f_deg -= (np.max(phi_f_deg) / 2)
-theta_f_deg -= (np.max(theta_f_deg) / 2)
-
-phi_f_deg = np.floor(phi_f_deg)
-theta_f_deg = np.floor(theta_f_deg)
+phi_f_deg_center = np.floor(phi_f_deg - (np.max(phi_f_deg) / 2))
+theta_f_deg_center = np.floor(theta_f_deg - (np.max(theta_f_deg) / 2))
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 25  # Maximum order of spherical harmonics
 ffData = spherical_far_field_transform(nfData, theta_f, phi_f, max_l)
 
-plot_heatmap(ffData, theta_f_deg, phi_f_deg)
-#exit()
-
-# 4. Smooth transformed data?
-# Comment out if no smoothing should be done
-
-# Select data at 0 degrees and smooth it with Savitzky-Golay filter
-
-n1 = ffData[int(ffData.shape[0] // 2), :]
-
-# Apply Savitzky-Golay filter for smoothing
-window_size = 13 # Choose an odd window size
-poly_order = 2    # Polynomial order for smoothing
-ffData_smooth = savgol_filter(n1, window_size, poly_order)
+# 4. Select far field at angle and smooth data
+data = select_data_at_angle(ffData, theta_f_deg_center, phi_f_deg_center, theta_select_angle=0, phi_select_angle=0)
 
 # 5. Output FF - plot or write to file
-hpbw = calculate_hpbw(ffData_smooth, phi_f_deg)
-print(f"HPBW: {hpbw} deg")
+plot_heatmap(ffData, theta_f_deg_center, phi_f_deg_center)
 
-plot_ff_at(ffData_smooth, n1, phi_f_deg, axisName='phi', title='0 degree theta')
+plot_copolar(data, theta_f_deg_center, phi_f_deg_center)
+
+plot_polar(data, theta_f, phi_f)
+
+phi_hpbw = calculate_hpbw(data.theta_angle_data_smooth, phi_f_deg)
+print(f"Phi HPBW: {phi_hpbw} deg")
+
+#theta_hpbw = calculate_hpbw(data.phi_angle_data_smooth, theta_f_deg)
+#print(f"Theta HPBW: {theta_hpbw} deg")
+
+# show all figures
+show_figures()
 
 
-n2 = ffData[:, int(ffData.shape[1] // 2)]
 
-# Apply Savitzky-Golay filter for smoothing
-window_size = 13 # Choose an odd window size
-poly_order = 2    # Polynomial order for smoothing
-ffData_smooth2 = savgol_filter(n2, window_size, poly_order)
-
-
-# 5. Output FF - plot or write to file
-# theta_f_roll = np.roll(theta_f, int(len(theta_f) / 2))
-#hpbw2 = calculate_hpbw(ffData_smooth2, theta_f_deg)
-#print(f"HPBW: {hpbw2} deg")
-
-plot_ff_at(ffData_smooth2, n2, theta_f_deg, axisName='theta', title="0 degrees phi")
-
-#plot_polar(ffData, theta_f, phi_f)
-#plot_heatmap(ffData)
-
-#exit()

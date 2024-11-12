@@ -1,29 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
-def plot_ff_at(smoothed_ff, original_ff, angles_f, axisName, title='0 degrees phi'):
-   
-    log_smo_data = 20 * np.log10(smoothed_ff)
-    log_ori_data = 20 * np.log10(original_ff)
+def seed():
+    return random.randint(1, 1000)
+
+def plot_copolar(data, theta_f_deg, phi_f_deg):
+
+    theta_plot_angle = data.theta_plot_angle
+    theta_angle_data_log_ori = 20 * np.log10(data.theta_angle_data_original)
+    theta_angle_data_log_smo = 20 * np.log10(data.theta_angle_data_smooth)
+
+    phi_plot_angle = data.phi_plot_angle
+    phi_angle_data_log_ori = 20 * np.log10(data.phi_angle_data_original)
+    phi_angle_data_log_smo = 20 * np.log10(data.phi_angle_data_smooth)
     
     # Plot the far-field patterns
-    ax1 = plt.subplot(1, 1, 1)
-    ax1.plot(angles_f, log_smo_data , label=f'E_phi (Far Field) {title}, copolar, with Savitzky-Golay filter', alpha=0.7)
-    ax1.plot(angles_f, log_ori_data, label=f'E_phi (Far Field) {title}, copolar', alpha=0.7)
-
-    ax1.set_title('Normalized Far-field Pattern')
-    ax1.set_xlabel(axisName)
+    fig = plt.figure(seed(), figsize=(8, 10))
+    grid = fig.add_gridspec(2, 1, height_ratios=[1, 1], width_ratios=[1])
+    
+    # Plot phi = 0 i.e theta values
+    ax1 = fig.add_subplot(grid[0, 0])
+    ax1.plot(phi_f_deg, theta_angle_data_log_smo , label=f'E_phi (Far Field) {theta_plot_angle} degree theta, copolar, with Savitzky-Golay filter', alpha=0.7)
+    ax1.plot(phi_f_deg, theta_angle_data_log_ori, label=f'E_phi (Far Field) {theta_plot_angle} degree theta, copolar', alpha=0.7)    
+    ax1.set_title(f'Normalized Far-field Pattern Theta = {theta_plot_angle}')
+    ax1.set_xlabel('Phi')
     ax1.grid()
     ax1.legend()
-    plt.tight_layout()
-    plt.show()
+    
+    # Plot theta = 0 i.e phi values
+    ax2 = fig.add_subplot(grid[1, 0])
+    ax2.plot(theta_f_deg, phi_angle_data_log_smo , label=f'E_theta (Far Field) {phi_plot_angle} degree phi, copolar, with Savitzky-Golay filter', alpha=0.7)
+    ax2.plot(theta_f_deg, phi_angle_data_log_ori, label=f'E_theta (Far Field) {phi_plot_angle} degree phi, copolar', alpha=0.7)    
+    ax2.set_title(f'Normalized Far-field Pattern Phi = {phi_plot_angle}')
+    ax2.set_xlabel('Theta')
+    ax2.grid()
+    ax2.legend()
+    
 
-
-def plot_heatmap(fData, theta_f_deg, phi_f_deg):
+def plot_heatmap(ffData, theta_f_deg, phi_f_deg):
 
     # Heatmap (Bottom, centered across both columns)
+    plt.figure(seed())
     ax3 = plt.subplot(1, 1, 1)
-    cax = ax3.imshow(fData, cmap='hot', aspect='auto')
+    cax = ax3.imshow(ffData, cmap='hot', aspect='auto')
     ax3.set_title('Far-Field Radiation Pattern Heatmap')
 
     plt.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
@@ -32,41 +52,40 @@ def plot_heatmap(fData, theta_f_deg, phi_f_deg):
     ax3.set_ylabel('Theta degree')
     
     ax3.set_xticks(np.arange(len(phi_f_deg)), labels=phi_f_deg)
-    #ax3.set_yticks(len(theta_f_deg), theta_f_deg)
-
-    plt.tight_layout()
-    plt.show()
+    ax3.set_yticks(np.arange(len(theta_f_deg)), labels=theta_f_deg)
 
 
-def plot_polar(ffData, theta, phi):
-    
-    e_plane_magnitude = 20 * np.log10(ffData[:, ffData.shape[1] // 2])  # Cut at phi = 0
-    #e_plane_magnitude_limited = e_plane_magnitude[valid_indices]  # Limit to valid angular range
-    
-    # H-plane: when theta = 0 (elevation is constant)
-    h_plane_magnitude = 20 * np.log10(ffData[ffData.shape[0] // 2 , :])  # Cut at theta = 0
-    #h_plane_magnitude_limited = h_plane_magnitude[valid_indices]  # Limit to valid angular range
+
+def plot_polar(data, theta_f, phi_f):
+
+    theta_plot_angle = data.theta_plot_angle
+    h_plane_magnitude = 20 * np.log10(data.theta_angle_data_smooth)
+    h_plane_magnitude = np.roll(h_plane_magnitude, len(h_plane_magnitude) // 2)
+
+    phi_plot_angle = data.phi_plot_angle
+    e_plane_magnitude = 20 * np.log10(data.phi_angle_data_smooth)
+    e_plane_magnitude = np.roll(e_plane_magnitude, len(e_plane_magnitude) // 2)
     
     # Create the figure and the gridspec
-    fig = plt.figure(figsize=(10, 12))
-    grid = fig.add_gridspec(3, 2, height_ratios=[1, 1, 0.8], width_ratios=[1, 1])
+    fig = plt.figure(seed())
+    grid = fig.add_gridspec(1, 2, height_ratios=[1], width_ratios=[1, 1])
 
-    # E-plane polar plot (Top Left)
+    # E-plane polar plot
     ax1 = fig.add_subplot(grid[0, 0], projection='polar')
-    ax1.plot(theta, e_plane_magnitude)
-    ax1.set_title('E-Plane (Limited Angle Range)')
+    ax1.plot(theta_f, e_plane_magnitude)
+    ax1.set_title(f'E-Plane (Phi = {phi_plot_angle})')
 
-    # H-plane polar plot (Top Right)
+    # H-plane polar plot
     ax2 = fig.add_subplot(grid[0, 1], projection='polar')
-    ax2.plot(phi, h_plane_magnitude)
-    ax2.set_title('H-Plane (Limited Angle Range)')
+    ax2.plot(phi_f, h_plane_magnitude)
+    ax2.set_title(f'H-Plane (Theta = {theta_plot_angle})')
 
+
+
+def show_figures():
     plt.tight_layout()
     plt.show()
 
-
-
-import numpy as np
 
 def calculate_hpbw(data, angles):
     """
@@ -108,4 +127,4 @@ def calculate_hpbw(data, angles):
     if (hpbw > 180):
         hpbw = 360 - hpbw
     
-    return hpbw
+    return np.round(hpbw, 2)
