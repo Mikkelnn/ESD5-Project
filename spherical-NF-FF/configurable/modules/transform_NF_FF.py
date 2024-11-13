@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import sph_harm
+import math
 
 def normalize_near_field_data(nf_data):
     """
@@ -35,8 +36,12 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     phi_f_grid, theta_f_grid = np.meshgrid(theta_f, phi_f, indexing='ij')
 
     # Extract theta, phi, and electric field components
-    E_theta = nf_data[:, :, 0].flatten()
-    E_phi = nf_data[:, :, 1].flatten()
+    E_H_plane = nf_data[:, :, 0].flatten()
+    E_E_plane = nf_data[:, :, 1].flatten()
+
+    # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
+    # calculate the length between the two polarities
+    E_tot = (abs(E_H_plane)**2 + abs(E_E_plane)**2)**0.5
 
     # Compute spherical harmonic coefficients a_lm
     a_lm = np.zeros((max_l + 1, 2 * max_l + 1), dtype=complex)
@@ -45,7 +50,7 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
         for m in range(-l, l + 1):
             Y_lm = sph_harm(m, l, theta_f_grid.flatten(), phi_f_grid.flatten())
             Y_lm_conj = np.conjugate(Y_lm)
-            a_lm[l, m + l] = np.sum(E_theta * Y_lm_conj)  # Use E_theta only for simplicity
+            a_lm[l, m + l] = np.sum(E_tot * Y_lm_conj)  # Use E_theta only for simplicity
 
     # Calculate the far-field pattern from coefficients
     theta_size = len(theta_f)
@@ -65,3 +70,17 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     #E_far_roll = np.roll(E_far_roll, int(E_far_roll.shape[0] // 2), axis=0)
 
     return E_far_roll
+
+
+def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, N = 3, M = 3):
+
+    # distance from AUT - refactorr to parameter
+    d = 0.2 # meters
+
+    phi_f_grid, theta_f_grid = np.meshgrid(theta_f, phi_f, indexing='ij')
+
+    Fnm = np.zeros(())
+
+#    for n in range(-N, N):
+ #       for m in range(-M, M):
+

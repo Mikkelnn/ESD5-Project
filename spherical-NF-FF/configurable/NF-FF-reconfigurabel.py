@@ -103,7 +103,7 @@ plot_copolar(data, theta_f_deg_center, phi_f_deg_center)
 
 plot_polar(data, theta_f, phi_f)
 
-phi_hpbw = calculate_hpbw(data.theta_angle_data_smooth, phi_f_deg)
+phi_hpbw = calculate_hpbw(data.theta_angle_data_original, phi_f_deg)
 print(f"Phi HPBW: {phi_hpbw} deg")
 
 #theta_hpbw = calculate_hpbw(data.phi_angle_data_smooth, theta_f_deg)
