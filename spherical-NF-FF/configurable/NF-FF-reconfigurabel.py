@@ -61,8 +61,10 @@ def select_data_at_angle(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, p
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 file_path = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
-nfData = load_data_lab_measurements(file_path)
+nfData, theta_deg, phi_deg = load_data_lab_measurements(file_path)
 
+file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
+ffData_loaded, theta_deg_loaded, phi_deg_loaded = load_data_lab_measurements(file_path2)
 
 # simulate data
 #nfData = simulate_NF_dipole_array()
@@ -97,17 +99,29 @@ ffData = spherical_far_field_transform(nfData, theta_f, phi_f, max_l)
 data = select_data_at_angle(ffData, theta_f_deg_center, phi_f_deg_center, theta_select_angle=0, phi_select_angle=0)
 
 # 5. Output FF - plot or write to file
-plot_heatmap(ffData, theta_f_deg_center, phi_f_deg_center)
+#plot_heatmap(ffData, theta_f_deg_center, phi_f_deg_center)
 
-plot_copolar(data, theta_f_deg_center, phi_f_deg_center)
+#plot_copolar(data, theta_f_deg_center, phi_f_deg_center)
 
-plot_polar(data, theta_f, phi_f)
+#plot_polar(data, theta_f, phi_f)
 
-phi_hpbw = calculate_hpbw(data.theta_angle_data_original, phi_f_deg)
-print(f"Phi HPBW: {phi_hpbw} deg")
+#phi_hpbw = calculate_hpbw(data.theta_angle_data_original, phi_f_deg)
+#print(f"Phi HPBW: {phi_hpbw} deg")
 
 #theta_hpbw = calculate_hpbw(data.phi_angle_data_smooth, theta_f_deg)
 #print(f"Theta HPBW: {theta_hpbw} deg")
+
+
+# abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
+# calculate the length between the two polarities
+ffData_loaded_abs = ((abs(ffData_loaded[:, :, 0])**2 + abs(ffData_loaded[:, :, 1])**2)**0.5)
+
+#ffData_loaded_abs = np.roll(ffData_loaded_abs, int(ffData_loaded_abs.shape[1] // 2), axis=1)
+#ffData_loaded_abs = np.roll(ffData_loaded_abs, int(ffData_loaded_abs.shape[0] // 2), axis=0)
+
+data_loaded = select_data_at_angle(ffData_loaded_abs, theta_f_deg_center, phi_f_deg_center, theta_select_angle=0, phi_select_angle=0)
+plot_copolar(data_loaded, theta_f_deg_center, phi_f_deg_center)
+plot_heatmap(ffData_loaded_abs, theta_f_deg_center, phi_f_deg_center)
 
 # show all figures
 show_figures()
