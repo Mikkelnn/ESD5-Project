@@ -66,10 +66,7 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
     E_far_magnitude = np.abs(E_far)
     E_far_magnitude /= np.max(E_far_magnitude)  # Normalize to the maximum value
 
-    E_far_roll = np.roll(E_far_magnitude, int(E_far_magnitude.shape[1] // 2), axis=1)
-    #E_far_roll = np.roll(E_far_roll, int(E_far_roll.shape[0] // 2), axis=0)
-
-    return E_far_roll
+    return E_far_magnitude
 
 
 def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, N = 3, M = 3):
