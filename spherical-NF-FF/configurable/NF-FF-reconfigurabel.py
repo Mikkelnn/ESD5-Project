@@ -136,18 +136,18 @@ max_l = 25  # Maximum order of spherical harmonics
 ffData = spherical_far_field_transform(nfData, theta_rad, phi_rad, max_l)
 
 # roll data if needed
-#E_far_roll = np.roll(E_far_magnitude, int(E_far_magnitude.shape[1] // 2), axis=1)
-#E_far_roll = np.roll(E_far_roll, int(E_far_roll.shape[0] // 2), axis=0)
+ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
+#ffData = np.roll(ffData, int(ffData.shape[0] // 2), axis=0)
 
 
 # 4. Select far field at angle and smooth data
-#data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
+data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
 #data = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
 
 # 5. Output FF - plot or write to file
 plot_heatmap(ffData, theta_deg_center, phi_deg_center, 'Transformed NF (FF) heatmap')
-#plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
-#plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
+plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
+plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
 
 #theta_deg_center2 = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
 #theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
@@ -172,9 +172,9 @@ theta_deg_center2 = np.linspace(-np.max(theta_deg_loaded), np.max(theta_deg_load
 theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-# plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
-# plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
+#plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+#plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
+#plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 
 # show all figures
 show_figures()
