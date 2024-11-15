@@ -5,7 +5,7 @@ import random
 def seed():
     return random.randint(1, 1000)
 
-def plot_copolar(data, theta_f_deg, phi_f_deg):
+def plot_copolar(data, theta_f_deg, phi_f_deg, figure_title):
 
     theta_plot_angle = data.theta_plot_angle
     theta_angle_data_log_ori = 20 * np.log10(data.theta_angle_data_original)
@@ -16,7 +16,7 @@ def plot_copolar(data, theta_f_deg, phi_f_deg):
     phi_angle_data_log_smo = 20 * np.log10(data.phi_angle_data_smooth)
     
     # Plot the far-field patterns
-    fig = plt.figure(seed(), figsize=(8, 10))
+    fig = plt.figure(figure_title, figsize=(8, 10))
     grid = fig.add_gridspec(2, 1, height_ratios=[1, 1], width_ratios=[1])
     
     # Plot phi = 0 i.e theta values
@@ -38,10 +38,40 @@ def plot_copolar(data, theta_f_deg, phi_f_deg):
     ax2.legend()
     
 
-def plot_heatmap(ffData, theta_f_deg, phi_f_deg):
+def plot_copolar2(data, theta_f_deg, figure_title):
+    h_plane_plot_angle = data.h_plane_plot_angle
+    h_plane_data_original = 20 * np.log10(data.h_plane_data_original)
+    h_plane_data_smooth = 20 * np.log10(data.h_plane_data_smooth)
+
+    e_plane_plot_angle = data.e_plane_plot_angle
+    e_plane_data_original = 20 * np.log10(data.e_plane_data_original)
+    e_plane_data_smooth = 20 * np.log10(data.e_plane_data_smooth)
+    
+    # Plot the far-field patterns
+    fig = plt.figure(figure_title, figsize=(8, 10))
+    grid = fig.add_gridspec(2, 1, height_ratios=[1, 1], width_ratios=[1])
+
+    ax1 = fig.add_subplot(grid[0, 0])
+    ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
+    ax1.plot(theta_f_deg, h_plane_data_original, label=f'no smoothing', alpha=0.7)    
+    ax1.set_title(f'Far-field Pattern H-plane Phi = {h_plane_plot_angle}')
+    ax1.set_xlabel('Theta')
+    ax1.grid()
+    ax1.legend()
+
+    ax2 = fig.add_subplot(grid[1, 0])
+    ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
+    ax2.plot(theta_f_deg, e_plane_data_original, label=f'no smoothing', alpha=0.7)    
+    ax2.set_title(f'Far-field Pattern E-plane Phi = {e_plane_plot_angle}')
+    ax2.set_xlabel('Theta')
+    ax2.grid()
+    ax2.legend()
+
+
+def plot_heatmap(ffData, theta_f_deg, phi_f_deg, figure_title):
 
     # Heatmap (Bottom, centered across both columns)
-    plt.figure(seed())
+    plt.figure(figure_title)
     ax3 = plt.subplot(1, 1, 1)
     cax = ax3.imshow(ffData, cmap='hot', aspect='auto')
     ax3.set_title('Far-Field Radiation Pattern Heatmap')
@@ -62,7 +92,7 @@ def plot_heatmap(ffData, theta_f_deg, phi_f_deg):
     ax3.set_yticklabels(theta_f_deg[::ytick_step])
     
 
-def plot_polar(data, theta_f, phi_f):
+def plot_polar(data, theta_f, phi_f, figure_title):
     # select data and roll back, roll ensures center of main lobe is at 0 deg
     theta_plot_angle = data.theta_plot_angle
     h_plane_magnitude = 20 * np.log10(data.theta_angle_data_smooth)
@@ -73,7 +103,7 @@ def plot_polar(data, theta_f, phi_f):
     e_plane_magnitude = np.roll(e_plane_magnitude, len(e_plane_magnitude) // 2)
     
     # Create the figure and the gridspec
-    fig = plt.figure(seed())
+    fig = plt.figure(figure_title)
     grid = fig.add_gridspec(1, 2, height_ratios=[1], width_ratios=[1, 1])
 
     # E-plane polar plot
@@ -86,6 +116,28 @@ def plot_polar(data, theta_f, phi_f):
     ax2.plot(phi_f, h_plane_magnitude)
     ax2.set_title(f'H-Plane (Theta = {theta_plot_angle})')
 
+
+def plot_polar2(data, theta_f, figure_title):
+    # select data and roll back, roll ensures center of main lobe is at 0 deg
+    h_plane_plot_angle = data.h_plane_plot_angle
+    h_plane_magnitude = 20 * np.log10(data.h_plane_data_smooth)
+
+    e_plane_plot_angle = data.e_plane_plot_angle
+    e_plane_magnitude = 20 * np.log10(data.e_plane_data_smooth)
+    
+    # Create the figure and the gridspec
+    fig = plt.figure(figure_title)
+    grid = fig.add_gridspec(1, 2, height_ratios=[1], width_ratios=[1, 1])
+
+    # E-plane polar plot
+    ax1 = fig.add_subplot(grid[0, 0], projection='polar')
+    ax1.plot(theta_f, e_plane_magnitude)
+    ax1.set_title(f'E-Plane (Phi = {e_plane_plot_angle})')
+
+    # H-plane polar plot
+    ax2 = fig.add_subplot(grid[0, 1], projection='polar')
+    ax2.plot(theta_f, h_plane_magnitude)
+    ax2.set_title(f'H-Plane (Phi = {h_plane_plot_angle})')
 
 
 def show_figures():
