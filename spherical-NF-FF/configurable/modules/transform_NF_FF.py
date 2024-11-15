@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.special as sci_sp
+import scipy as sp
 import math
 
 def normalize_near_field_data(nf_data):
@@ -70,6 +71,8 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
 
 
 def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, frequency, nf_meas_dist = 0.2, N = 3, M = 3):
+    # refactor to either calculate frauhofer distance or as a parameter
+    transform_dist = 150 # the distance in meters to transform NF to FF at ex. FF at 150 meters
 
     # validate parameters
     if N < 1:
@@ -136,26 +139,46 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, frequency, nf_me
         g_radial_function[n_idx, 0] = sci_sp.spherical_jn(n, z, derivative=False) - 1j*sci_sp.spherical_yn(n, z, derivative=False) # equvalent to g_{1n}
         g_radial_function[n_idx, 1] = ((1/z) * g_radial_function[n_idx, 0]) + (sci_sp.spherical_jn(n, z, derivative=True) - 1j*sci_sp.spherical_yn(n, z, derivative=True)) # equvalent to g_{2n}
 
-    #
+    # calculate spherical expansion coefficients a1nm and a2nm, implementation of report eq. 2.22
     a_spherical_wave_expansion_coefficient = np.zeros((len(n_range), len(m_range), 2), dtype=complex)
-    
+    for n_idx, n in enumerate(n_range): # this range results in N=1 is index 0
+        frac_g1 = 2 * np.pi / (β * g_radial_function[n_idx, 0])
+        frac_g2 = 2 * np.pi / (β * g_radial_function[n_idx, 1])
+        for m_idx, m in enumerate(m_range): # this range results in -M is index 0
+            double_sum_f1 = 0
+            double_sum_f2 = 0
+            for l in range(-N, N+1):
+                for i in range(-N, N+1):
+                    k = l - i
+                    sin_integral = -((1 + math.exp(1j * np.pi * k)) / ((k**2) - 1))
+                    #G_ml = sp.ifft(nf_data[,:])
+                    #double_sum_f1 += something_fft * sin_integral
+                    #double_sum_f2 += something_fft * sin_integral
+            
+            #a_spherical_wave_expansion_coefficient[n_idx, m_idx, 0] = frac_g1 * double_sum_f1
+            #a_spherical_wave_expansion_coefficient[n_idx, m_idx, 1] = frac_g2 * double_sum_f2
+
 
     # implementation of report eq. 2.17
+    constant_term = math.exp(math.e, -1j * β * transform_dist) / transform_dist
     for θ_idx, θ in enumerate(theta_f):
         for φ_idx, φ in enumerate(phi_f):
-            sum = 0 # eq to the double sum
-            for n_idx, n in enumerate(n_range): # this range results in N=1 is index 0
-                for m_idx, m in range(m_range): # this range results in -M is index 0
+            double_sum = 0 # eq to the double sum
+            for m_idx, m in range(m_range): # this range results in -M is index 0
+                for n in range(abs(m), N+1):
+                    n_idx = n_range.index(n) # get the corresponding index of n
+
                     a1nm = a_spherical_wave_expansion_coefficient[n_idx, m_idx, 0] # in report denoted: a_{1nm}
                     a2nm = a_spherical_wave_expansion_coefficient[n_idx, m_idx, 1] # in report denoted: a_{2nm}
-                    g1n = g_radial_function[n_idx, 0] # in report denoted: g_{1n}
-                    g2n = g_radial_function[n_idx, 1] # in report denoted: g_{2n}
+                    #g1n = g_radial_function[n_idx, 0] # in report denoted: g_{1n}
+                    #g2n = g_radial_function[n_idx, 1] # in report denoted: g_{2n}
                     F1nm = F_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] # in report denoted: F_{1nm}
                     F2nm = F_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] # in report denoted: F_{2nm}
-                    sum += (a1nm * g1n * F1nm) + (a2nm * g2n * F2nm)
 
-            E_far[θ_idx, φ_idx] = β * sum
-                    
+                    double_sum += ((math.exp(1j, n + 1) * a1nm * F1nm) + (math.exp(1j, n) * a2nm * F2nm)) #* math.exp(math.e, 1j * m * φ)
+
+            E_far[θ_idx, φ_idx] = constant_term * double_sum
+
 
     # Normalize the far-field electric field magnitudes
     E_far_magnitude = np.abs(E_far)
