@@ -27,6 +27,10 @@ show(AUT);
 title('Standard Gain Horn Antenna Model');
 axis equal;
 
+% Compute the angles
+azimuthAngles = -180:1:179;   % Azimuth angles in degrees
+elevationAngles = -180:1:179;   % Elevation angles in degrees
+
 % Compute and normalize the azimuth gain pattern
 azimuthGain = patternAzimuth(AUT, frequency, azimuthAngles, 'Elevation', 0);
 
@@ -67,7 +71,7 @@ legend('Azimuth Gain (Elevation = 0°)', 'Elevation Gain (Azimuth = 0°)', 'Loca
 
 % Analyze and visualize radiation pattern at 10 GHz
 figure;
-pattern(AUT, frequency);
+pattern(AUT, frequency,azimuthAngles,elevationAngles);
 title('3D Radiation Pattern at 10 GHz');
 
 % Plot Gain in Azimuth at 10 GHz
