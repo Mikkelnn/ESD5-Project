@@ -1,7 +1,8 @@
 from modules.loadData import *
 from modules.simulate_NF_spherical import *
 from modules.errors import *
-from modules.transform_NF_FF import spherical_far_field_transform
+from modules.transform_NF_FF import *
+from modules.pre_process import *
 from modules.output import *
 from scipy.signal import savgol_filter  # Savitzky-Golay filter
 from collections import namedtuple
@@ -95,12 +96,13 @@ def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
+frequency_Hz = 10e9 # 10GHz
 file_path = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
-nfData, theta_deg, phi_deg = load_data_lab_measurements(file_path)
+nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 file_path2 = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
-ffData_loaded, theta_deg_loaded, phi_deg_loaded = load_data_lab_measurements(file_path2)
+ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
 
 # simulate data
 #nfData = simulate_NF_dipole_array()
@@ -125,29 +127,36 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded = load_data_lab_measurements(fil
 phi_rad = (phi_deg * np.pi) / 180
 theta_rad = (theta_deg * np.pi) / 180
 
+theta_step_rad = (theta_step_deg * np.pi) / 180
+phi_step_rad = (phi_step_deg * np.pi) / 180
+
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.floor(theta_deg - (np.max(theta_deg) / 2))
 
+# pre-process nfData
+nfData_sum = sum_NF_poles(nfData)
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 25  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform(nfData, theta_rad, phi_rad, max_l)
+ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=3)
 
 # roll data if needed
-ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
+#ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
 #ffData = np.roll(ffData, int(ffData.shape[0] // 2), axis=0)
 
 
 # 4. Select far field at angle and smooth data
-data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
-#data = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
+#data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
+data = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
 
 # 5. Output FF - plot or write to file
-plot_heatmap(ffData, theta_deg_center, phi_deg_center, 'Transformed NF (FF) heatmap')
-plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
-plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
+plot_heatmap(ffData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+#plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
+#plot_copolar2(data, theta_deg, 'Transformed NF (FF) copolar')
+#plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
+
 
 #theta_deg_center2 = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
 #theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
@@ -172,7 +181,7 @@ theta_deg_center2 = np.linspace(-np.max(theta_deg_loaded), np.max(theta_deg_load
 theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-#plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
 #plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 

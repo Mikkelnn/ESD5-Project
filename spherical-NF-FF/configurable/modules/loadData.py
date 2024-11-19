@@ -65,7 +65,7 @@ def load_data_lab_measurements(file_path):
             complex_field_data[i, j, 1] += nf_data.iloc[k + int(nf_data.shape[0] / 2), 3] + 1j * nf_data.iloc[k + int(nf_data.shape[0] / 2), 4]
             k += 1
 
-    return (complex_field_data, headerData["theta_values"], headerData["phi_values"])
+    return (complex_field_data, headerData["theta_values"], headerData["phi_values"], headerData["theta_stepSize"], headerData["phi_stepSize"])
 
 
 
