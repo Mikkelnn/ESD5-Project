@@ -40,13 +40,13 @@ def plot_copolar(data, theta_f_deg, phi_f_deg, figure_title):
 
 def plot_copolar2(data, theta_f_deg, figure_title):
     h_plane_plot_angle = data.h_plane_plot_angle
-    h_plane_data_original = 20 * np.log10(data.h_plane_data_original)
-    h_plane_data_smooth = 20 * np.log10(data.h_plane_data_smooth)
+    h_plane_data_original = data.h_plane_data_original # 20 * np.log10(data.h_plane_data_original)
+    h_plane_data_smooth = data.h_plane_data_smooth #20 * np.log10(data.h_plane_data_smooth)
 
     e_plane_plot_angle = data.e_plane_plot_angle
-    e_plane_data_original = 20 * np.log10(data.e_plane_data_original)
-    e_plane_data_smooth = 20 * np.log10(data.e_plane_data_smooth)
-    
+    e_plane_data_original = data.e_plane_data_original #20 * np.log10(data.e_plane_data_original)
+    e_plane_data_smooth = data.e_plane_data_smooth #20 * np.log10(data.e_plane_data_smooth)
+
     # Plot the far-field patterns
     fig = plt.figure(figure_title, figsize=(8, 10))
     grid = fig.add_gridspec(2, 1, height_ratios=[1, 1], width_ratios=[1])

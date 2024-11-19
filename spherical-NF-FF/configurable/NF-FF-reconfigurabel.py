@@ -124,6 +124,9 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 #phi_f_deg = (phi_f * 180 / np.pi)
 #theta_f_deg = (theta_f * 180 / np.pi)
 
+
+theta_deg = np.linspace(0, 180, int(180 / theta_step_deg)+1)
+
 phi_rad = (phi_deg * np.pi) / 180
 theta_rad = (theta_deg * np.pi) / 180
 
@@ -132,20 +135,25 @@ phi_step_rad = (phi_step_deg * np.pi) / 180
 
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
-theta_deg_center = np.floor(theta_deg - (np.max(theta_deg) / 2))
+theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1) #np.floor(theta_deg - (np.max(theta_deg) / 2))
 
 # pre-process nfData
 nfData_sum = sum_NF_poles(nfData)
+nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg)
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 25  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=3)
+ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=5)
 
 # roll data if needed
 #ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
 #ffData = np.roll(ffData, int(ffData.shape[0] // 2), axis=0)
 
+# order by row sum DESC
+#row_sums = np.sum(ffData, axis=1)
+#sorted_indices_desc = np.argsort(row_sums)[::-1]
+#ffData = ffData[sorted_indices_desc]
 
 # 4. Select far field at angle and smooth data
 #data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
@@ -154,7 +162,7 @@ data = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
 # 5. Output FF - plot or write to file
 plot_heatmap(ffData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
-#plot_copolar2(data, theta_deg, 'Transformed NF (FF) copolar')
+plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
 
 
