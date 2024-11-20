@@ -144,7 +144,7 @@ nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg)
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 25  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=5)
+ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=12)
 
 # roll data if needed
 #ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
