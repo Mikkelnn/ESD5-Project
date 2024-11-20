@@ -94,7 +94,7 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
     β = (2*np.pi) / λ # wavenumber [1/m]
 
     n_range = range(1, N+1) # N+1 as end is exclusive
-    m_range = range(-M, M+1) # M+1 as end is exclusive
+    m_range = range(-N, N+1) # M+1 as end is exclusive
 
     theta_size = len(theta_f)
     phi_size = len(phi_f)
@@ -106,7 +106,7 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
 
     # calculate the angular spherical harmonics F1 and F2, using report eq. 2.20{a,b}  
     # for each N value in 1 to N, where N=1 is index: 0; The second axis is for index 0: F_{1}; index 1: F_{2}
-    f_angular_spherical_harmonics = np.zeros((theta_size, phi_size, N, 2*M+1, 2, 3), dtype=complex)
+    f_angular_spherical_harmonics = np.zeros((theta_size, phi_size, len(n_range), len(m_range), 2, 3), dtype=complex)
     F_angular_spherical_harmonics = np.zeros((f_angular_spherical_harmonics.shape), dtype=complex)
     for θ_idx, θ in enumerate(theta_f):
         cos_θ = math.cos(θ)
@@ -119,7 +119,8 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
             θ_hat = np.asarray([cos_φ, sin_φ, -sin_θ]) * (1.0 / math.sqrt(1 + sin_θ**2))
 
             for n_idx, n in enumerate(n_range): # this range results in N=1 is index 0
-                for m_idx, m in enumerate(m_range): # this range results in -M is index 0
+                for m in range(-n, n+1):
+                    m_idx = m_range.index(m)    
                     m_term = 1
                     if m != 0:
                         m_term = (-m / abs(m))**m
@@ -129,17 +130,18 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
                     if sin_θ == 0:
                         sin_θ = 0.00001
 
+                    n_term = 1/(np.sqrt(2*np.pi*n*(n+1)))
+
                     frac_legrende = ((1j * m) / sin_θ) * legendre
                     deriv_legrende = (1.0 / sin_θ) * (((n - m + 1) * legendre_next_order) - ((n + 1) * cos_θ * legendre))
 
-                    f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] = m_term * ((frac_legrende * θ_hat) - (deriv_legrende * φ_hat))
-                    f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] = m_term * ((deriv_legrende * θ_hat) + (frac_legrende * φ_hat))
+                    f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] = m_term * n_term *((frac_legrende * θ_hat) - (deriv_legrende * φ_hat))
+                    f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] = m_term * n_term * ((deriv_legrende * θ_hat) + (frac_legrende * φ_hat))
                     
                     # calculate the angular spherical harmonics F1 and F2, using report eq. 2.19
                     ejmφ = cmath.exp(1j * m * φ)
                     F_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] = f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] * ejmφ
                     F_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] = f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] * ejmφ
-    
 
     # calculate g1n and g2n, implementation of report eq. 2.18{a,b}
     # the implementation of hankel functions are calculated using eq. A.16
@@ -155,7 +157,8 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
     for n_idx, n in enumerate(n_range): # this range results in N=1 is index 0
         frac_g1 = 1.0 / (β * g_radial_function[n_idx, 0])
         frac_g2 = 1.0 / (β * g_radial_function[n_idx, 1])
-        for m_idx, m in enumerate(m_range): # this range results in -M is index 0
+        for m in range(-n, n+1):
+            m_idx = m_range.index(m)
             double_sum_f1 = complex(0.0, 0.0)
             double_sum_f2 = complex(0.0, 0.0)
             for φ_idx, φ in enumerate(phi_f): # equivalent to integral from zero -> 2*pi
@@ -181,11 +184,9 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
             #for n_idx, n in enumerate(n_range):
                 #for m_idx, m in range(-n, n):
                 #for m_idx, m in enumerate(m_range): # this range results in -M is index 0
-            for m_idx, m in enumerate(m_range):
-                for n in range(abs(m), N+1):
-                    if n == 0:
-                        continue
-                    n_idx = n_range.index(n) # get the corresponding index of m
+            for n_idx, n in enumerate(n_range):
+                for m in range(-n, n+1):
+                    m_idx = m_range.index(m)
 
                     a1nm = a_spherical_wave_expansion_coefficient[n_idx, m_idx, 0] # in report denoted: a_{1nm}
                     a2nm = a_spherical_wave_expansion_coefficient[n_idx, m_idx, 1] # in report denoted: a_{2nm}
@@ -224,7 +225,7 @@ def spherical_far_field_transform_cook_fft(nf_data, theta_f, phi_f, Δθ, Δφ, 
     β = (2*np.pi) / λ # wavenumber [1/m]
 
     n_range = range(1, N+1) # N+1 as end is exclusive
-    m_range = range(-M, M+1) # M+1 as end is exclusive
+    m_range = range(-N, N+1) # M+1 as end is exclusive
 
     theta_size = len(theta_f)
     phi_size = len(phi_f)
@@ -406,7 +407,9 @@ def spherical_far_field_transform_cookV2(nf_data, theta_f, phi_f, Δθ, Δφ, fr
                         sin_θ = 1
 
                     frac_legrende = ((1j * m) / sin_θ) * legendre
-                    deriv_legrende = (1.0 / sin_θ) * (((n - m + 1) * legendre_next_order) - ((n + 1) * cos_θ * legendre))
+                    deriv_legrende = np.gradient(legendre)
+                    print
+                    print(deriv_legrende)
 
                     #f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 0] = m_term * ((frac_legrende * θ_hat) - (deriv_legrende * φ_hat))
                     #f_angular_spherical_harmonics[θ_idx, φ_idx, n_idx, m_idx, 1] = m_term * ((deriv_legrende * θ_hat) + (frac_legrende * φ_hat))
@@ -475,3 +478,34 @@ def spherical_far_field_transform_cookV2(nf_data, theta_f, phi_f, Δθ, Δφ, fr
     #E_far_magnitude /= np.max(E_far_magnitude)  # Normalize to the maximum value
 
     return E_far_magnitude
+
+def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 3.2, N = 3, M = 3):
+    
+    # validate parameters
+    if N > (nf_data.shape[0]-1)/2 or 1 > N:
+        raise ValueError("N must uphold Table 4.4 in JE Hansen")
+    
+    n_range = range(1,N+1)
+    j_range = range(0, 4*N) # Eq 4.86
+    m_range = range(-N,N+1)
+    zero_array1 = np.zeros((N-2, nf_data.shape[1]), dtype=complex)
+    zero_array2 = np.zeros((N-1, nf_data.shape[1]), dtype=complex)
+
+    NF_IFFT_phi_data = np.fft.ifft(nf_data, axis = 1) #Equation 4.127
+    for m_idx, m in enumerate(m_range):
+        bl_m = np.fft.ifft(NF_IFFT_phi_data, axis = 0) #Equation 4.128
+        bl_tilte_m = np.concatenate((zero_array1, bl_m, zero_array2)) #Equation 4.87
+        K_m = 0
+        for l in j_range:
+            PI_lm = 0
+            if (l - m) % 2 == 0:
+                PI_lm = 2 / (1 - ((l - m)**2))
+            K_m += PI_lm * bl_tilte_m #Equation 4.130
+        for n_idx, n in enumerate(n_range):
+            w_n_uA = 0
+            w_n_uA_const = ((2*n+1)/2) * 1j**(-m)
+            for m_mark in range(-n, n+1):
+                w_n_uA = delta_something * K_m
+            
+            w_n_uA *= w_n_uA_const
+

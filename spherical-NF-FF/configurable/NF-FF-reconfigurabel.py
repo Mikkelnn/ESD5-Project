@@ -138,14 +138,14 @@ phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1) #np.floor(theta_deg - (np.max(theta_deg) / 2))
 
 # pre-process nfData
-nfData_sum = sum_NF_poles(nfData)
+nfData_sum = sum_NF_poles_Hansen(nfData)
 nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg)
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 10  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=3.2, N=max_l, M=10)
-
+ffData = spherical_far_field_transform_megacook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=3.2, N=max_l, M=10)
+exit() #Remember to remove this when done testing.
 # roll data if needed
 #ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
 #ffData = np.roll(ffData, int(ffData.shape[0] // 2), axis=0)
