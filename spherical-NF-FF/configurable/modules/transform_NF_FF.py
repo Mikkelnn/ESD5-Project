@@ -4,6 +4,17 @@ import scipy as sp
 import math
 import cmath # for complex math
 
+# function definition to compute magnitude of the vector
+def magnitude(vector): 
+    return math.sqrt(sum(pow(element, 2) for element in vector))
+
+def to_cartesian(radius, theta, phi):
+    """Converts a spherical coordinate (radius, theta, phi) into a cartesian one (x, y, z)."""
+    x = radius * np.cos(phi) * np.sin(theta)
+    y = radius * np.sin(phi) * np.sin(theta)
+    z = radius * np.cos(theta)
+    return (x, y, z)
+
 def normalize_near_field_data(nf_data):
     """
     Normalize the near-field data by scaling E_theta and E_phi to have a maximum value of 1.
@@ -67,7 +78,7 @@ def spherical_far_field_transform(nf_data, theta_f, phi_f, max_l):
 
 def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 0.2, N = 3, M = 3):
     # refactor to either calculate frauhofer distance or as a parameter
-    transform_dist = 150 # the distance in meters to transform NF to FF at ex. FF at 150 meters
+    transform_dist = 3.2 # the distance in meters to transform NF to FF at ex. FF at 5 meters
 
     # validate parameters
     if N < 1:
@@ -116,7 +127,7 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
                     legendre = calc_legendre(n, m, cos_θ)
                     legendre_next_order = calc_legendre(n+1, m, cos_θ)
                     if sin_θ == 0:
-                        sin_θ = 1
+                        sin_θ = 0.00001
 
                     frac_legrende = ((1j * m) / sin_θ) * legendre
                     deriv_legrende = (1.0 / sin_θ) * (((n - m + 1) * legendre_next_order) - ((n + 1) * cos_θ * legendre))
@@ -184,14 +195,16 @@ def spherical_far_field_transform_cook(nf_data, theta_f, phi_f, Δθ, Δφ, freq
                     double_sum += (((1j**(n + 1)) * a1nm * f1nm) + ((1j**n) * a2nm * f2nm))
 
             vector_res_3d = constant_term * double_sum
-            E_far[θ_idx, φ_idx] = math.sqrt(abs(vector_res_3d[0])**2 + abs(vector_res_3d[1])**2 + abs(vector_res_3d[2])**2)
+            vector_res_3d = np.abs(vector_res_3d)
+            vector_sphere_3d = to_cartesian(transform_dist, θ, φ)
+            vector_efield_3d = ((vector_res_3d * vector_sphere_3d) / magnitude(vector_sphere_3d)**2) * vector_sphere_3d
+            E_far[θ_idx, φ_idx] = magnitude(vector_efield_3d)
 
     # Normalize the far-field electric field magnitudes
     E_far_magnitude = np.abs(E_far)
     E_far_magnitude /= np.max(E_far_magnitude)  # Normalize to the maximum value
 
     return E_far_magnitude
-
 
 def spherical_far_field_transform_cook_fft(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 0.2, N = 3, M = 3):
     # refactor to either calculate frauhofer distance or as a parameter
@@ -328,7 +341,10 @@ def spherical_far_field_transform_cook_fft(nf_data, theta_f, phi_f, Δθ, Δφ, 
                     double_sum += (((1j**(n + 1)) * a1nm * f1nm) + ((1j**n) * a2nm * f2nm))
 
             vector_res_3d = constant_term * double_sum
-            E_far[θ_idx, φ_idx] = math.sqrt(abs(vector_res_3d[0])**2 + abs(vector_res_3d[1])**2 + abs(vector_res_3d[2])**2)
+            vector_res_3d = np.abs(vector_res_3d)
+            vector_sphere_3d = to_cartesian(transform_dist, φ, θ)
+            vector_efield_3d = ((vector_res_3d * vector_sphere_3d) / magnitude(vector_sphere_3d)**2) * vector_sphere_3d
+            E_far[θ_idx, φ_idx] = magnitude(vector_efield_3d)
 
     # Normalize the far-field electric field magnitudes
     E_far_magnitude = np.abs(E_far)

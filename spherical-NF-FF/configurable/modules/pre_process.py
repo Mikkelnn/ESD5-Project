@@ -10,11 +10,12 @@ def sum_NF_poles(nfData):
 def zero_pad_theta(nfData, theta_deg, theta_step_deg):
     
     num_zero_rows = len(theta_deg) - nfData.shape[0]
+    print(num_zero_rows)
     if (num_zero_rows == 0):
         return nfData
 
     # Create zero rows with the same number of columns as the original array
-    zero_rows = np.full((num_zero_rows, nfData.shape[1]), np.min(nfData))
+    zero_rows = np.full((num_zero_rows, nfData.shape[1]), 0)
 
     # Add the zero rows to the array
     return np.vstack((nfData, zero_rows))

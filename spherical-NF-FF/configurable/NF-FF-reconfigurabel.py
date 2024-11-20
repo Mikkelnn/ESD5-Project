@@ -101,7 +101,7 @@ file_path = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-file_path2 = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
 ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
 
 # simulate data
@@ -143,8 +143,8 @@ nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg)
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
-max_l = 25  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=0.2, N=max_l, M=12)
+max_l = 10  # Maximum order of spherical harmonics
+ffData = spherical_far_field_transform_cook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=3.2, N=max_l, M=10)
 
 # roll data if needed
 #ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
@@ -190,7 +190,7 @@ theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
 plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-#plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
+plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 
 # show all figures
