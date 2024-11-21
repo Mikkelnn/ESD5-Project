@@ -516,6 +516,8 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 
     NF_IFFT_phi_datamu1 = np.fft.ifft(nf_data[:, :, 0], axis = 1) #Equation 4.127
     NF_IFFT_phi_datamu2 = np.fft.ifft(nf_data[:, :, 1], axis = 1) #Equation 4.127
+    T1 = np.zeros((2*N+1, N+1), dtype= complex)
+    T2 = np.zeros((2*N+1, N+1), dtype= complex)
     for m_idx, m in enumerate(m_range):
         bl_mmu1 = np.fft.ifft(NF_IFFT_phi_datamu1, axis = 0) #Equation 4.128
         bl_mmu2 = np.fft.ifft(NF_IFFT_phi_datamu2, axis = 0) #Equation 4.128
@@ -536,8 +538,8 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
                 w_n_uA2 = calc_delta(n, 1, m) * calc_delta(n, m_mark, m) * K_mmu2 #Equation 4.132
             w_n_uA1 *= w_n_uA_const
             w_n_uA2 *= w_n_uA_const
-            T2 = ((w_n_uA2 * PHertzian[n_idx,0,0]) - (w_n_uA1 * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
-            T1 = ((-T2) * PHertzian[n_idx, 1, 0] + w_n_uA1) / PHertzian[n_idx, 0, 0]
+            T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
+            T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
             
 
 
