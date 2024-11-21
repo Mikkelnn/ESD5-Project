@@ -15,6 +15,10 @@ def to_cartesian(radius, theta, phi):
     z = radius * np.cos(theta)
     return (x, y, z)
 
+def calc_delta(n, mp, m):
+    delta = np.sqrt((sci_sp.gamma(n+mp+1) * sci_sp.gamma(n-mp+1)) / (sci_sp.gamma(n+m+1) * sci_sp.gamma(n-m+1))) * 1 / (2**mp) * sci_sp.jacobi(n-mp, abs(mp-m), abs(mp+m))(0)
+    return delta
+
 def normalize_near_field_data(nf_data):
     """
     Normalize the near-field data by scaling E_theta and E_phi to have a maximum value of 1.
@@ -491,21 +495,49 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     zero_array1 = np.zeros((N-2, nf_data.shape[1]), dtype=complex)
     zero_array2 = np.zeros((N-1, nf_data.shape[1]), dtype=complex)
 
-    NF_IFFT_phi_data = np.fft.ifft(nf_data, axis = 1) #Equation 4.127
+    # calculate relevant constants
+    c = 3e8 # light speed [m/s]
+    λ = c / frequency_Hz # wavelength [m]
+    β = (2*np.pi) / λ # wavenumber [1/m]
+
+    #Calculate Input Coefficients
+    g_radial_function = np.zeros((N, 2), dtype=complex)
+    PHertzian = np.zeros((N, 2, 2), dtype=complex)
+    for n_idx, n in enumerate(n_range):
+        z = β * nf_meas_dist
+        g_radial_function[n_idx, 0] = sci_sp.spherical_jn(n, z, derivative=False) + 1j*sci_sp.spherical_yn(n, z, derivative=False) # equaivalent to R^3 s = 1
+        g_radial_function[n_idx, 1] = ((1/z) * g_radial_function[n_idx, 0]) + (sci_sp.spherical_jn(n, z, derivative=True) - 1j*sci_sp.spherical_yn(n, z, derivative=True)) # equvalent to R^3 s = 2
+        #Calculating P for Hertzian dipole
+        PHertzian[n_idx, 0, 0] = np.sqrt(6)/8 * 1j**-1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
+        PHertzian[n_idx, 1, 0] = np.sqrt(6)/8 * 1j**-2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
+        PHertzian[n_idx, 0, 1] = - np.sqrt(6)/8 * 1j**1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
+        PHertzian[n_idx, 1, 1] = - np.sqrt(6)/8 * 1j**2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
+
+
+    NF_IFFT_phi_datamu1 = np.fft.ifft(nf_data[:, :, 0], axis = 1) #Equation 4.127
+    NF_IFFT_phi_datamu2 = np.fft.ifft(nf_data[:, :, 1], axis = 1) #Equation 4.127
     for m_idx, m in enumerate(m_range):
-        bl_m = np.fft.ifft(NF_IFFT_phi_data, axis = 0) #Equation 4.128
-        bl_tilte_m = np.concatenate((zero_array1, bl_m, zero_array2)) #Equation 4.87
-        K_m = 0
+        bl_mmu1 = np.fft.ifft(NF_IFFT_phi_datamu1, axis = 0) #Equation 4.128
+        bl_mmu2 = np.fft.ifft(NF_IFFT_phi_datamu2, axis = 0) #Equation 4.128
+        bl_tilte_mmu1 = np.concatenate((zero_array1, bl_mmu1, zero_array2)) #Equation 4.87
+        bl_tilte_mmu2 = np.concatenate((zero_array1, bl_mmu2, zero_array2)) #Equation 4.87
+        K_mmu1 = 0
+        K_mmu2 = 0
         for l in j_range:
             PI_lm = 0
             if (l - m) % 2 == 0:
                 PI_lm = 2 / (1 - ((l - m)**2))
-            K_m += PI_lm * bl_tilte_m #Equation 4.130
+            K_mmu1 += PI_lm * bl_tilte_mmu1 #Equation 4.130
+            K_mmu2 += PI_lm * bl_tilte_mmu2 #Equation 4.130
         for n_idx, n in enumerate(n_range):
-            w_n_uA = 0
             w_n_uA_const = ((2*n+1)/2) * 1j**(-m)
             for m_mark in range(-n, n+1):
-                w_n_uA = delta_something * K_m
+                w_n_uA1 = calc_delta(n, -1, m) * calc_delta(n, m_mark, m) * K_mmu1 #Equation 4.132
+                w_n_uA2 = calc_delta(n, 1, m) * calc_delta(n, m_mark, m) * K_mmu2 #Equation 4.132
+            w_n_uA1 *= w_n_uA_const
+            w_n_uA2 *= w_n_uA_const
+            T2 = ((w_n_uA2 * PHertzian[n_idx,0,0]) - (w_n_uA1 * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
+            T1 = ((-T2) * PHertzian[n_idx, 1, 0] + w_n_uA1) / PHertzian[n_idx, 0, 0]
             
-            w_n_uA *= w_n_uA_const
+
 

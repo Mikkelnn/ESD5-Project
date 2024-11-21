@@ -138,8 +138,8 @@ phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1) #np.floor(theta_deg - (np.max(theta_deg) / 2))
 
 # pre-process nfData
-nfData_sum = sum_NF_poles_Hansen(nfData)
-nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg)
+nfData_sum = HansenPreProcessing(nfData)
+#nfData_sum = zero_pad_theta(nfData_sum, theta_deg, theta_step_deg) #Might need to implement this later.
 
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
