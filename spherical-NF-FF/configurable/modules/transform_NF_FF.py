@@ -74,7 +74,7 @@ def singlesphere2doublesphere(singlesphere):
     doublesphere = np.zeros((2*(numthetas-1), numphis), dtype='complex')
 
     doublesphere[:numthetas, :] = ss[:, :]
-    doublesphere[numthetas:, :] = -np.roll(ss[-2:0:-1, :], numphis/2, axis=1)
+    doublesphere[numthetas:, :] = -np.roll(ss[-2:0:-1, :], int(numphis/2), axis=1)
 
     return doublesphere
 
@@ -240,7 +240,7 @@ def b_wiggle(b_l_m_mu):
 
     b_l_m_mu_wiggle[get_l_index(-n_max):get_l_index(n_max)+1, :, :] = b_l_m_mu
 
-    b_l_m_mu_wiggle = np.roll(b_l_m_mu_wiggle, shift=-2*n_max+1, axis=0)
+    b_l_m_mu_wiggle = np.roll(b_l_m_mu_wiggle, shift=int(-2*n_max+1), axis=0)
 
     return b_l_m_mu_wiggle
 
