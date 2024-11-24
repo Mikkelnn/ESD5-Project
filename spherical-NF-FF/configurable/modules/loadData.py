@@ -53,7 +53,7 @@ def load_data_lab_measurements(file_path):
     phi_size = len(headerData["phi_values"]) #int(theta_size * 2 * 2.5)
    
     # Initialize the total electric fields in the near field as a single array
-    complex_field_data = np.zeros((theta_size, phi_size, 2), dtype=np.complex_)
+    complex_field_data = np.zeros((theta_size, phi_size, 2), dtype=complex)
 
     # Fill in the electric field arrays with complex numbers
     k = 0

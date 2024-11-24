@@ -6,15 +6,18 @@ from modules.pre_process import *
 from modules.output import *
 from scipy.signal import savgol_filter  # Savitzky-Golay filter
 from collections import namedtuple
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 
 def select_data_at_angle(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, phi_select_angle=0):
   # variabels used for smoothing
-  window_size = 13 # Choose an odd window size
+  window_size = 9 # Choose an odd window size
   poly_order = 2    # Polynomial order for smoothing
 
   # deterimne sample number corresponding to plot angles
-  theta_index = np.absolute(theta_f_deg - theta_select_angle).argmin()
+  theta_index = np.absolute(theta_f_deg - theta_select_angle).argmin() - 1
   theta_plot_angle = theta_f_deg[theta_index]
 
   phi_index = np.absolute(phi_f_deg - phi_select_angle).argmin()
@@ -97,11 +100,11 @@ def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 frequency_Hz = 10e9 # 10GHz
-file_path = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
+file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
+file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
 
 # simulate data
@@ -144,11 +147,15 @@ nfData_sum = HansenPreProcessing(nfData)
 # 3. Transform data - most likely static...
 # This function should ensure data is normalized before transforming!
 max_l = 10  # Maximum order of spherical harmonics
-ffData = spherical_far_field_transform_megacook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=3.2, N=max_l, M=10)
-exit() #Remember to remove this when done testing.
+ffData = spherical_far_field_transform_gigacook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=10e3, N=max_l, M=10) #nf_meas_dist is the distance you want the transform at!
 # roll data if needed
 #ffData = np.roll(ffData, int(ffData.shape[1] // 2), axis=1)
 #ffData = np.roll(ffData, int(ffData.shape[0] // 2), axis=0)
+
+#Flip the array:
+ffData = np.flip(ffData, 0)
+#Roll 2
+ffData = np.roll(ffData, -1, axis=0)
 
 # order by row sum DESC
 #row_sums = np.sum(ffData, axis=1)
@@ -156,13 +163,13 @@ exit() #Remember to remove this when done testing.
 #ffData = ffData[sorted_indices_desc]
 
 # 4. Select far field at angle and smooth data
-#data = select_data_at_angle(ffData, theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
-data = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
+#data = select_data_at_angle(np.abs(ffData[:,:,0]), theta_deg_center, phi_deg_center, theta_select_angle=0, phi_select_angle=0)
+#data = select_data_at_angle2(np.abs(ffData[:,:,0]), theta_deg, phi_deg, phi_select_angle=0)
 
 # 5. Output FF - plot or write to file
-plot_heatmap(ffData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+#plot_heatmap(np.abs(ffData[:,:,0]), theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
-plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
+#plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
 
 
@@ -188,13 +195,16 @@ ffData_loaded_abs = ((abs(ffData_loaded[:, :, 0])**2 + abs(ffData_loaded[:, :, 1
 theta_deg_center2 = np.linspace(-np.max(theta_deg_loaded), np.max(theta_deg_loaded), (len(theta_deg_loaded)*2)-1)
 theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 
+farfieldData = np.abs(ffData[:,:,0]**2 + ffData[:,:,1]**2)
+
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+data = select_data_at_angle2(farfieldData, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
 plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
 plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
+plot_copolar2(data, theta_deg_center2, 'Transformed FF copolar')
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 
 # show all figures
 show_figures()
-
-
 

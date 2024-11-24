@@ -5,13 +5,14 @@ def sum_NF_poles(nfData):
     # calculate the length between the two polarities
     return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
 
-def HansenPreProcessing(nfData): # Sum implementation of eq 4.126
-    # Sum method by hansen
+def HansenPreProcessing(nfData): # Implementation of eq 4.126
     nfDataNew = np.zeros((nfData.shape[0], nfData.shape[1], 2), dtype= complex)
-    nfDataNew[:, :, 0] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1/2)
-    nfDataNew[:, :, 1] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1/2)
-    return nfDataNew
+    nfDataNew[:, :, 0] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)   #+1
+    nfDataNew[:, :, 1] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)     #-1
 
+    #nfDataNew = np.pad(nfDataNew, ((0,36-nfDataNew.shape[0]), (0,0), (0, 0)), mode='constant', constant_values=0) # this only works if the step size is 5 degrees
+
+    return nfDataNew
 
 def zero_pad_theta(nfData, theta_deg, theta_step_deg):
     

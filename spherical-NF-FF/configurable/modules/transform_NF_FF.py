@@ -3,6 +3,7 @@ import scipy.special as sci_sp
 import scipy as sp
 import math
 import cmath # for complex math
+import fractions
 
 # function definition to compute magnitude of the vector
 def magnitude(vector): 
@@ -18,6 +19,230 @@ def to_cartesian(radius, theta, phi):
 def calc_delta(n, mp, m):
     delta = np.sqrt((sci_sp.gamma(n+mp+1) * sci_sp.gamma(n-mp+1)) / (sci_sp.gamma(n+m+1) * sci_sp.gamma(n-m+1))) * 1 / (2**mp) * sci_sp.jacobi(n-mp, abs(mp-m), abs(mp+m))(0)
     return delta
+
+def interpft(a, ny):
+
+    # Operates on the last axis of a 2D array
+    axis = -1
+
+    # Get initial length and width of the 2D array
+    n, m = np.shape(a)
+
+    # Ensure that ny is an integer
+    ny = np.floor(ny)
+
+    # If necessary, increase ny by an integer multiple to make ny > size(a,axis)
+    if ny <= 0:
+        raise Exception("n must be an integer greater than 0.")
+    elif np.size(a, axis) > m:
+        incr = 1
+    else:
+        incr = np.floor(m/ny) + 1
+        ny *= incr
+
+    b = np.fft.fft(a, axis=axis)
+
+    nyqst = np.ceil((m + 1.0)/2.0)
+
+    c = np.zeros((n, ny), dtype='complex')
+    c[:, 0:nyqst] = b[:, 0:nyqst]
+    c[:, nyqst+(ny-m):] = b[:, nyqst:]
+
+    if np.remainder(m, 2) == 0:
+        c[:, nyqst-1] = c[:, nyqst-1]/2.0
+        c[:, nyqst+ny-m-1] = c[:, nyqst-1]
+
+    d = np.fft.ifft(c, axis=axis)
+
+    d *= float(ny)/float(m)
+
+    d = d[:, 0::incr]  # Skip over extra points when original ny <= m
+
+    return d
+
+def singlesphere2doublesphere(singlesphere):
+
+    numthetas = np.size(singlesphere, axis=0)
+    numphis = np.size(singlesphere, axis=1)
+
+    if numphis % 2 == 1:
+        ss = interpft(singlesphere, numphis-1)
+        numphis -= 1
+    else:
+        ss = singlesphere.copy()
+
+    doublesphere = np.zeros((2*(numthetas-1), numphis), dtype='complex')
+
+    doublesphere[:numthetas, :] = ss[:, :]
+    doublesphere[numthetas:, :] = -np.roll(ss[-2:0:-1, :], numphis/2, axis=1)
+
+    return doublesphere
+
+def delta_pyramid(n_max):
+    # Function used to calculate the delta pyramid.
+    # The delta pyramid is defined in [1], Section A2.4
+
+    # Region Diagram
+    #
+    #      |<--(-m)---m---(+m)-->|
+    #  -    ---------------------
+    #  ˄   |          |          |
+    #  |   |          |          |
+    # -m'  |    IV    |   III    |
+    #  |   |          |          |
+    #  |   |          |          |
+    #  m'  |---------------------|
+    #  |   |          |          |
+    #  |   |          |          |
+    # +m'  |    II    |    I     |
+    #  |   |          |          |
+    #  ˅   |          |          |
+    #  -    ---------------------
+
+    # Set mp_max and m_max equal to n_max in order to simplify calculations
+    mp_max = m_max = n_max
+
+    # Initialize the matrix to store the entire delta pyramid
+    deltas = np.zeros((n_max+1, 2*mp_max+1, 2*m_max+1))
+
+    # Initialize two "helper" functions
+    def get_mp_index(mp_): return mp_max + mp_
+
+    def get_m_index(m_): return m_max + m_
+
+    # Initialize the delta values for n==0 and n==1, [1],Section A2.6
+    deltas[0, get_mp_index(0), get_m_index(0)] = 1.0
+    deltas[1, get_mp_index(0), get_m_index(1)] = -np.sqrt(2.0)/2.0
+    deltas[1, get_mp_index(1), get_m_index(0)] = np.sqrt(2.0)/2.0
+    deltas[1, get_mp_index(1), get_m_index(1)] = 1.0/2.0
+
+    # Initialize positive values of mp and m
+    mp_vec = np.linspace(0, mp_max, mp_max+1)
+    m_vec = np.linspace(0, m_max, m_max+1)
+
+    # Promote mp_vec and m_vec to 2 dimensions
+    # (this will facilitate broadcasting later)
+    mp_array = np.reshape(mp_vec, (mp_max+1, 1))
+    m_array = np.reshape(m_vec, (1, m_max+1))
+
+    # Copy two common indices to their own variables
+    ind_mp_0 = get_mp_index(0)
+    ind_m_0 = get_m_index(0)
+
+    # Traverse through each n level from n==2 to n==N
+    for n in range(2, n_max+1):
+
+        # Copy two more common indices to their own variables
+        ind_mp_n = get_mp_index(n)
+        ind_m_n = get_m_index(n)
+
+        # Calculate this particular n level using the previous two n levels.
+        # [1],(A2.35)
+        term1 = -1.0/(np.sqrt((n+mp_array[0:n, :]) *
+                                 (n-mp_array[0:n, :]) *
+                                 (n+m_array[:, 0:n]) *
+                                 (n-m_array[:, 0:n]))*(n-1))
+        term2 = np.sqrt((n+mp_array[0:n, :]-1) *
+                           (n-mp_array[0:n, :]-1) *
+                           (n+m_array[:, 0:n]-1) *
+                           (n-m_array[:, 0:n]-1))*n
+        term3 = (2*n-1)*mp_array[0:n, :]*m_array[:, 0:n]
+
+        deltas[n, ind_mp_0:ind_mp_n, ind_m_0:ind_mp_n] = term1*(
+            term2*deltas[n-2, ind_mp_0:ind_mp_n, ind_m_0:ind_mp_n] +
+            term3*deltas[n-1, ind_mp_0:ind_mp_n, ind_m_0:ind_mp_n])
+
+        # Initialize the vector full of this iteration's n value
+        n_vec = n*np.ones(n+1)
+        # Calculate the bottom edge of Region I, [1],(A2.41)
+        temp = 1/(2.0**n)*np.sqrt(sci_sp.binom(2*n_vec, n_vec - m_vec[0:n+1]))
+        deltas[n, ind_mp_n, ind_m_0:ind_m_n+1] = temp
+        # Copy the bottom edge of Region I to the right edge of Region I
+        # using the symmetry relationship [1],(A2.26) with m set equal to n.
+        deltas[n, ind_mp_0:ind_mp_n, ind_m_n] = (-1)**(mp_vec[0:n] + n)*temp[0:n]
+
+    # Create new n_vec, mp_vec, and m_vec vectors
+    n_vec = np.linspace(0, n_max, n_max+1)
+    mp_vec = np.linspace(-mp_max, mp_max, 2*mp_max+1)
+    m_vec = np.linspace(-m_max, m_max, 2*m_max+1)
+
+    # Promote n_vec, mp_vec, and m_vec to 3 dimensions
+    # (this will facilitate broadcasting later)
+    n_array = np.reshape(n_vec, (n_max+1, 1, 1))
+    mp_array = np.reshape(mp_vec, (1, 2*mp_max+1, 1))
+    m_array = np.reshape(m_vec, (1, 1, 2*m_max+1))
+
+    # Compute Region II using symmetry relation [1],(A2.32)
+    temp1 = ((-1)**(n_array + mp_array[:, get_mp_index(0):, :]) *
+             deltas[:, get_mp_index(0):, get_m_index(1):])
+    temp1 = temp1[:, :, ::-1]
+    deltas[:, get_mp_index(0):, 0:get_m_index(0)] = temp1
+
+    # Compute Region III using symmetry relation [1],(A2.28)
+    temp2 = ((-1)**(n_array + m_array[:, :, get_m_index(0):]) *
+             deltas[:, get_mp_index(1):, get_m_index(0):])
+    temp2 = temp2[:, ::-1, :]
+    deltas[:, 0:get_mp_index(0), get_m_index(0):] = temp2
+
+    # Compute Region IV using symmetry relation [1],(A2.30)
+    temp3 = deltas[:, get_mp_index(1):, get_m_index(1):]
+    temp3 = temp3[:, ::-1, ::-1].transpose((0, 2, 1))
+    deltas[:, 0:get_mp_index(0), 0:get_m_index(0)] = temp3
+
+    # Return the deltas from the function
+    return deltas
+
+def pi_wiggle(n_max):
+
+    jj = np.linspace(-2*n_max+1, 2*n_max, 4*n_max)
+
+    even_indices = jj % 2 == 0
+
+    pi_wig = np.zeros(4*n_max)
+
+    pi_wig[even_indices] = 2.0/(1.0 - jj[even_indices]**2)
+
+    pi_wig = np.roll(pi_wig, -2*n_max+1)
+
+    pi_wig = np.reshape(pi_wig,(4*n_max,1,1))
+
+    return pi_wig
+
+def Phertzian(frequency_Hz, n_max, nf_meas_dist):
+    # calculate relevant constants
+    c = 3e8 # light speed [m/s]
+    λ = c / frequency_Hz # wavelength [m]
+    β = (2*np.pi) / λ # wavenumber [1/m]
+
+    #Calculate Input Coefficients
+    g_radial_function = np.zeros((n_max, 2), dtype=complex)
+    PHertzian = np.zeros((n_max, 2, 2), dtype=complex)
+    for n_idx, n in enumerate(range(1, n_max+1)):
+        z = β * nf_meas_dist
+        g_radial_function[n_idx, 0] = sci_sp.spherical_jn(n, z, derivative=False) + 1j*sci_sp.spherical_yn(n, z, derivative=False) # equaivalent to R^3 s = 1
+        g_radial_function[n_idx, 1] = ((1/z) * g_radial_function[n_idx, 0]) + (sci_sp.spherical_jn(n, z, derivative=True) - 1j*sci_sp.spherical_yn(n, z, derivative=True)) # equvalent to R^3 s = 2
+        #Calculating P for Hertzian dipole
+        PHertzian[n_idx, 0, 0] = np.sqrt(6)/8 * 1j**-1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
+        PHertzian[n_idx, 1, 0] = np.sqrt(6)/8 * 1j**-2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
+        PHertzian[n_idx, 0, 1] = - np.sqrt(6)/8 * 1j**1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
+        PHertzian[n_idx, 1, 1] = - np.sqrt(6)/8 * 1j**2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
+    return PHertzian
+
+def b_wiggle(b_l_m_mu):
+
+    numrows, numcolumns, numpages = np.shape(b_l_m_mu)
+    n_max = (numrows-1)/2
+    m_max = (numcolumns-1)/2
+
+    b_l_m_mu_wiggle = np.zeros((int(4*n_max), int(2*m_max+1), 2), dtype=complex)
+
+    def get_l_index(l_): return int(l_ + 2*n_max - 1)
+
+    b_l_m_mu_wiggle[get_l_index(-n_max):get_l_index(n_max)+1, :, :] = b_l_m_mu
+
+    b_l_m_mu_wiggle = np.roll(b_l_m_mu_wiggle, shift=-2*n_max+1, axis=0)
+
+    return b_l_m_mu_wiggle
 
 def normalize_near_field_data(nf_data):
     """
@@ -495,24 +720,7 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     zero_array1 = np.zeros((N-2, nf_data.shape[1]), dtype=complex)
     zero_array2 = np.zeros((N-1, nf_data.shape[1]), dtype=complex)
 
-    # calculate relevant constants
-    c = 3e8 # light speed [m/s]
-    λ = c / frequency_Hz # wavelength [m]
-    β = (2*np.pi) / λ # wavenumber [1/m]
-
-    #Calculate Input Coefficients
-    g_radial_function = np.zeros((N, 2), dtype=complex)
-    PHertzian = np.zeros((N, 2, 2), dtype=complex)
-    for n_idx, n in enumerate(n_range):
-        z = β * nf_meas_dist
-        g_radial_function[n_idx, 0] = sci_sp.spherical_jn(n, z, derivative=False) + 1j*sci_sp.spherical_yn(n, z, derivative=False) # equaivalent to R^3 s = 1
-        g_radial_function[n_idx, 1] = ((1/z) * g_radial_function[n_idx, 0]) + (sci_sp.spherical_jn(n, z, derivative=True) - 1j*sci_sp.spherical_yn(n, z, derivative=True)) # equvalent to R^3 s = 2
-        #Calculating P for Hertzian dipole
-        PHertzian[n_idx, 0, 0] = np.sqrt(6)/8 * 1j**-1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
-        PHertzian[n_idx, 1, 0] = np.sqrt(6)/8 * 1j**-2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
-        PHertzian[n_idx, 0, 1] = - np.sqrt(6)/8 * 1j**1 * np.sqrt(2*n+1) * g_radial_function[n_idx, 0]
-        PHertzian[n_idx, 1, 1] = - np.sqrt(6)/8 * 1j**2 * np.sqrt(2*n+1) * g_radial_function[n_idx, 1]
-
+    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=N, nf_meas_dist=nf_meas_dist)
 
     NF_IFFT_phi_datamu1 = np.fft.ifft(nf_data[:, :, 0], axis = 1) #Equation 4.127
     NF_IFFT_phi_datamu2 = np.fft.ifft(nf_data[:, :, 1], axis = 1) #Equation 4.127
@@ -541,5 +749,415 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
             
+def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 10e3, N = 3, M = 3):
+    
+    #This part is based on pysnf by rcutshall
+    nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
+    nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
+    nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
 
+    num_th = nf_data_double.shape[0]
+    num_ph = nf_data_double.shape[1]
 
+    n_max = int(num_th/2)   # This works because num_th should always be even after
+                            # the singlesphere2doublesphere function
+    #m_max = int(num_ph/2)   # This works because num_ph should always be even after
+                            # the singlesphere2doublesphere function
+    m_max = n_max # Since m is not allowed to be higher than n.
+
+    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, nf_meas_dist=nf_meas_dist)
+
+    # Perform (4.127)
+    temp = np.fft.ifft(nf_data_double, axis=1)
+
+    # Reorganize such that m runs from -m_max to m_max
+    temp1 = int((m_max * 2) + 1)
+    temp2 = int((n_max * 2) + 1)
+    w_th_m_mu = np.zeros((num_th, temp1, 2), dtype=complex)
+    temp = np.fft.fftshift(temp, axes=(1,))
+    if num_ph/2.0 == m_max:
+        w_th_m_mu[:, :-1, :] = temp
+        w_th_m_mu[:, -1, :] = temp[:, 0, :]
+    elif num_ph/2.0 > m_max:
+        w_th_m_mu[:, :, :] = temp[:, int(num_ph/2-m_max):int(num_ph/2+m_max+1), :]
+
+    # Perform (4.128)
+    temp = np.fft.ifft(w_th_m_mu, axis=0)
+
+    # Reorganize such that n runs from -n_max to n_max
+    b_l_m_mu = np.zeros((temp2, temp1, 2), dtype=complex)
+    temp = np.fft.fftshift(temp, axes=(0,))
+    if num_th/2.0 == n_max:
+        b_l_m_mu[:-1, :, :] = temp
+        b_l_m_mu[-1, :, :] = temp[0, :, :]
+    elif num_th/2.0 > n_max:
+        b_l_m_mu[:, :, :] = temp[num_th/2-n_max:num_th/temp2, :, :]
+
+    # Calculate the pi_wiggle array with [1],(4.84) and [1],(4.86)
+    pi_wig = pi_wiggle(n_max)
+    
+    # Calculate the b_l_m_mu_wiggle array from b_l_m_mu using [1],(4.87)
+    b_l_m_mu_wiggle = b_wiggle(b_l_m_mu)
+
+    # Calculate k_mp with fast convolution via FFT methods as explained in [1],(4.89).
+    # However, note that [1],(4.89) has a typo. If correct, [1],(4.89) should read:
+    #
+    #   K(m') = IDFT{ DFT{ PI_wiggle(i) | i = 0,1,...,4N-1 } *
+    #                 DFT{ b_j_m_mu_wiggle | j = 0,1,...,4N-1 } }
+    #
+    k_mp = np.fft.ifft(np.fft.fft(pi_wig, axis=0) * np.fft.fft(b_l_m_mu_wiggle, axis=0), axis=0)
+
+    # Keep only the values of k_mp where -n_max <= m' <= n_max.
+    # This is required prior to the evaluation of [1],(4.92)
+    temp = np.zeros((temp2, temp1, 2), dtype=complex)
+    temp[0:n_max, :, :] = k_mp[3*n_max:, :, :]
+    temp[n_max:, :, :] = k_mp[0:n_max+1, :, :]
+    k_mp = temp
+
+    # Pull out k_mp for mu == -1 and mu == +1
+    k_mp_m1 = np.reshape(k_mp[:, :, 0], (1, temp2, temp1))
+    k_mp_p1 = np.reshape(k_mp[:, :, 1], (1, temp2, temp1))
+
+    # Initialize the n and m arrays
+    n_array = np.reshape(np.linspace(1, n_max, n_max), (n_max, 1))
+    m_array = np.reshape(np.linspace(-m_max, m_max, temp1), (1, temp1))
+
+    # Initialize a delta pyramid helper function
+    def get_mi(m_): return m_ + n_max  # This returns the m index of the deltas
+
+    # Get the deltas for 1 <= n <= n_max and -m_max <= m <= m_max
+    deltas = delta_pyramid(n_max)
+    deltas = deltas[1:, :, get_mi(-m_max):get_mi(m_max)+1]
+
+    # Get the deltas for only mu == -1 or 1
+    deltas_mu_m1 = np.reshape(deltas[:, :, get_mi(-1)], (n_max, temp2, 1))
+    deltas_mu_p1 = np.reshape(deltas[:, :, get_mi(+1)], (n_max, temp2, 1))
+
+    # Calculate w_n_m_mu as shown in [1],(4.92). Same as 4.132, if with both polarizations as this is.
+    w_n_m_mu = np.zeros((n_max, temp1, 2), dtype=complex)
+    w_n_m_mu[:, :, 0] = (
+        (2.0*n_array+1.0)/2.0 *
+        1j**(-1-m_array) *
+        np.sum(deltas_mu_m1*deltas*k_mp_m1, axis=1)
+    )
+    w_n_m_mu[:, :, 1] = (
+        (2.0*n_array+1.0)/2.0 *
+        1j**(+1-m_array) *
+        np.sum(deltas_mu_p1*deltas*k_mp_p1, axis=1)
+    )
+
+    # Initialize the wave coefficient matrix
+    q_n_m_s = np.zeros((n_max, temp1, 2), dtype='complex')
+
+    # Pull out and reshape the necessary values of the probe response constants
+    p_n_neg1_1 = np.reshape(PHertzian[:, 0, 0], (n_max,1))  # mu = -1 , s = 1
+    p_n_pos1_1 = np.reshape(PHertzian[:, 1, 0], (n_max,1))  # mu = +1 , s = 1
+    p_n_neg1_2 = np.reshape(PHertzian[:, 0, 1], (n_max,1))  # mu = -1 , s = 2
+    p_n_pos1_2 = np.reshape(PHertzian[:, 1, 1], (n_max,1))  # mu = +1 , s = 2
+
+    # Solve for q_n_m_s as described in [1],(4.133) and [1],(4.134)
+    determinant = p_n_pos1_1*p_n_neg1_2 - p_n_neg1_1*p_n_pos1_2
+    q_n_m_s[:, :, 0] = (p_n_neg1_2*w_n_m_mu[:, :, 1] - p_n_pos1_2*w_n_m_mu[:, :, 0])/determinant
+    q_n_m_s[:, :, 1] = (p_n_pos1_1*w_n_m_mu[:, :, 0] - p_n_neg1_1*w_n_m_mu[:, :, 1])/determinant
+
+    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, nf_meas_dist)
+
+    nf_data[:,:,0] = theta
+    nf_data[:,:,1] = phi
+
+    return nf_data
+
+def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, nf_meas_dist):
+    # Taken from pysnf by rcutshall
+    # Determine n_max and m_max from q_n_m_s
+    n_max, m_max, s_max = np.shape(q_n_m_s)
+    m_max = (m_max - 1)/2
+
+    # Determine the number of theta and phis points required based on dT and dP
+    numthetas = thetapoints
+    numphis = phipoints
+
+    # Get the dipole probe response constants
+    # (N x 2 x 2, where dim 0 = n, dim 1 = mu, dim 2 = s)
+    p_n_mu_s = Phertzian(frequency_Hz=frequency, n_max=n_max, nf_meas_dist=nf_meas_dist)
+
+    # Copy out the mu==1, s==1 probe response constants
+    p_n = np.reshape(p_n_mu_s[:, 0, 0], (n_max,1,1))  # N x M x Theta
+
+    # Calculate the rotation coefficients
+    # (N x 3 x M x numThetas)
+    d_n_mu_m = rotation_coefficients(n_max, m_max, 1, np.linspace(0, np.pi, numthetas))
+
+    # Calculate the addition and subtraction of the rotation coefficients
+    # (N x M x numThetas)
+    dp1_plus_dm1 = d_n_mu_m[:, 2, :, :] + d_n_mu_m[:, 0, :, :]  # N x M x Theta
+    dp1_minus_dm1 = d_n_mu_m[:, 2, :, :] - d_n_mu_m[:, 0, :, :]
+
+    # Reshape the spherical wave coefficients to get ready for multiplication
+    q_n_m_s = np.reshape(q_n_m_s, (n_max,int(2*m_max+1),s_max,1))  # N x M x S x Theta
+
+    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    temp = p_n*(q_n_m_s[:, :, 0, :]*dp1_plus_dm1 + q_n_m_s[:, :, 1, :]*dp1_minus_dm1)  # N x M x Theta
+    n_sum_chi_0 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
+
+    # Perform the M summations as detailed in [1], (4.135), using an FFT
+    n_sum_chi_0 = np.fft.ifftshift(n_sum_chi_0, axes=1)
+    temp = np.zeros((numthetas,numphis),dtype='complex')
+    temp[:,0:int(m_max+1)] = n_sum_chi_0[:,0:int(m_max+1)]
+    temp[:,int(numphis-m_max):] = n_sum_chi_0[:,int(m_max+1):]
+    theta_pol = np.fft.fft(temp, axis=1)
+
+    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    temp = 1j*p_n*(q_n_m_s[:, :, 0, :]*dp1_minus_dm1 + q_n_m_s[:, :, 1, :]*dp1_plus_dm1)  # N x M x Theta
+    n_sum_chi_90 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
+
+    # Perform the M summations as detailed in [1], (4.135), using an FFT
+    n_sum_chi_90 = np.fft.ifftshift(n_sum_chi_90, axes=1)
+    temp = np.zeros((numthetas,numphis),dtype='complex')
+    temp[:,0:int(m_max+1)] = n_sum_chi_90[:,0:int(m_max+1)]
+    temp[:,int(numphis-m_max):] = n_sum_chi_90[:,int(m_max+1):]
+    phi_pol = np.fft.fft(temp, axis=1)
+
+    return theta_pol, phi_pol
+
+def rotation_coefficients(n_max, m_max, mu_max, thetas):
+    # Taken from pysnf by rcutshall
+    # Function used to calculate the rotation coefficients.
+    # The rotation coefficients are defined in [1],Section A2.3
+    m_max = int(m_max)
+    n_max = int(n_max)
+    # Make sure that the thetas variable is a numpy array
+    if isinstance(thetas, float):
+        thetas = np.array([thetas])
+    else:
+        thetas = np.array(thetas)
+
+    # Make sure that MU <= M <= N
+    if not(mu_max <= m_max <= n_max):
+        raise Exception('MU must be less than or equal to M, '
+                        'which in turn must be less than or '
+                        'equal to N.')
+
+    # Also make sure that MU >= 1
+    if mu_max < 1:
+        raise Exception('MU must be greater than or equal to 1.')
+
+    # Make sure that all theta values are between 0 and pi
+    if np.any(thetas < 0) or np.any(thetas > np.pi):
+        raise Exception('theta values must be between 0 and pi, inclusive.')
+
+    # For mu == -1, 0, or 1, calculate the rotation coefficients using [1],(A2.17),
+    # (A2.18), and (A2.19). This is done to improve computation speed.
+    ## print 'Calculating rotation coefficients for mu = -1, 0, and 1'
+
+    # Calculate the normalized associated Legendre function values,
+    # and the values of the derivative with respect to cos(theta)
+    legendre_norm, dlegendre_norm = lpmn_norm(n_max, m_max, thetas)
+
+    # Extend the legendre_norm array to negative values
+    # of m (to ease future calculations), but set the arrays
+    # such that legendre_norm of -m is equal to legendre_norm of m.
+    # Also remove the n == 0 part of the array.
+    temp1 = int(2*m_max+1)
+    temp2 = int(2*n_max+1)
+    lpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    lpmn_norm_extended[:, 0:m_max, :] = np.fliplr(legendre_norm[1:, 1:, :])
+    lpmn_norm_extended[:, m_max:, :] = legendre_norm[1:, :, :]
+
+    # Extend the dlegendre_norm array to negative values
+    # of m (to ease future calculations), but set the arrays
+    # such that legendre_norm of -m is equal to legendre_norm of m.
+    # Also remove the n == 0 part of the array.
+    dlpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    dlpmn_norm_extended[:, 0:m_max, :] = np.fliplr(dlegendre_norm[1:, 1:, :])
+    dlpmn_norm_extended[:, m_max:, :] = dlegendre_norm[1:, :, :]
+
+    # Initialize the matrix that will hold the rotation coefficients
+    d = np.zeros((n_max, 3, temp1, len(thetas)))
+
+    # Create arrays that hold the n, m, and mu indices. Also promote
+    # the thetas to a 4-dimensional array. This will come in handy
+    # when later multiplying the matrices. No need to perform
+    # a matrix replication because of the way that Numpy "broadcasts"
+    # the arrays during multiplication.
+    n_vec = np.linspace(1, n_max, n_max)
+    n_array = np.reshape(n_vec, (n_max, 1, 1, 1))
+    mu_vec = np.linspace(-1, 1, 3)
+    mu_array = np.reshape(mu_vec, (1, 3, 1, 1))
+    m_vec = np.linspace(-m_max, m_max, 2*m_max+1)
+    m_array = np.reshape(m_vec, (1, 1, 2*m_max+1, 1))
+
+    # Calculate the (-m/m)**m factor, using [1],(2.19) to handle
+    # the case when m==0
+    nonzeroinds = m_array != 0
+    mm = np.ones(np.shape(m_array))
+    mm[nonzeroinds] = (-m_array[nonzeroinds] /
+                       abs(m_array[nonzeroinds]))**m_array[nonzeroinds]
+
+    # Calculate leading terms that are used in [1],(A2.17),(A2.18),
+    # and (A2.19)
+    c1 = mm*np.sqrt(2.0/(2.0*n_array+1))
+    c2 = -2.0/np.sqrt(n_array*(n_array+1.0))
+
+    # Calculate the mu==0 rotation coefficients according to (A2.17)
+    d_0 = c1[:, 0, :, :]*lpmn_norm_extended
+
+    # Initialize the d_plus1 and d_minus1 arrays
+    d_plus1 = np.zeros([n_max, temp1, len(thetas)])
+    d_minus1 = np.zeros([n_max, temp1, len(thetas)])
+
+    # Calculate the mu==-1 and mu==1 rotation coefficients by
+    # solving for d_-1 and d_+1 using equations (A2.18) and (A2.19).
+    # Only calculate for values of theta where 1e-6 <= theta <= pi-1e-6.
+    inds = np.logical_and((thetas >= 1e-6), (thetas <= np.pi-1e-6))
+    d_plus1__plus__d_minus1 = (c2[:, 0, :, :]*m_array[:, 0, :, :])*d_0[:, :, inds]/np.sin(thetas[inds])
+    d_plus1__minus__d_minus1 = (c1[:, 0, :, :]*c2[:, 0, :, :])*dlpmn_norm_extended[:, :, inds]
+    d_minus1[:, :, inds] = (d_plus1__plus__d_minus1 - d_plus1__minus__d_minus1)/2.0
+    d_plus1[:, :, inds] = (d_plus1__plus__d_minus1 + d_plus1__minus__d_minus1)/2.0
+
+    # Assign d_minus1, d_0, and d_plus1 back into the d array
+    d[:, 0, :, :] = d_minus1
+    d[:, 1, :, :] = d_0
+    d[:, 2, :, :] = d_plus1
+
+    # Calculate the special cases when theta < 1e-6 or theta > pi-1e-6
+    inds = thetas < 1e-6
+    d[:, :, :, inds] = mu_array == m_array
+    inds = thetas > np.pi-1e-6
+    d[:, :, :, inds] = (-1)**(n_array+m_array)*(mu_array == -m_array)
+
+    # If MU > 1, calculate the mu != -1, 0, or 1 rotation coefficients using [1],(A2.11)
+    if mu_max > 1:
+
+        # Store d for mu == -1,0,1 to a temp variable
+        d_temp = d
+
+        # Output shaped like this: (n,mu,m,theta)
+        d = np.zeros((n_max, int(2*mu_max+1), temp1, len(thetas)))
+
+        # Define a helper function
+        def get_mu_index(mu_): return mu_max + mu_
+
+        # Place d_temp back inside of d
+        d[:, get_mu_index(-1):get_mu_index(1)+1, :, :] = d_temp
+
+        # Calculate the delta pyramid
+        deltas = delta_pyramid(n_max)
+
+        # Create the mp and m vectors
+        mp_vec = np.linspace(-n_max, n_max, temp2)
+        m_vec = np.linspace(-m_max, m_max, temp1)
+
+        # Remove the extra m values from the delta pyramid, if necessary
+        extra = (len(mp_vec)-len(m_vec))/2
+        if extra > 0:
+            deltas = deltas[:, :, extra:-extra]
+
+        # promote mp_vec to 4 dimensions
+        mp_array = np.reshape(mp_vec, (1, temp2, 1, 1))
+
+        # Assign len(thetas) to a variable before we promote it to 4 dimensions
+        numthetas = len(thetas)
+
+        # promote thetas to 4 dimensions
+        thetas = np.reshape(thetas, (1, 1, 1, len(thetas)))
+
+        # Delete n==0 in deltas
+        deltas = np.delete(deltas, 0, 0)
+
+        # promote the deltas to 4 dimensions
+        deltas4d = np.reshape(deltas, (n_max, temp2, temp1, 1))
+
+        # Calculate the exponent matrix
+        expon = np.exp(-1j*mp_array*thetas)
+
+        # promote the m_vec to 2 dimensions
+        m_array = np.reshape(m_vec, (1, temp1))
+
+        # define a helper function
+        def get_m_index(m_): return m_max + m_
+
+        # Calculate the summation for mu != -1,0,1
+        mu_vec = np.linspace(-mu_max, mu_max, int(2*mu_max+1))
+        mu_vec = mu_vec[np.logical_or(mu_vec < -1, mu_vec > 1)]
+        for mu in mu_vec:
+            ## print 'Calculating rotation coefficients for mu =', mu
+            # Calculate the kernel
+            temp = np.reshape(deltas4d[:, :, get_m_index(mu), :], (n_max, temp2, 1, 1))
+            kernel = temp*deltas4d
+            for nt in range(numthetas):
+                d[:, get_mu_index(mu), :, nt] = ((1j**(mu-m_array))*np.sum(kernel[:, :, :, 0] *
+                                                                           expon[:, :, :, nt], 1)).real
+    return d
+
+def lpmn_norm(n_max, m_max, thetas):
+    # Returns the normalized associated Legendre function values of
+    # cos(theta), as defined in [1],(A1.25). Also returns the derivative
+    # of the normalized associated Legendre function values, where the
+    # derivative is taken with respect to cos(theta).
+
+    # Make sure that the thetas variable is a numpy array
+    if isinstance(thetas, float):
+        thetas = np.array([thetas])
+    else:
+        thetas = np.array(thetas)
+
+    # Make sure that M <= N
+    if m_max > n_max:
+        raise Exception('M must be less than or equal to N.')
+
+    # Make sure that all theta values are between 0 and pi
+    if np.any(thetas < 0) or np.any(thetas > np.pi):
+        raise Exception('theta values must be between 0 and pi, inclusive.')
+
+    # Initialize the matrices which will store the associated Legendre
+    # function values. legendre_m_n_thetas will contain the associated Legendre
+    # function values, whereas dlegendre_m_n_thetas will contain the derivative
+    # of the associated Legendre function ( derivative taken with
+    # respect to cos(theta) )
+    tempm = int(m_max+1)
+    tempn = int(n_max+1)
+    legendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
+    dlegendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
+
+    # Loop through all theta values, using the scipy.special.lpmn
+    # function to calculate the associated Legendre function values.
+    for tt in range(1, len(thetas)): #Small change here, so that there is no legendre of 0.
+        legendre_m_n_thetas[:, :, tt], dlegendre_m_n_thetas[:, :, tt] = sci_sp.lpmn(m_max, n_max, np.cos(thetas[tt]))
+        dlegendre_m_n_thetas[:, :, tt] = dlegendre_m_n_thetas[:, :, tt]*-np.sin(thetas[tt])
+    # Next, we wish to obtain the normalized associated Legendre functions
+    # (and the derivatives) from the associated Legendre functions.
+    # Therefore, we must calculate the normalization factors,
+    # as given in [1],(A1.25). The math.factorial and fractions.Fraction
+    # functions are used to prevent numerical overflow from occurring.
+    # Also, it should be noted that [1] defines the associated Legendre
+    # function differently than the scipy.special package. Therefore,
+    # we must multiply the scipy.special values by (-1)**m in order
+    # to have our normalized associated Legendre function values agree
+    # with those given in the table in [1],pg.322
+    normfactor = np.zeros((tempm, tempn, 1))
+    for m in range(tempm):
+        for n in range(tempn):
+            if m > n:
+                continue
+            temp1 = math.factorial(n-m)
+            temp2 = math.factorial(n+m)
+            temp3 = fractions.Fraction(temp1, temp2)
+            normfactor[m, n, 0] = (-1)**m*math.sqrt((2*n+1)/2.0*float(temp3))
+
+    # Multiply the associate Legendre function values by the
+    # normalization factors to obtain the normalized associated
+    # Legendre function values. Also, take this opportunity to copy
+    # the values such that legendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
+    legendre_m_n_thetas = legendre_m_n_thetas*normfactor
+    legendre_m_n_thetas = legendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
+
+    # Multiply the associate Legendre function derivative values by the
+    # normalization factors to obtain the derivative of the normalized
+    # associated Legendre function values ( derivative taken with respect
+    # to cos(theta) ). Also, take this opportunity to copy
+    # the values such that dlegendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
+    dlegendre_m_n_thetas = dlegendre_m_n_thetas*normfactor
+    dlegendre_m_n_thetas = dlegendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
+
+    return legendre_m_n_thetas, dlegendre_m_n_thetas
