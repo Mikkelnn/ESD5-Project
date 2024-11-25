@@ -49,7 +49,7 @@ def select_data_at_angle(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, p
 
 def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
   # variabels used for smoothing
-  window_size = 13 # Choose an odd window size
+  window_size = 9 # Choose an odd window size
   poly_order = 2    # Polynomial order for smoothing
 
   # deterimne sample number corresponding to plot angles
@@ -109,12 +109,14 @@ nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_pa
 new_shape = (int(nfData.shape[0] / 2), int(nfData.shape[1] / 2))
 nfData_reduced = get_theta_phi_error_from_fine_set(nfData, new_shape, sample_theta=True, sample_phi=True)
 
+print(phi_deg)
+
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 frequency_Hz = 10e9 # 10GHz
-file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
-nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
+#file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+#nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
@@ -143,11 +145,11 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 
 theta_deg = np.linspace(0, 180, int(180 / theta_step_deg)+1)
 
-phi_rad = (phi_deg * np.pi) / 180
-theta_rad = (theta_deg * np.pi) / 180
+phi_rad =  np.deg2rad(phi_deg)
+theta_rad = np.deg2rad(theta_deg)
 
-theta_step_rad = (theta_step_deg * np.pi) / 180
-phi_step_rad = (phi_step_deg * np.pi) / 180
+theta_step_rad = np.deg2rad(theta_step_deg)
+phi_step_rad = np.deg2rad(phi_step_deg)
 
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
@@ -211,12 +213,39 @@ theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 farfieldData = np.abs(ffData[:,:,0]**2 + ffData[:,:,1]**2)
 
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-data = select_data_at_angle2(farfieldData, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
-plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
-plot_copolar2(data, theta_deg_center2, 'Transformed FF copolar')
+data1 = select_data_at_angle2(farfieldData, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
+
+#Introduce errors:
+nfDataError = np.copy(nfData)
+amplitude_errors(nfDataError, 0.05)
+phase_errors(nfDataError, 0.05)
+#fixed_phase_error(nfDataError, 0.4)
+
+nfData_sum_error = HansenPreProcessing(nfDataError)
+
+ffDataError = spherical_far_field_transform_gigacook(nfData_sum_error, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=10e3, N=max_l, M=10) #nf_meas_dist is the distance you want the transform at!
+
+ffDataError = np.flip(ffDataError, 0)
+ffDataError = np.roll(ffDataError, -1, axis = 0)
+farfieldDataError = np.abs(ffDataError[:,:,0]**2 + ffDataError[:,:,1]**2)
+
+dataError = select_data_at_angle2(farfieldDataError, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+dataDif = select_data_at_angle2(20*np.log10(abs(farfieldDataError - farfieldData) / farfieldData), theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+
+#plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+#plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
+#plot_heatmap(farfieldDataError, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap with Error')
+#plot_heatmap(abs(farfieldDataError - farfieldData) / farfieldData, theta_deg_loaded, phi_deg_loaded, 'Dif error heatmap')
+
+#plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
+#plot_copolar2(data1, theta_deg_center2, 'Transformed FF copolar')
+#plot_copolar2(dataError, theta_deg_center2, 'Transformed FF copolar with Error')
+plot_error_compare(data1, dataError, theta_deg_center2, 'Error compare')
+plot_dif(data1, dataError, theta_deg_center2, 'Dif Radiation plot')
+
+
 
 # show all figures
 show_figures()

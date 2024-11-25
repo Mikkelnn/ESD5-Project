@@ -83,11 +83,11 @@ def load_data_cst(file_path):
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=2, header=None)
 
     # Calculate theta and phi sizes
-    theta_values = list(set(nf_data.iloc[:, 0])) # distinct (deduplicate) theta values
+    theta_values = sorted(list(set(nf_data.iloc[:, 0]))) # distinct (deduplicate) theta values
     theta_size = len(theta_values)
     theta_stepSize = (np.max(theta_values) - np.min(theta_values)) / (theta_size - 1)
 
-    phi_values = list(set(nf_data.iloc[:, 1])) # distinct (deduplicate) theta values
+    phi_values = sorted(list(set(nf_data.iloc[:, 1]))) # distinct (deduplicate) theta values
     phi_size = len(phi_values)
     phi_stepSize = (np.max(phi_values) - np.min(phi_values)) / (phi_size - 1)
 
