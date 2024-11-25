@@ -26,4 +26,21 @@ def zero_pad_theta(nfData, theta_deg, theta_step_deg):
     # Add the zero rows to the array
     return np.vstack((nfData, zero_rows))
 
+def combine_data_for_position_error(dataArr):
+
+    if len(dataArr) < 2:
+        raise ValueError(f"Not possible to combine data from single data set")
     
+    # Stack the arrays along a new axis to simplify random selection
+    stacked_arrays = np.stack(dataArr)  # Shape: (3, rows, cols)
+
+    # Generate a random index array to choose from the stacked arrays
+    rows, cols, _ = dataArr[0].shape
+
+    random_indices = np.random.randint(0, len(dataArr), size=(rows, cols))  # Random indices (0, 1, or 2)
+
+    # Use advanced indexing to select random values from the stacked arrays
+    output_array = stacked_arrays[random_indices, np.arange(rows)[:, None], np.arange(cols)]
+
+    return output_array
+

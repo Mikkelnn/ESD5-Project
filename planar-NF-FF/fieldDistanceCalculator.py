@@ -27,7 +27,7 @@ def calculate_field_regions(antenna_size, wavelength):
     }
 
 # Example usage:
-antenna_size = 10  # Largest dimension of the antenna (D) in meters
+antenna_size = 0.32  # Largest dimension of the antenna (D) in meters
 wavelength = 0.03   # Wavelength in meters
 
 regions = calculate_field_regions(antenna_size, wavelength)
