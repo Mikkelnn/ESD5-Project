@@ -49,7 +49,7 @@ def select_data_at_angle(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, p
 
 def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
   # variabels used for smoothing
-  window_size = 13 # Choose an odd window size
+  window_size = 9 # Choose an odd window size
   poly_order = 2    # Polynomial order for smoothing
 
   # deterimne sample number corresponding to plot angles
@@ -198,12 +198,39 @@ theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
 farfieldData = np.abs(ffData[:,:,0]**2 + ffData[:,:,1]**2)
 
 data_loaded = select_data_at_angle2(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-data = select_data_at_angle2(farfieldData, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
-plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
-plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
-plot_copolar2(data, theta_deg_center2, 'Transformed FF copolar')
+data1 = select_data_at_angle2(farfieldData, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
+
+#Introduce errors:
+nfDataError = np.copy(nfData)
+amplitude_errors(nfDataError, 0.05)
+phase_errors(nfDataError, 0.05)
+#fixed_phase_error(nfDataError, 0.4)
+
+nfData_sum_error = HansenPreProcessing(nfDataError)
+
+ffDataError = spherical_far_field_transform_gigacook(nfData_sum_error, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, nf_meas_dist=10e3, N=max_l, M=10) #nf_meas_dist is the distance you want the transform at!
+
+ffDataError = np.flip(ffDataError, 0)
+ffDataError = np.roll(ffDataError, -1, axis = 0)
+farfieldDataError = np.abs(ffDataError[:,:,0]**2 + ffDataError[:,:,1]**2)
+
+dataError = select_data_at_angle2(farfieldDataError, theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+dataDif = select_data_at_angle2(20*np.log10(abs(farfieldDataError - farfieldData) / farfieldData), theta_deg_loaded, phi_deg_loaded, phi_select_angle=0)
+
+#plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+#plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
+#plot_heatmap(farfieldDataError, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap with Error')
+#plot_heatmap(abs(farfieldDataError - farfieldData) / farfieldData, theta_deg_loaded, phi_deg_loaded, 'Dif error heatmap')
+
+#plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
+#plot_copolar2(data1, theta_deg_center2, 'Transformed FF copolar')
+#plot_copolar2(dataError, theta_deg_center2, 'Transformed FF copolar with Error')
+plot_error_compare(data1, dataError, theta_deg_center2, 'Error compare')
+plot_dif(data1, dataError, theta_deg_center2, 'Dif Radiation plot')
+
+
 
 # show all figures
 show_figures()
