@@ -1,9 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import random
-
-def seed():
-    return random.randint(1, 1000)
 
 def plot_copolar(data, theta_f_deg, phi_f_deg, figure_title):
 
@@ -257,3 +253,16 @@ def calculate_hpbw(data, angles):
         hpbw = 360 - hpbw
     
     return np.round(hpbw, 2)
+
+def calculate_print_hpbw(data, theta_deg_center):
+    h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
+    h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
+    e_plane_hpbw_smooth = calculate_hpbw(data.e_plane_data_smooth, theta_deg_center)
+    e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
+
+    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth} deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
+    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+
+
+
+

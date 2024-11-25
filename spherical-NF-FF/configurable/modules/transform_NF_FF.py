@@ -244,6 +244,302 @@ def b_wiggle(b_l_m_mu):
 
     return b_l_m_mu_wiggle
 
+def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, nf_meas_dist):
+    # Taken from pysnf by rcutshall
+    # Determine n_max and m_max from q_n_m_s
+    n_max, m_max, s_max = np.shape(q_n_m_s)
+    m_max = (m_max - 1)/2
+
+    # Determine the number of theta and phis points required based on dT and dP
+    numthetas = thetapoints
+    numphis = phipoints
+
+    # Get the dipole probe response constants
+    # (N x 2 x 2, where dim 0 = n, dim 1 = mu, dim 2 = s)
+    p_n_mu_s = Phertzian(frequency_Hz=frequency, n_max=n_max, nf_meas_dist=nf_meas_dist)
+
+    # Copy out the mu==1, s==1 probe response constants
+    p_n = np.reshape(p_n_mu_s[:, 0, 0], (n_max,1,1))  # N x M x Theta
+
+    # Calculate the rotation coefficients
+    # (N x 3 x M x numThetas)
+    d_n_mu_m = rotation_coefficients(n_max, m_max, 1, np.linspace(0, np.pi, numthetas))
+
+    # Calculate the addition and subtraction of the rotation coefficients
+    # (N x M x numThetas)
+    dp1_plus_dm1 = d_n_mu_m[:, 2, :, :] + d_n_mu_m[:, 0, :, :]  # N x M x Theta
+    dp1_minus_dm1 = d_n_mu_m[:, 2, :, :] - d_n_mu_m[:, 0, :, :]
+
+    # Reshape the spherical wave coefficients to get ready for multiplication
+    q_n_m_s = np.reshape(q_n_m_s, (n_max,int(2*m_max+1),s_max,1))  # N x M x S x Theta
+
+    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    temp = p_n*(q_n_m_s[:, :, 0, :]*dp1_plus_dm1 + q_n_m_s[:, :, 1, :]*dp1_minus_dm1)  # N x M x Theta
+    n_sum_chi_0 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
+
+    # Perform the M summations as detailed in [1], (4.135), using an FFT
+    n_sum_chi_0 = np.fft.ifftshift(n_sum_chi_0, axes=1)
+    temp = np.zeros((numthetas,numphis),dtype='complex')
+    temp[:,0:int(m_max+1)] = n_sum_chi_0[:,0:int(m_max+1)]
+    temp[:,int(numphis-m_max):] = n_sum_chi_0[:,int(m_max+1):]
+    theta_pol = np.fft.fft(temp, axis=1)
+
+    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    temp = 1j*p_n*(q_n_m_s[:, :, 0, :]*dp1_minus_dm1 + q_n_m_s[:, :, 1, :]*dp1_plus_dm1)  # N x M x Theta
+    n_sum_chi_90 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
+
+    # Perform the M summations as detailed in [1], (4.135), using an FFT
+    n_sum_chi_90 = np.fft.ifftshift(n_sum_chi_90, axes=1)
+    temp = np.zeros((numthetas,numphis),dtype='complex')
+    temp[:,0:int(m_max+1)] = n_sum_chi_90[:,0:int(m_max+1)]
+    temp[:,int(numphis-m_max):] = n_sum_chi_90[:,int(m_max+1):]
+    phi_pol = np.fft.fft(temp, axis=1)
+
+    return theta_pol, phi_pol
+
+def rotation_coefficients(n_max, m_max, mu_max, thetas):
+    # Taken from pysnf by rcutshall
+    # Function used to calculate the rotation coefficients.
+    # The rotation coefficients are defined in [1],Section A2.3
+    m_max = int(m_max)
+    n_max = int(n_max)
+    # Make sure that the thetas variable is a numpy array
+    if isinstance(thetas, float):
+        thetas = np.array([thetas])
+    else:
+        thetas = np.array(thetas)
+
+    # Make sure that MU <= M <= N
+    if not(mu_max <= m_max <= n_max):
+        raise Exception('MU must be less than or equal to M, '
+                        'which in turn must be less than or '
+                        'equal to N.')
+
+    # Also make sure that MU >= 1
+    if mu_max < 1:
+        raise Exception('MU must be greater than or equal to 1.')
+
+    # Make sure that all theta values are between 0 and pi
+    if np.any(thetas < 0) or np.any(thetas > np.pi):
+        raise Exception('theta values must be between 0 and pi, inclusive.')
+
+    # For mu == -1, 0, or 1, calculate the rotation coefficients using [1],(A2.17),
+    # (A2.18), and (A2.19). This is done to improve computation speed.
+    ## print 'Calculating rotation coefficients for mu = -1, 0, and 1'
+
+    # Calculate the normalized associated Legendre function values,
+    # and the values of the derivative with respect to cos(theta)
+    legendre_norm, dlegendre_norm = lpmn_norm(n_max, m_max, thetas)
+
+    # Extend the legendre_norm array to negative values
+    # of m (to ease future calculations), but set the arrays
+    # such that legendre_norm of -m is equal to legendre_norm of m.
+    # Also remove the n == 0 part of the array.
+    temp1 = int(2*m_max+1)
+    temp2 = int(2*n_max+1)
+    lpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    lpmn_norm_extended[:, 0:m_max, :] = np.fliplr(legendre_norm[1:, 1:, :])
+    lpmn_norm_extended[:, m_max:, :] = legendre_norm[1:, :, :]
+
+    # Extend the dlegendre_norm array to negative values
+    # of m (to ease future calculations), but set the arrays
+    # such that legendre_norm of -m is equal to legendre_norm of m.
+    # Also remove the n == 0 part of the array.
+    dlpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    dlpmn_norm_extended[:, 0:m_max, :] = np.fliplr(dlegendre_norm[1:, 1:, :])
+    dlpmn_norm_extended[:, m_max:, :] = dlegendre_norm[1:, :, :]
+
+    # Initialize the matrix that will hold the rotation coefficients
+    d = np.zeros((n_max, 3, temp1, len(thetas)))
+
+    # Create arrays that hold the n, m, and mu indices. Also promote
+    # the thetas to a 4-dimensional array. This will come in handy
+    # when later multiplying the matrices. No need to perform
+    # a matrix replication because of the way that Numpy "broadcasts"
+    # the arrays during multiplication.
+    n_vec = np.linspace(1, n_max, n_max)
+    n_array = np.reshape(n_vec, (n_max, 1, 1, 1))
+    mu_vec = np.linspace(-1, 1, 3)
+    mu_array = np.reshape(mu_vec, (1, 3, 1, 1))
+    m_vec = np.linspace(-m_max, m_max, 2*m_max+1)
+    m_array = np.reshape(m_vec, (1, 1, 2*m_max+1, 1))
+
+    # Calculate the (-m/m)**m factor, using [1],(2.19) to handle
+    # the case when m==0
+    nonzeroinds = m_array != 0
+    mm = np.ones(np.shape(m_array))
+    mm[nonzeroinds] = (-m_array[nonzeroinds] /
+                       abs(m_array[nonzeroinds]))**m_array[nonzeroinds]
+
+    # Calculate leading terms that are used in [1],(A2.17),(A2.18),
+    # and (A2.19)
+    c1 = mm*np.sqrt(2.0/(2.0*n_array+1))
+    c2 = -2.0/np.sqrt(n_array*(n_array+1.0))
+
+    # Calculate the mu==0 rotation coefficients according to (A2.17)
+    d_0 = c1[:, 0, :, :]*lpmn_norm_extended
+
+    # Initialize the d_plus1 and d_minus1 arrays
+    d_plus1 = np.zeros([n_max, temp1, len(thetas)])
+    d_minus1 = np.zeros([n_max, temp1, len(thetas)])
+
+    # Calculate the mu==-1 and mu==1 rotation coefficients by
+    # solving for d_-1 and d_+1 using equations (A2.18) and (A2.19).
+    # Only calculate for values of theta where 1e-6 <= theta <= pi-1e-6.
+    inds = np.logical_and((thetas >= 1e-6), (thetas <= np.pi-1e-6))
+    d_plus1__plus__d_minus1 = (c2[:, 0, :, :]*m_array[:, 0, :, :])*d_0[:, :, inds]/np.sin(thetas[inds])
+    d_plus1__minus__d_minus1 = (c1[:, 0, :, :]*c2[:, 0, :, :])*dlpmn_norm_extended[:, :, inds]
+    d_minus1[:, :, inds] = (d_plus1__plus__d_minus1 - d_plus1__minus__d_minus1)/2.0
+    d_plus1[:, :, inds] = (d_plus1__plus__d_minus1 + d_plus1__minus__d_minus1)/2.0
+
+    # Assign d_minus1, d_0, and d_plus1 back into the d array
+    d[:, 0, :, :] = d_minus1
+    d[:, 1, :, :] = d_0
+    d[:, 2, :, :] = d_plus1
+
+    # Calculate the special cases when theta < 1e-6 or theta > pi-1e-6
+    inds = thetas < 1e-6
+    d[:, :, :, inds] = mu_array == m_array
+    inds = thetas > np.pi-1e-6
+    d[:, :, :, inds] = (-1)**(n_array+m_array)*(mu_array == -m_array)
+
+    # If MU > 1, calculate the mu != -1, 0, or 1 rotation coefficients using [1],(A2.11)
+    if mu_max > 1:
+
+        # Store d for mu == -1,0,1 to a temp variable
+        d_temp = d
+
+        # Output shaped like this: (n,mu,m,theta)
+        d = np.zeros((n_max, int(2*mu_max+1), temp1, len(thetas)))
+
+        # Define a helper function
+        def get_mu_index(mu_): return mu_max + mu_
+
+        # Place d_temp back inside of d
+        d[:, get_mu_index(-1):get_mu_index(1)+1, :, :] = d_temp
+
+        # Calculate the delta pyramid
+        deltas = delta_pyramid(n_max)
+
+        # Create the mp and m vectors
+        mp_vec = np.linspace(-n_max, n_max, temp2)
+        m_vec = np.linspace(-m_max, m_max, temp1)
+
+        # Remove the extra m values from the delta pyramid, if necessary
+        extra = (len(mp_vec)-len(m_vec))/2
+        if extra > 0:
+            deltas = deltas[:, :, extra:-extra]
+
+        # promote mp_vec to 4 dimensions
+        mp_array = np.reshape(mp_vec, (1, temp2, 1, 1))
+
+        # Assign len(thetas) to a variable before we promote it to 4 dimensions
+        numthetas = len(thetas)
+
+        # promote thetas to 4 dimensions
+        thetas = np.reshape(thetas, (1, 1, 1, len(thetas)))
+
+        # Delete n==0 in deltas
+        deltas = np.delete(deltas, 0, 0)
+
+        # promote the deltas to 4 dimensions
+        deltas4d = np.reshape(deltas, (n_max, temp2, temp1, 1))
+
+        # Calculate the exponent matrix
+        expon = np.exp(-1j*mp_array*thetas)
+
+        # promote the m_vec to 2 dimensions
+        m_array = np.reshape(m_vec, (1, temp1))
+
+        # define a helper function
+        def get_m_index(m_): return m_max + m_
+
+        # Calculate the summation for mu != -1,0,1
+        mu_vec = np.linspace(-mu_max, mu_max, int(2*mu_max+1))
+        mu_vec = mu_vec[np.logical_or(mu_vec < -1, mu_vec > 1)]
+        for mu in mu_vec:
+            ## print 'Calculating rotation coefficients for mu =', mu
+            # Calculate the kernel
+            temp = np.reshape(deltas4d[:, :, get_m_index(mu), :], (n_max, temp2, 1, 1))
+            kernel = temp*deltas4d
+            for nt in range(numthetas):
+                d[:, get_mu_index(mu), :, nt] = ((1j**(mu-m_array))*np.sum(kernel[:, :, :, 0] *
+                                                                           expon[:, :, :, nt], 1)).real
+    return d
+
+def lpmn_norm(n_max, m_max, thetas):
+    # Returns the normalized associated Legendre function values of
+    # cos(theta), as defined in [1],(A1.25). Also returns the derivative
+    # of the normalized associated Legendre function values, where the
+    # derivative is taken with respect to cos(theta).
+
+    # Make sure that the thetas variable is a numpy array
+    if isinstance(thetas, float):
+        thetas = np.array([thetas])
+    else:
+        thetas = np.array(thetas)
+
+    # Make sure that M <= N
+    if m_max > n_max:
+        raise Exception('M must be less than or equal to N.')
+
+    # Make sure that all theta values are between 0 and pi
+    if np.any(thetas < 0) or np.any(thetas > np.pi):
+        raise Exception('theta values must be between 0 and pi, inclusive.')
+
+    # Initialize the matrices which will store the associated Legendre
+    # function values. legendre_m_n_thetas will contain the associated Legendre
+    # function values, whereas dlegendre_m_n_thetas will contain the derivative
+    # of the associated Legendre function ( derivative taken with
+    # respect to cos(theta) )
+    tempm = int(m_max+1)
+    tempn = int(n_max+1)
+    legendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
+    dlegendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
+
+    # Loop through all theta values, using the scipy.special.lpmn
+    # function to calculate the associated Legendre function values.
+    for tt in range(1, len(thetas)): #Small change here, so that there is no legendre of 0.
+        legendre_m_n_thetas[:, :, tt], dlegendre_m_n_thetas[:, :, tt] = sci_sp.lpmn(m_max, n_max, np.cos(thetas[tt]))
+        dlegendre_m_n_thetas[:, :, tt] = dlegendre_m_n_thetas[:, :, tt]*-np.sin(thetas[tt])
+    # Next, we wish to obtain the normalized associated Legendre functions
+    # (and the derivatives) from the associated Legendre functions.
+    # Therefore, we must calculate the normalization factors,
+    # as given in [1],(A1.25). The math.factorial and fractions.Fraction
+    # functions are used to prevent numerical overflow from occurring.
+    # Also, it should be noted that [1] defines the associated Legendre
+    # function differently than the scipy.special package. Therefore,
+    # we must multiply the scipy.special values by (-1)**m in order
+    # to have our normalized associated Legendre function values agree
+    # with those given in the table in [1],pg.322
+    normfactor = np.zeros((tempm, tempn, 1))
+    for m in range(tempm):
+        for n in range(tempn):
+            if m > n:
+                continue
+            temp1 = math.factorial(n-m)
+            temp2 = math.factorial(n+m)
+            temp3 = fractions.Fraction(temp1, temp2)
+            normfactor[m, n, 0] = (-1)**m*math.sqrt((2*n+1)/2.0*float(temp3))
+
+    # Multiply the associate Legendre function values by the
+    # normalization factors to obtain the normalized associated
+    # Legendre function values. Also, take this opportunity to copy
+    # the values such that legendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
+    legendre_m_n_thetas = legendre_m_n_thetas*normfactor
+    legendre_m_n_thetas = legendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
+
+    # Multiply the associate Legendre function derivative values by the
+    # normalization factors to obtain the derivative of the normalized
+    # associated Legendre function values ( derivative taken with respect
+    # to cos(theta) ). Also, take this opportunity to copy
+    # the values such that dlegendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
+    dlegendre_m_n_thetas = dlegendre_m_n_thetas*normfactor
+    dlegendre_m_n_thetas = dlegendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
+
+    return legendre_m_n_thetas, dlegendre_m_n_thetas
+
+
 def normalize_near_field_data(nf_data):
     """
     Normalize the near-field data by scaling E_theta and E_phi to have a maximum value of 1.
@@ -862,302 +1158,13 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 
     theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, nf_meas_dist)
 
-    nf_data[:,:,0] = theta
-    nf_data[:,:,1] = phi
+    ffData = np.zeros(nf_data.shape, dtype=complex)
+    ffData[:, :, 0] = theta
+    ffData[:, :, 1] = phi
 
-    return nf_data
+    #Flip the array:
+    ffData = np.flip(ffData, 0)
+    #Roll 2
+    ffData = np.roll(ffData, -1, axis=0)
 
-def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, nf_meas_dist):
-    # Taken from pysnf by rcutshall
-    # Determine n_max and m_max from q_n_m_s
-    n_max, m_max, s_max = np.shape(q_n_m_s)
-    m_max = (m_max - 1)/2
-
-    # Determine the number of theta and phis points required based on dT and dP
-    numthetas = thetapoints
-    numphis = phipoints
-
-    # Get the dipole probe response constants
-    # (N x 2 x 2, where dim 0 = n, dim 1 = mu, dim 2 = s)
-    p_n_mu_s = Phertzian(frequency_Hz=frequency, n_max=n_max, nf_meas_dist=nf_meas_dist)
-
-    # Copy out the mu==1, s==1 probe response constants
-    p_n = np.reshape(p_n_mu_s[:, 0, 0], (n_max,1,1))  # N x M x Theta
-
-    # Calculate the rotation coefficients
-    # (N x 3 x M x numThetas)
-    d_n_mu_m = rotation_coefficients(n_max, m_max, 1, np.linspace(0, np.pi, numthetas))
-
-    # Calculate the addition and subtraction of the rotation coefficients
-    # (N x M x numThetas)
-    dp1_plus_dm1 = d_n_mu_m[:, 2, :, :] + d_n_mu_m[:, 0, :, :]  # N x M x Theta
-    dp1_minus_dm1 = d_n_mu_m[:, 2, :, :] - d_n_mu_m[:, 0, :, :]
-
-    # Reshape the spherical wave coefficients to get ready for multiplication
-    q_n_m_s = np.reshape(q_n_m_s, (n_max,int(2*m_max+1),s_max,1))  # N x M x S x Theta
-
-    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
-    temp = p_n*(q_n_m_s[:, :, 0, :]*dp1_plus_dm1 + q_n_m_s[:, :, 1, :]*dp1_minus_dm1)  # N x M x Theta
-    n_sum_chi_0 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
-
-    # Perform the M summations as detailed in [1], (4.135), using an FFT
-    n_sum_chi_0 = np.fft.ifftshift(n_sum_chi_0, axes=1)
-    temp = np.zeros((numthetas,numphis),dtype='complex')
-    temp[:,0:int(m_max+1)] = n_sum_chi_0[:,0:int(m_max+1)]
-    temp[:,int(numphis-m_max):] = n_sum_chi_0[:,int(m_max+1):]
-    theta_pol = np.fft.fft(temp, axis=1)
-
-    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
-    temp = 1j*p_n*(q_n_m_s[:, :, 0, :]*dp1_minus_dm1 + q_n_m_s[:, :, 1, :]*dp1_plus_dm1)  # N x M x Theta
-    n_sum_chi_90 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
-
-    # Perform the M summations as detailed in [1], (4.135), using an FFT
-    n_sum_chi_90 = np.fft.ifftshift(n_sum_chi_90, axes=1)
-    temp = np.zeros((numthetas,numphis),dtype='complex')
-    temp[:,0:int(m_max+1)] = n_sum_chi_90[:,0:int(m_max+1)]
-    temp[:,int(numphis-m_max):] = n_sum_chi_90[:,int(m_max+1):]
-    phi_pol = np.fft.fft(temp, axis=1)
-
-    return theta_pol, phi_pol
-
-def rotation_coefficients(n_max, m_max, mu_max, thetas):
-    # Taken from pysnf by rcutshall
-    # Function used to calculate the rotation coefficients.
-    # The rotation coefficients are defined in [1],Section A2.3
-    m_max = int(m_max)
-    n_max = int(n_max)
-    # Make sure that the thetas variable is a numpy array
-    if isinstance(thetas, float):
-        thetas = np.array([thetas])
-    else:
-        thetas = np.array(thetas)
-
-    # Make sure that MU <= M <= N
-    if not(mu_max <= m_max <= n_max):
-        raise Exception('MU must be less than or equal to M, '
-                        'which in turn must be less than or '
-                        'equal to N.')
-
-    # Also make sure that MU >= 1
-    if mu_max < 1:
-        raise Exception('MU must be greater than or equal to 1.')
-
-    # Make sure that all theta values are between 0 and pi
-    if np.any(thetas < 0) or np.any(thetas > np.pi):
-        raise Exception('theta values must be between 0 and pi, inclusive.')
-
-    # For mu == -1, 0, or 1, calculate the rotation coefficients using [1],(A2.17),
-    # (A2.18), and (A2.19). This is done to improve computation speed.
-    ## print 'Calculating rotation coefficients for mu = -1, 0, and 1'
-
-    # Calculate the normalized associated Legendre function values,
-    # and the values of the derivative with respect to cos(theta)
-    legendre_norm, dlegendre_norm = lpmn_norm(n_max, m_max, thetas)
-
-    # Extend the legendre_norm array to negative values
-    # of m (to ease future calculations), but set the arrays
-    # such that legendre_norm of -m is equal to legendre_norm of m.
-    # Also remove the n == 0 part of the array.
-    temp1 = int(2*m_max+1)
-    temp2 = int(2*n_max+1)
-    lpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
-    lpmn_norm_extended[:, 0:m_max, :] = np.fliplr(legendre_norm[1:, 1:, :])
-    lpmn_norm_extended[:, m_max:, :] = legendre_norm[1:, :, :]
-
-    # Extend the dlegendre_norm array to negative values
-    # of m (to ease future calculations), but set the arrays
-    # such that legendre_norm of -m is equal to legendre_norm of m.
-    # Also remove the n == 0 part of the array.
-    dlpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
-    dlpmn_norm_extended[:, 0:m_max, :] = np.fliplr(dlegendre_norm[1:, 1:, :])
-    dlpmn_norm_extended[:, m_max:, :] = dlegendre_norm[1:, :, :]
-
-    # Initialize the matrix that will hold the rotation coefficients
-    d = np.zeros((n_max, 3, temp1, len(thetas)))
-
-    # Create arrays that hold the n, m, and mu indices. Also promote
-    # the thetas to a 4-dimensional array. This will come in handy
-    # when later multiplying the matrices. No need to perform
-    # a matrix replication because of the way that Numpy "broadcasts"
-    # the arrays during multiplication.
-    n_vec = np.linspace(1, n_max, n_max)
-    n_array = np.reshape(n_vec, (n_max, 1, 1, 1))
-    mu_vec = np.linspace(-1, 1, 3)
-    mu_array = np.reshape(mu_vec, (1, 3, 1, 1))
-    m_vec = np.linspace(-m_max, m_max, 2*m_max+1)
-    m_array = np.reshape(m_vec, (1, 1, 2*m_max+1, 1))
-
-    # Calculate the (-m/m)**m factor, using [1],(2.19) to handle
-    # the case when m==0
-    nonzeroinds = m_array != 0
-    mm = np.ones(np.shape(m_array))
-    mm[nonzeroinds] = (-m_array[nonzeroinds] /
-                       abs(m_array[nonzeroinds]))**m_array[nonzeroinds]
-
-    # Calculate leading terms that are used in [1],(A2.17),(A2.18),
-    # and (A2.19)
-    c1 = mm*np.sqrt(2.0/(2.0*n_array+1))
-    c2 = -2.0/np.sqrt(n_array*(n_array+1.0))
-
-    # Calculate the mu==0 rotation coefficients according to (A2.17)
-    d_0 = c1[:, 0, :, :]*lpmn_norm_extended
-
-    # Initialize the d_plus1 and d_minus1 arrays
-    d_plus1 = np.zeros([n_max, temp1, len(thetas)])
-    d_minus1 = np.zeros([n_max, temp1, len(thetas)])
-
-    # Calculate the mu==-1 and mu==1 rotation coefficients by
-    # solving for d_-1 and d_+1 using equations (A2.18) and (A2.19).
-    # Only calculate for values of theta where 1e-6 <= theta <= pi-1e-6.
-    inds = np.logical_and((thetas >= 1e-6), (thetas <= np.pi-1e-6))
-    d_plus1__plus__d_minus1 = (c2[:, 0, :, :]*m_array[:, 0, :, :])*d_0[:, :, inds]/np.sin(thetas[inds])
-    d_plus1__minus__d_minus1 = (c1[:, 0, :, :]*c2[:, 0, :, :])*dlpmn_norm_extended[:, :, inds]
-    d_minus1[:, :, inds] = (d_plus1__plus__d_minus1 - d_plus1__minus__d_minus1)/2.0
-    d_plus1[:, :, inds] = (d_plus1__plus__d_minus1 + d_plus1__minus__d_minus1)/2.0
-
-    # Assign d_minus1, d_0, and d_plus1 back into the d array
-    d[:, 0, :, :] = d_minus1
-    d[:, 1, :, :] = d_0
-    d[:, 2, :, :] = d_plus1
-
-    # Calculate the special cases when theta < 1e-6 or theta > pi-1e-6
-    inds = thetas < 1e-6
-    d[:, :, :, inds] = mu_array == m_array
-    inds = thetas > np.pi-1e-6
-    d[:, :, :, inds] = (-1)**(n_array+m_array)*(mu_array == -m_array)
-
-    # If MU > 1, calculate the mu != -1, 0, or 1 rotation coefficients using [1],(A2.11)
-    if mu_max > 1:
-
-        # Store d for mu == -1,0,1 to a temp variable
-        d_temp = d
-
-        # Output shaped like this: (n,mu,m,theta)
-        d = np.zeros((n_max, int(2*mu_max+1), temp1, len(thetas)))
-
-        # Define a helper function
-        def get_mu_index(mu_): return mu_max + mu_
-
-        # Place d_temp back inside of d
-        d[:, get_mu_index(-1):get_mu_index(1)+1, :, :] = d_temp
-
-        # Calculate the delta pyramid
-        deltas = delta_pyramid(n_max)
-
-        # Create the mp and m vectors
-        mp_vec = np.linspace(-n_max, n_max, temp2)
-        m_vec = np.linspace(-m_max, m_max, temp1)
-
-        # Remove the extra m values from the delta pyramid, if necessary
-        extra = (len(mp_vec)-len(m_vec))/2
-        if extra > 0:
-            deltas = deltas[:, :, extra:-extra]
-
-        # promote mp_vec to 4 dimensions
-        mp_array = np.reshape(mp_vec, (1, temp2, 1, 1))
-
-        # Assign len(thetas) to a variable before we promote it to 4 dimensions
-        numthetas = len(thetas)
-
-        # promote thetas to 4 dimensions
-        thetas = np.reshape(thetas, (1, 1, 1, len(thetas)))
-
-        # Delete n==0 in deltas
-        deltas = np.delete(deltas, 0, 0)
-
-        # promote the deltas to 4 dimensions
-        deltas4d = np.reshape(deltas, (n_max, temp2, temp1, 1))
-
-        # Calculate the exponent matrix
-        expon = np.exp(-1j*mp_array*thetas)
-
-        # promote the m_vec to 2 dimensions
-        m_array = np.reshape(m_vec, (1, temp1))
-
-        # define a helper function
-        def get_m_index(m_): return m_max + m_
-
-        # Calculate the summation for mu != -1,0,1
-        mu_vec = np.linspace(-mu_max, mu_max, int(2*mu_max+1))
-        mu_vec = mu_vec[np.logical_or(mu_vec < -1, mu_vec > 1)]
-        for mu in mu_vec:
-            ## print 'Calculating rotation coefficients for mu =', mu
-            # Calculate the kernel
-            temp = np.reshape(deltas4d[:, :, get_m_index(mu), :], (n_max, temp2, 1, 1))
-            kernel = temp*deltas4d
-            for nt in range(numthetas):
-                d[:, get_mu_index(mu), :, nt] = ((1j**(mu-m_array))*np.sum(kernel[:, :, :, 0] *
-                                                                           expon[:, :, :, nt], 1)).real
-    return d
-
-def lpmn_norm(n_max, m_max, thetas):
-    # Returns the normalized associated Legendre function values of
-    # cos(theta), as defined in [1],(A1.25). Also returns the derivative
-    # of the normalized associated Legendre function values, where the
-    # derivative is taken with respect to cos(theta).
-
-    # Make sure that the thetas variable is a numpy array
-    if isinstance(thetas, float):
-        thetas = np.array([thetas])
-    else:
-        thetas = np.array(thetas)
-
-    # Make sure that M <= N
-    if m_max > n_max:
-        raise Exception('M must be less than or equal to N.')
-
-    # Make sure that all theta values are between 0 and pi
-    if np.any(thetas < 0) or np.any(thetas > np.pi):
-        raise Exception('theta values must be between 0 and pi, inclusive.')
-
-    # Initialize the matrices which will store the associated Legendre
-    # function values. legendre_m_n_thetas will contain the associated Legendre
-    # function values, whereas dlegendre_m_n_thetas will contain the derivative
-    # of the associated Legendre function ( derivative taken with
-    # respect to cos(theta) )
-    tempm = int(m_max+1)
-    tempn = int(n_max+1)
-    legendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
-    dlegendre_m_n_thetas = np.zeros((tempm, tempn, len(thetas)))
-
-    # Loop through all theta values, using the scipy.special.lpmn
-    # function to calculate the associated Legendre function values.
-    for tt in range(1, len(thetas)): #Small change here, so that there is no legendre of 0.
-        legendre_m_n_thetas[:, :, tt], dlegendre_m_n_thetas[:, :, tt] = sci_sp.lpmn(m_max, n_max, np.cos(thetas[tt]))
-        dlegendre_m_n_thetas[:, :, tt] = dlegendre_m_n_thetas[:, :, tt]*-np.sin(thetas[tt])
-    # Next, we wish to obtain the normalized associated Legendre functions
-    # (and the derivatives) from the associated Legendre functions.
-    # Therefore, we must calculate the normalization factors,
-    # as given in [1],(A1.25). The math.factorial and fractions.Fraction
-    # functions are used to prevent numerical overflow from occurring.
-    # Also, it should be noted that [1] defines the associated Legendre
-    # function differently than the scipy.special package. Therefore,
-    # we must multiply the scipy.special values by (-1)**m in order
-    # to have our normalized associated Legendre function values agree
-    # with those given in the table in [1],pg.322
-    normfactor = np.zeros((tempm, tempn, 1))
-    for m in range(tempm):
-        for n in range(tempn):
-            if m > n:
-                continue
-            temp1 = math.factorial(n-m)
-            temp2 = math.factorial(n+m)
-            temp3 = fractions.Fraction(temp1, temp2)
-            normfactor[m, n, 0] = (-1)**m*math.sqrt((2*n+1)/2.0*float(temp3))
-
-    # Multiply the associate Legendre function values by the
-    # normalization factors to obtain the normalized associated
-    # Legendre function values. Also, take this opportunity to copy
-    # the values such that legendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
-    legendre_m_n_thetas = legendre_m_n_thetas*normfactor
-    legendre_m_n_thetas = legendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
-
-    # Multiply the associate Legendre function derivative values by the
-    # normalization factors to obtain the derivative of the normalized
-    # associated Legendre function values ( derivative taken with respect
-    # to cos(theta) ). Also, take this opportunity to copy
-    # the values such that dlegendre_m_n_thetas has dimensions N x (2*M+1) x len(thetas)
-    dlegendre_m_n_thetas = dlegendre_m_n_thetas*normfactor
-    dlegendre_m_n_thetas = dlegendre_m_n_thetas.transpose((1, 0, 2))  # now arranged as (N, M, THETA)
-
-    return legendre_m_n_thetas, dlegendre_m_n_thetas
+    return ffData

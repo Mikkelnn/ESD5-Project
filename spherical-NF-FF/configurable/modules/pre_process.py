@@ -3,7 +3,8 @@ import numpy as np
 def sum_NF_poles(nfData):
     # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
     # calculate the length between the two polarities
-    return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
+    # return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
+    return abs(nfData[:, :, 0]**2 + nfData[:, :, 1]**2)
 
 def HansenPreProcessing(nfData): # Implementation of eq 4.126
     nfDataNew = np.zeros((nfData.shape[0], nfData.shape[1], 2), dtype= complex)
@@ -44,8 +45,7 @@ def combine_data_for_position_error(dataArr):
 
     return output_array
 
-
-def get_theta_phi_error_from_fine_set(array, new_shape, theta_values, phi_values, sample_theta=True, sample_phi=True):
+def get_theta_phi_error_from_fine_set(array, new_shape, sample_theta=True, sample_phi=True):
     """
     Reduces the resolution of a 3D array along the first two axes by random sampling.
     
@@ -89,18 +89,8 @@ def get_theta_phi_error_from_fine_set(array, new_shape, theta_values, phi_values
             output[i, j] = array[sampled_i, sampled_j]
 
     # determine new theta,phi values and stepsizes
-    theta_value_max = np.max(theta_values)
-    theta_value_min = np.min(theta_values)
-    phi_value_max = np.max(phi_values)
-    phi_value_min = np.min(phi_values)
-
-    new_theta_values = np.linspace(theta_value_min, theta_value_max, new_d1)
-    new_theta_stepSize = (theta_value_max - theta_value_min) / (new_d1 - 1)
-
-    new_phi_values = np.linspace(phi_value_min, phi_value_max, new_d2)
-    new_phi_stepSize = (phi_value_max - phi_value_min) / (new_d2 - 1)
-
-    print(f'max: {theta_value_max}, min: {theta_value_min}, dif: {(theta_value_max - theta_value_min)}')
+    new_theta_values, new_theta_stepSize = np.linspace(0, 180, new_d1, retstep=True, endpoint=False)
+    new_phi_values, new_phi_stepSize = np.linspace(0, 360, new_d2, retstep=True, endpoint=False)
 
     return output, new_theta_values, new_phi_values, new_theta_stepSize, new_phi_stepSize
 

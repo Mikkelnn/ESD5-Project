@@ -67,17 +67,6 @@ def load_data_lab_measurements(file_path):
 
     return (complex_field_data, headerData["theta_values"], headerData["phi_values"], headerData["theta_stepSize"], headerData["phi_stepSize"])
 
-
-
-#Newtons method for square root, used to get the square root of integers.
-def isqrt(n):
-    x = n
-    y = (x + 1) // 2
-    while y < x:
-        x = y
-        y = (x + n // x) // 2
-    return x
-
 def load_data_cst(file_path):
     # Load the data, skipping the row with dashes (assumed to be the second row)
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=2, header=None)
@@ -87,7 +76,7 @@ def load_data_cst(file_path):
     theta_size = len(theta_values)
     theta_stepSize = (np.max(theta_values) - np.min(theta_values)) / (theta_size - 1)
 
-    phi_values = sorted(list(set(nf_data.iloc[:, 1]))) # distinct (deduplicate) theta values
+    phi_values = sorted(list(set(nf_data.iloc[:, 1]))) # distinct (deduplicate) phi values
     phi_size = len(phi_values)
     phi_stepSize = (np.max(phi_values) - np.min(phi_values)) / (phi_size - 1)
 
