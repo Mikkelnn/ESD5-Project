@@ -1,9 +1,57 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="24.8.6">
   <diagram name="Side-1" id="EuS9wLJlG5Tf41Z68-jM">
-    <mxGraphModel>
+    <mxGraphModel dx="1235" dy="669" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="1" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-1" value="Input Signal&lt;div&gt;w&lt;/div&gt;" style="ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="80" y="30" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-2" value="$$\chi \textrm{-integration.}$$ $$ \textrm{ Compute }w_{\pm1}(A,\theta, \varphi )$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="140" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-3" value="$$\varphi -\textrm{Integration.} $$ $$\textrm{Compute } w_{\pm 1m}(A,\theta)$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="140" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-4" value="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="130" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-5" value="2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="130" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-6" value="$$\textrm{Compute two }\ell \textrm{-sequnces}$$ $$\textrm{of Fourier coefficients }\tilde{b}^{\pm 1m}_{\ell }$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="280" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-7" value="3" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="270" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-10" value="$$\textrm{Compute two } K(m&#39;)$$ $$\textrm{sequences by convolution}$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="380" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-11" value="4" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="370" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-12" value="$$\textrm{Compute four m&#39;-sums}$$ $$w_{1m}^{n}(A), w_{-1m}^{n}(A), $$ $$w_{1-m}^{n}(A), w_{-1-m}^{n}(A)$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="520" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-13" value="5" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="510" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-14" value="$$\textrm{Solve 2 sets of 2 equations}$$ $$\textrm{with 2 unknowns for}$$ $$T_{1mn}, T_{2mn}, T_{1-mn}, T_{2-mn}$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="640" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-15" value="7" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="640" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-16" value="$$\textrm{Multiply by response constants}$$ $$\textrm{and compute s-sum. Multiply}$$ $$\textrm{by }\Delta \textrm{-product vector and}$$ $$\textrm{compute a term of the n-sum}$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="767" width="200" height="103" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-19" value="8" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="290" y="760" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Id44_y4bwpbwHdYrjrn3-20" value="$$\textrm{Compute m&#39;-sequence}$$ $$\textrm{of }\Delta \textrm{-products}$$" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="655" width="150" height="60" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
