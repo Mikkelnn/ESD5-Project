@@ -95,7 +95,7 @@ def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
 
 # data from CST simulation:
 file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
-nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
+nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
 
 # file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3mParabolic.txt'
 # nfData_2, _, _, _, _ = load_data_cst(file_path)
@@ -106,11 +106,12 @@ nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_pa
 # nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
 
 # rezise theta and phi axis
-new_shape = (int(nfData.shape[0] / 2), int(nfData.shape[1] / 2))
-nfData_reduced = get_theta_phi_error_from_fine_set(nfData, new_shape, sample_theta=True, sample_phi=True)
+new_shape = (int(nfData_1.shape[0] / 2), int(nfData_1.shape[1] / 2))
+nfData_reduced, theta_deg, phi_deg, theta_step_deg, phi_step_deg = get_theta_phi_error_from_fine_set(nfData_1, new_shape, theta_deg, phi_deg, sample_theta=True, sample_phi=True)
 
-print(phi_deg)
+print(f'{theta_step_deg}, {phi_step_deg}')
 
+exit()
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)

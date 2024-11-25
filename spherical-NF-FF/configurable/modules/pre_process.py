@@ -100,5 +100,7 @@ def get_theta_phi_error_from_fine_set(array, new_shape, theta_values, phi_values
     new_phi_values = np.linspace(phi_value_min, phi_value_max, new_d2)
     new_phi_stepSize = (phi_value_max - phi_value_min) / (new_d2 - 1)
 
+    print(f'max: {theta_value_max}, min: {theta_value_min}, dif: {(theta_value_max - theta_value_min)}')
+
     return output, new_theta_values, new_phi_values, new_theta_stepSize, new_phi_stepSize
 
