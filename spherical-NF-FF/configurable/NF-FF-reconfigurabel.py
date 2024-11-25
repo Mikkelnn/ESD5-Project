@@ -105,12 +105,14 @@ nfData_3, _, _, _, _ = load_data_cst(file_path)
 
 nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
 
+print(phi_deg)
+
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 frequency_Hz = 10e9 # 10GHz
-file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
-nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
+#file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+#nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
@@ -139,11 +141,11 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 
 theta_deg = np.linspace(0, 180, int(180 / theta_step_deg)+1)
 
-phi_rad = (phi_deg * np.pi) / 180
-theta_rad = (theta_deg * np.pi) / 180
+phi_rad =  np.deg2rad(phi_deg)
+theta_rad = np.deg2rad(theta_deg)
 
-theta_step_rad = (theta_step_deg * np.pi) / 180
-phi_step_rad = (phi_step_deg * np.pi) / 180
+theta_step_rad = np.deg2rad(theta_step_deg)
+phi_step_rad = np.deg2rad(phi_step_deg)
 
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
