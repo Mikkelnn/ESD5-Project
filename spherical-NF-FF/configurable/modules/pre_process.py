@@ -44,3 +44,61 @@ def combine_data_for_position_error(dataArr):
 
     return output_array
 
+
+def get_theta_phi_error_from_fine_set(array, new_shape, theta_values, phi_values, sample_theta=True, sample_phi=True):
+    """
+    Reduces the resolution of a 3D array along the first two axes by random sampling.
+    
+    Parameters:
+        array (numpy.ndarray): Input 3D array with shape (d1, d2, d3).
+        new_shape (tuple): Desired shape for the first two axes (new_d1, new_d2).
+        sample_axis1 (bool): If True, samples randomly along axis 1.
+        sample_axis2 (bool): If True, samples randomly along axis 2.
+    
+    Returns:
+        numpy.ndarray: Output 3D array with reduced resolution.
+        new_theta_values: Output a 1D array with correct theta resolution
+        new_phi_values: Output a 1D array with correct phi resolution
+        new_theta_stepSize: Output correct theta step size
+        new_phi_stepSize: Output correct phi step size
+    """
+
+    d1, d2, d3 = array.shape
+    new_d1, new_d2 = new_shape
+
+    if not (sample_theta or sample_phi):
+        raise ValueError("At least one sampling mode (sample_theta or sample_phi) must be True.")
+
+    # Define output array
+    output = np.zeros((new_d1, new_d2, d3), dtype=array.dtype)
+
+    # Generate new coordinates for sampling
+    for i in range(new_d1):
+        for j in range(new_d2):
+            # Determine the sampling range in the original array
+            start_i = (i * d1) // new_d1
+            end_i = ((i + 1) * d1) // new_d1
+            start_j = (j * d2) // new_d2
+            end_j = ((j + 1) * d2) // new_d2
+
+            # Sampling logic
+            sampled_i = np.random.randint(start_i, end_i) if sample_theta else (start_i + end_i) // 2
+            sampled_j = np.random.randint(start_j, end_j) if sample_phi else (start_j + end_j) // 2
+
+            # Assign value to output
+            output[i, j] = array[sampled_i, sampled_j]
+
+    # determine new theta,phi values and stepsizes
+    theta_value_max = np.max(theta_values)
+    theta_value_min = np.min(theta_values)
+    phi_value_max = np.max(phi_values)
+    phi_value_min = np.min(phi_values)
+
+    new_theta_values = np.linspace(theta_value_min, theta_value_max, new_d1)
+    new_theta_stepSize = (theta_value_max - theta_value_min) / (new_d1 - 1)
+
+    new_phi_values = np.linspace(phi_value_min, phi_value_max, new_d2)
+    new_phi_stepSize = (phi_value_max - phi_value_min) / (new_d2 - 1)
+
+    return output, new_theta_values, new_phi_values, new_theta_stepSize, new_phi_stepSize
+
