@@ -94,8 +94,17 @@ def select_data_at_angle2(ffData, theta_f_deg, phi_f_deg, phi_select_angle=0):
 # 1. Where is the NF data from? (simulated or from a file)
 
 # data from CST simulation:
-#file_path = './simoulation CST/Parabolic/ReflectorParabolic5meterEfield_virker3D.txt'
-#nfData = load_data_cst(file_path)
+file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
+nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
+
+file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3mParabolic.txt'
+nfData_2, _, _, _, _ = load_data_cst(file_path)
+
+file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3.02mParabolic.txt'
+nfData_3, _, _, _, _ = load_data_cst(file_path)
+
+nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
+
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)

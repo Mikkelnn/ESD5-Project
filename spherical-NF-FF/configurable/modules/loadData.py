@@ -83,15 +83,13 @@ def load_data_cst(file_path):
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=2, header=None)
 
     # Calculate theta and phi sizes
-    theta_size = int(isqrt(nf_data.shape[0] // 2))
-    phi_size = theta_size * 2
+    theta_values = list(set(nf_data.iloc[:, 0])) # distinct (deduplicate) theta values
+    theta_size = len(theta_values)
+    theta_stepSize = (np.max(theta_values) - np.min(theta_values)) / (theta_size - 1)
 
-    # Define theta and phi ranges for spherical coordinates
-    theta = np.linspace(0, np.pi, theta_size)  # Polar angle
-    phi = np.linspace(0, 2 * np.pi, phi_size)  # Azimuthal angle
-
-    # Create meshgrid for spherical coordinates
-    theta_grid, phi_grid = np.meshgrid(theta, phi, indexing='ij')
+    phi_values = list(set(nf_data.iloc[:, 1])) # distinct (deduplicate) theta values
+    phi_size = len(phi_values)
+    phi_stepSize = (np.max(phi_values) - np.min(phi_values)) / (phi_size - 1)
 
     # Initialize the total electric fields in the near field
     complex_field_data = np.zeros((theta_size, phi_size, 2), dtype=np.complex_)
@@ -111,4 +109,4 @@ def load_data_cst(file_path):
             complex_field_data[i, j, 1] = e_phi_magnitude * np.cos(e_phi_phase) + 1j * e_phi_magnitude * np.sin(e_phi_phase)
             k += 1
 
-    return complex_field_data
+    return (complex_field_data, theta_values, phi_values, theta_stepSize, phi_stepSize)
