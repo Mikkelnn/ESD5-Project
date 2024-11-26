@@ -3,14 +3,12 @@ import numpy as np
 def sum_NF_poles(nfData):
     # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
     # calculate the length between the two polarities
-    # return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
     return abs(nfData[:, :, 0]) + abs(nfData[:, :, 1])
 
 def sum_NF_poles_sqrt(nfData):
     # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
     # calculate the length between the two polarities
     return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
-    #return abs(nfData[:, :, 0]) + abs(nfData[:, :, 1])
 
 def HansenPreProcessing(nfData): # Implementation of eq 4.126
     nfDataNew = np.zeros((nfData.shape[0], nfData.shape[1], 2), dtype= complex)
