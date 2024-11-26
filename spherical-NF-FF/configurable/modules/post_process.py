@@ -2,6 +2,17 @@ import numpy as np
 from scipy.signal import savgol_filter  # Savitzky-Golay filter
 from collections import namedtuple
 
+def sum_NF_poles(nfData):
+    # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
+    # calculate the length between the two polarities
+    return abs(nfData[:, :, 0]) + abs(nfData[:, :, 1])
+
+def sum_NF_poles_sqrt(nfData):
+    # abs() calculates the magnitude of a complex number see python ref: https://www.geeksforgeeks.org/finding-magnitude-of-a-complex-number-in-python/
+    # calculate the length between the two polarities
+    return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
+
+
 def select_data_at_angle_old(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, phi_select_angle=0):
   # variabels used for smoothing
   window_size = 9 # Choose an odd window size
