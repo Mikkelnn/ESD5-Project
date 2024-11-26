@@ -3,7 +3,7 @@ import numpy as np
 def HansenPreProcessing(nfData): # Implementation of eq 4.126
     nfDataNew = np.zeros((nfData.shape[0], nfData.shape[1], 2), dtype= complex)
     nfDataNew[:, :, 0] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)   #+1
-    nfDataNew[:, :, 1] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)     #-1
+    nfDataNew[:, :, 1] = (nfData[:, :, 0] + 1j*nfData[:, :, 1]) * (1./2.)     #-1
 
     #nfDataNew = np.pad(nfDataNew, ((0,36-nfDataNew.shape[0]), (0,0), (0, 0)), mode='constant', constant_values=0) # this only works if the step size is 5 degrees
 
@@ -22,7 +22,7 @@ def zero_pad_theta(nfData, theta_step_deg):
     # Create zero rows with the same number of columns as the original array
     # shape = list(nfData.shape)
     # shape[0] = num_zero_rows
-    # zero_rows = np.full(tuple(shape), np.min(nfData))
+    # zero_rows = np.full(tuple(shape), 0)
 
     # copy the last roe as padding
     zero_rows = np.repeat([nfData[-1]], num_zero_rows, axis=0)

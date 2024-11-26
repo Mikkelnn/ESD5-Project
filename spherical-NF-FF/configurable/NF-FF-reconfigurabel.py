@@ -51,6 +51,7 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 #nfData = simulate_NF_dipole_array()
 
 # zero-pad before converting theta, phi values
+
 nfData, theta_deg = zero_pad_theta(nfData, theta_step_deg)
 ffData_loaded, theta_deg = zero_pad_theta(ffData_loaded, theta_step_deg)
 
@@ -74,8 +75,8 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 ##############################################################################################################
 
 nfDataError = np.copy(nfData)
-# amplitude_errors(nfDataError, 0.0)
-# phase_errors(nfDataError, 0.0)
+amplitude_errors(nfDataError, 0.4)
+phase_errors(nfDataError, 0.08)
 #fixed_phase_error(nfDataError, 0.4)
 
 
@@ -102,7 +103,7 @@ ffData_loaded = sum_NF_poles_sqrt(ffData_loaded)
 # Normalize plots
 ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
 farfieldData = farfieldData / np.max(np.abs(farfieldData))
-farfieldDataError = farfieldDataError / np.max(np.abs(farfieldData))
+farfieldDataError = farfieldDataError / np.max(np.abs(farfieldDataError))
 
 
 ##############################################################################################################
@@ -124,8 +125,8 @@ dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
-plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
+plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
+plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
 #calculate_print_hpbw(data1, theta_deg_center)
 
 #plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
@@ -144,8 +145,8 @@ plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
 
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 
-plot_heatmap(ffData_loaded, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
+#plot_heatmap(ffData_loaded, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+#plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
 #plot_heatmap(farfieldDataError, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap with Error')
 #plot_heatmap(abs(farfieldDataError - farfieldData) / farfieldData, theta_deg_loaded, phi_deg_loaded, 'Dif error heatmap')
 
