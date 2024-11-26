@@ -1048,9 +1048,14 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 10e3, N = 3, M = 3):
     
     #This part is based on pysnf by rcutshall
-    nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
-    nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
-    nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
+    nf_data_double = np.zeros((2*nf_data.shape[0], nf_data.shape[1], 2), dtype=complex)
+    #nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
+    #nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
+
+    nf_data_double[0:nf_data.shape[0],:,0] = nf_data[:,:,0]
+    nf_data_double[nf_data.shape[0]:,:,0] = nf_data[:,:,0]
+    nf_data_double[0:nf_data.shape[0],:,1] = nf_data[:,:,1]
+    nf_data_double[nf_data.shape[0]:,:,1] = nf_data[:,:,1]
 
     num_th = nf_data_double.shape[0]
     num_ph = nf_data_double.shape[1]
@@ -1165,6 +1170,6 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     #Flip the array:
     ffData = np.flip(ffData, 0)
     #Roll 2
-    ffData = np.roll(ffData, -1, axis=0)
+    ffData = np.roll(ffData, 1, axis=0)
 
     return ffData

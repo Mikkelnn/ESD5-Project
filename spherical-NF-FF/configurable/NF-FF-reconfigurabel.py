@@ -22,20 +22,20 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 ##############################################################################################################
 
 # data from CST simulation:
-# file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
-# nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
+#file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
+#nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
 
-# file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3mParabolic.txt'
-# nfData_2, _, _, _, _ = load_data_cst(file_path)
+#file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3mParabolic.txt'
+#nfData_2, _, _, _, _ = load_data_cst(file_path)
 
-# file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3.02mParabolic.txt'
-# nfData_3, _, _, _, _ = load_data_cst(file_path)
+#file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3.02mParabolic.txt'
+#nfData_3, _, _, _, _ = load_data_cst(file_path)
 
-# nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
+#nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
 
 # rezise theta and phi axis
-# new_shape = (int(nfData_1.shape[0] / 2), int(nfData_1.shape[1] / 2))
-# nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = get_theta_phi_error_from_fine_set(nfData_1, new_shape, sample_theta=True, sample_phi=True)
+#new_shape = (int(nfData_1.shape[0] / 2), int(nfData_1.shape[1] / 2))
+#nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = get_theta_phi_error_from_fine_set(nfData_1, new_shape, sample_theta=True, sample_phi=True)
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
@@ -44,8 +44,8 @@ file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-# file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-# ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
+file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
+ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
 
 # simulate data
 #nfData = simulate_NF_dipole_array()
@@ -70,19 +70,20 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 ##############################################################################################################
 
 nfDataError = np.copy(nfData)
-amplitude_errors(nfDataError, 0.05)
-phase_errors(nfDataError, 0.05)
+amplitude_errors(nfDataError, 0.0)
+phase_errors(nfDataError, 0.0)
 #fixed_phase_error(nfDataError, 0.4)
 
 
 ##############################################################################################################
 # 3. Transform data - most likely static...
 ##############################################################################################################
-max_l = 10  # Maximum order of spherical harmonics
+max_l = 20  # Maximum order of spherical harmonics
 M = 10
-transform_to_dist_meters = 10e3 # the distance you want the transform to!
+transform_to_dist_meters = 10e6 # the distance you want the transform to!
 
 # pre-process nfData
+nfData = zero_pad_theta(nfData, theta_deg, theta_step_deg)
 nfData_sum = HansenPreProcessing(nfData)
 nfData_sum_error = HansenPreProcessing(nfDataError)
 
@@ -93,6 +94,12 @@ ffDataError = spherical_far_field_transform_gigacook(nfData_sum_error, theta_rad
 # post-process FF
 farfieldData = sum_NF_poles(ffData)
 farfieldDataError = sum_NF_poles(ffDataError)
+ffData_loaded = sum_NF_poles_sqrt(ffData_loaded)
+
+# Normalize plots
+ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
+farfieldData = farfieldData / np.max(np.abs(farfieldData))
+farfieldDataError = farfieldDataError / np.max(np.abs(farfieldData))
 
 
 ##############################################################################################################
@@ -100,20 +107,22 @@ farfieldDataError = sum_NF_poles(ffDataError)
 ##############################################################################################################
 phi_select_angle = 0 # the angle of witch to represent h-plane plot in degrees
 
-farfieldData_20log10 = 20 * np.log10(farfieldData)
-farfieldDataError_20log10 = 20 * np.log10(farfieldDataError)
-farfieldDataDiff = 20 * np.log10(abs(farfieldDataError - farfieldData) / farfieldData)
+#farfieldData_20log10 = 20 * np.log10(farfieldData)
+#farfieldDataError_20log10 = 20 * np.log10(farfieldDataError)
+#farfieldDataDiff = 20 * np.log10(abs(farfieldDataError - farfieldData) / farfieldData)
 
-data1 = select_data_at_angle(farfieldData_20log10, phi_deg, phi_select_angle)
-dataError = select_data_at_angle(farfieldDataError_20log10, phi_deg, phi_select_angle)
-dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
+dataLoaded = select_data_at_angle(ffData_loaded, phi_deg_loaded, phi_select_angle)
+
+data1 = select_data_at_angle(farfieldData, phi_deg, phi_select_angle)
+dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
+#dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
 
 
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
-plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
+plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
+plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
 calculate_print_hpbw(data1, theta_deg_center)
 
 
