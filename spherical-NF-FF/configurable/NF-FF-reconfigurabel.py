@@ -52,7 +52,7 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 
 # zero-pad before converting theta, phi values
 nfData, theta_deg = zero_pad_theta(nfData, theta_step_deg)
-exit()
+ffData_loaded, theta_deg = zero_pad_theta(ffData_loaded, theta_step_deg)
 
 # Determine theta and phi sizes from the nf_data shape
 # Define theta and phi ranges for far-field computation
@@ -126,9 +126,9 @@ dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
 ##############################################################################################################
 plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
 plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
-calculate_print_hpbw(data1, theta_deg_center)
+#calculate_print_hpbw(data1, theta_deg_center)
 
-plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+#plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
 #plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
@@ -144,8 +144,8 @@ plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 
 #plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
 
-#plot_heatmap(ffData_loaded_abs, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-#plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
+plot_heatmap(ffData_loaded, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
+plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
 #plot_heatmap(farfieldDataError, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap with Error')
 #plot_heatmap(abs(farfieldDataError - farfieldData) / farfieldData, theta_deg_loaded, phi_deg_loaded, 'Dif error heatmap')
 

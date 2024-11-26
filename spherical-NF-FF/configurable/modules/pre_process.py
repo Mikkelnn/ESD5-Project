@@ -22,7 +22,7 @@ def zero_pad_theta(nfData, theta_step_deg):
     # Create zero rows with the same number of columns as the original array
     shape = list(nfData.shape)
     shape[0] = num_zero_rows
-    zero_rows = np.full(tuple(shape), np.min(nfData))
+    zero_rows = np.full(tuple(shape), 0)
 
     # Add the zero rows to the array
     result = np.vstack((nfData, zero_rows))
