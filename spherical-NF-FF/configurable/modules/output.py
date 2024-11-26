@@ -260,6 +260,61 @@ def calculate_hpbw(data, angles):
     
     return np.round(hpbw, 2)
 
+
+def calculate_hpbw_linear_approx(data, angles):
+    """
+    Calculate the Half-Power Beamwidth (HPBW) of a signal using linear interpolation for precision.
+
+    Parameters:
+    - data: Array of far-field data points (e.g., power or intensity values).
+    - angles: Array of corresponding angles in degrees.
+
+    Returns:
+    - hpbw: The calculated HPBW in degrees.
+    """
+
+    # Ensure data and angles have the same length
+    if len(data) != len(angles):
+        raise ValueError("Data and angles arrays must have the same length")
+
+    # Find the index of the maximum value in the data array
+    max_index = np.argmax(data)
+    max_value = data[max_index]
+
+    # Calculate the half-power level (-3 dB point)
+    half_power_level = max_value / 2.0
+
+    # Helper function for linear interpolation
+    def interpolate(x1, y1, x2, y2, target_y):
+        """Linear interpolation to find x for a given y."""
+        return x1 + (target_y - y1) * (x2 - x1) / (y2 - y1)
+
+    # Find the crossing point on the left
+    left_index = np.where(data[:max_index] > half_power_level)[0][-1]  # Last point above
+    left_angle = interpolate(
+        angles[left_index], data[left_index],
+        angles[left_index + 1], data[left_index + 1],
+        half_power_level
+    )
+
+    # Find the crossing point on the right
+    right_index = max_index + np.where(data[max_index:] > half_power_level)[0][0]  # First point above
+    right_angle = interpolate(
+        angles[right_index - 1], data[right_index - 1],
+        angles[right_index], data[right_index],
+        half_power_level
+    )
+
+    # Calculate the HPBW
+    hpbw = np.abs(right_angle - left_angle)
+
+    # Handle wrap-around for angles
+    if hpbw > 180:
+        hpbw = 360 - hpbw
+
+    return np.round(hpbw, 2)
+
+
 def calculate_print_hpbw(data, theta_deg_center):
     h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
     #h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
