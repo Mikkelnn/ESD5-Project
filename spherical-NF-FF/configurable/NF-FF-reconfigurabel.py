@@ -22,8 +22,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 ##############################################################################################################
 
 # data from CST simulation:
-# file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
-# nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
+file_path = './simoulation CST/Parabolic/0.5sampleNearfield_2.98mParabolic.txt'
+nfData_1, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_cst(file_path)
 
 # file_path = './simoulation CST/Parabolic/0.5sampleNearfield_3mParabolic.txt'
 # nfData_2, _, _, _, _ = load_data_cst(file_path)
@@ -34,14 +34,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # nfData = combine_data_for_position_error([nfData_1, nfData_2, nfData_3])
 
 # rezise theta and phi axis
-# new_shape = (int(nfData_1.shape[0] / 2), int(nfData_1.shape[1] / 2))
-# nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = get_theta_phi_error_from_fine_set(nfData_1, new_shape, sample_theta=True, sample_phi=True)
+new_shape = (int(nfData_1.shape[0] / 2), int(nfData_1.shape[1] / 2))
+nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = get_theta_phi_error_from_fine_set(nfData_1, new_shape, sample_theta=False, sample_phi=False)
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 frequency_Hz = 10e9 # 10GHz
-file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
-nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
+# file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+# nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
@@ -112,12 +112,11 @@ dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
-plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
-calculate_print_hpbw(data1, theta_deg_center)
+# plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
+# plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
+# calculate_print_hpbw(data1, theta_deg_center)
 
-
-#plot_heatmap(np.abs(ffData[:,:,0]), theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
 #plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
