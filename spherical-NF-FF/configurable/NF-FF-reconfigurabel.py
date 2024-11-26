@@ -50,6 +50,10 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 # simulate data
 #nfData = simulate_NF_dipole_array()
 
+# zero-pad before converting theta, phi values
+nfData, theta_deg = zero_pad_theta(nfData, theta_step_deg)
+exit()
+
 # Determine theta and phi sizes from the nf_data shape
 # Define theta and phi ranges for far-field computation
 # convert to radians
@@ -70,8 +74,8 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 ##############################################################################################################
 
 nfDataError = np.copy(nfData)
-amplitude_errors(nfDataError, 0.0)
-phase_errors(nfDataError, 0.0)
+# amplitude_errors(nfDataError, 0.0)
+# phase_errors(nfDataError, 0.0)
 #fixed_phase_error(nfDataError, 0.4)
 
 
@@ -83,7 +87,6 @@ M = 10
 transform_to_dist_meters = 10e6 # the distance you want the transform to!
 
 # pre-process nfData
-nfData = zero_pad_theta(nfData, theta_deg, theta_step_deg)
 nfData_sum = HansenPreProcessing(nfData)
 nfData_sum_error = HansenPreProcessing(nfDataError)
 
@@ -121,11 +124,11 @@ dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
-plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
+# plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
+# plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
 #calculate_print_hpbw(data1, theta_deg_center)
 
-#plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
 #plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
