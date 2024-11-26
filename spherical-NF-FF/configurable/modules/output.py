@@ -317,15 +317,18 @@ def calculate_hpbw_linear_approx(data, angles):
 
 def calculate_print_hpbw(data, theta_deg_center):
     h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
-    #h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
+    h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
     e_plane_hpbw_smooth = calculate_hpbw(data.e_plane_data_smooth, theta_deg_center)
-    #e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
+    e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
 
     #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
     #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
-    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")
-    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg")
+    #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")
+    #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg")
+
+    print(f"H-plane (original) HPBW: {h_plane_hpbw_original} deg")
+    print(f"E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
 
 

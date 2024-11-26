@@ -3,7 +3,7 @@ import numpy as np
 def HansenPreProcessing(nfData): # Implementation of eq 4.126
     nfDataNew = np.zeros((nfData.shape[0], nfData.shape[1], 2), dtype= complex)
     nfDataNew[:, :, 0] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)   #+1
-    nfDataNew[:, :, 1] = (nfData[:, :, 0] - 1j*nfData[:, :, 1]) * (1./2.)     #-1
+    nfDataNew[:, :, 1] = (nfData[:, :, 0] + 1j*nfData[:, :, 1]) * (1./2.)   #-1
 
     #nfDataNew = np.pad(nfDataNew, ((0,36-nfDataNew.shape[0]), (0,0), (0, 0)), mode='constant', constant_values=0) # this only works if the step size is 5 degrees
 

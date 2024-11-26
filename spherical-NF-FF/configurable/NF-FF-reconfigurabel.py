@@ -40,7 +40,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
 frequency_Hz = 10e9 # 10GHz
-file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+file_path = './NF-FF-Data-2/Flann16240-20_CBC_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
@@ -95,8 +95,8 @@ ffData = spherical_far_field_transform_gigacook(nfData_sum, theta_rad, phi_rad, 
 ffDataError = spherical_far_field_transform_gigacook(nfData_sum_error, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, transform_to_dist_meters, N=max_l, M=M)
 
 # post-process FF
-farfieldData = sum_NF_poles(ffData)
-farfieldDataError = sum_NF_poles(ffDataError)
+farfieldData = sum_NF_poles_sqrt(ffData)
+farfieldDataError = sum_NF_poles_sqrt(ffDataError)
 ffData_loaded = sum_NF_poles_sqrt(ffData_loaded)
 
 # Normalize plots
@@ -124,9 +124,9 @@ dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-# plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
-# plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
-#calculate_print_hpbw(data1, theta_deg_center)
+plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
+plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
+calculate_print_hpbw(data1, theta_deg_center)
 
 plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 #plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')

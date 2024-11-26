@@ -51,7 +51,7 @@ def select_data_at_angle_old(ffData, theta_f_deg, phi_f_deg, theta_select_angle=
 
 def select_data_at_angle(ffData, phi_f_deg, phi_select_angle=0):
   # variabels used for smoothing
-  window_size = 9 # Choose an odd window size
+  window_size = 5 # Choose an odd window size
   poly_order = 2    # Polynomial order for smoothing
 
   # deterimne sample number corresponding to plot angles
