@@ -92,6 +92,8 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
     ax1 = fig.add_subplot(grid[0, 0])
     ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
     ax1.plot(theta_f_deg, h_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)    
+    #ax1.plot(theta_f_deg, h_plane_data_original , label=f'Radiation plot without errors - original', alpha=0.7)
+    #ax1.plot(theta_f_deg, h_plane_data_original2, label=f'Radiation plot with errors - original', alpha=0.7)    
     ax1.set_title(f'Far-field Pattern H-plane Phi = {h_plane_plot_angle}')
     ax1.set_xlabel('Theta')
     ax1.grid()
@@ -99,7 +101,9 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
 
     ax2 = fig.add_subplot(grid[1, 0])
     ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
-    ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)    
+    ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)   
+    #ax2.plot(theta_f_deg, e_plane_data_original , label=f'Radiation plot without errors - original', alpha=0.7)
+    #ax2.plot(theta_f_deg, e_plane_data_original2, label=f'Radiation plot with errors - original', alpha=0.7)    
     ax2.set_title(f'Far-field Pattern E-plane Phi = {e_plane_plot_angle}')
     ax2.set_xlabel('Theta')
     ax2.grid()
@@ -310,13 +314,16 @@ def calculate_hpbw_linear_approx(data, angles):
 
 
 def calculate_print_hpbw(data, theta_deg_center):
-    h_plane_hpbw_smooth = calculate_hpbw_linear_approx(data.h_plane_data_smooth, theta_deg_center)
-    h_plane_hpbw_original = calculate_hpbw_linear_approx(data.h_plane_data_original, theta_deg_center)
-    e_plane_hpbw_smooth = calculate_hpbw_linear_approx(data.e_plane_data_smooth, theta_deg_center)
-    e_plane_hpbw_original = calculate_hpbw_linear_approx(data.e_plane_data_original, theta_deg_center)
+    h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
+    #h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
+    e_plane_hpbw_smooth = calculate_hpbw(data.e_plane_data_smooth, theta_deg_center)
+    #e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
 
-    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth} deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
-    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+    #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
+    #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+
+    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")
+    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg")
 
 
 
