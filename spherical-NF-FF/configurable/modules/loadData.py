@@ -85,13 +85,13 @@ def load_data_cst(file_path):
 
     # Fill in the electric field arrays with complex numbers
     k = 0
-    for i in range(theta_size):
-        for j in range(phi_size):
+    for j in range(phi_size):
+        for i in range(theta_size):
             # Compute E_theta and E_phi as complex numbers
             e_theta_magnitude = nf_data.iloc[k, 3]
-            e_theta_phase = nf_data.iloc[k, 4] * 2 * np.pi / 360  # Convert degrees to radians
+            e_theta_phase = np.deg2rad(nf_data.iloc[k, 4]) # Convert degrees to radians
             e_phi_magnitude = nf_data.iloc[k, 5]
-            e_phi_phase = nf_data.iloc[k, 6] * 2 * np.pi / 360  # Convert degrees to radians
+            e_phi_phase = np.deg2rad(nf_data.iloc[k, 6]) # Convert degrees to radians
 
             # Construct the complex electric field components
             complex_field_data[i, j, 0] = e_theta_magnitude * np.cos(e_theta_phase) + 1j * e_theta_magnitude * np.sin(e_theta_phase)

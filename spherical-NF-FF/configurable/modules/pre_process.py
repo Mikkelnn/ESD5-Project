@@ -66,8 +66,8 @@ def get_theta_phi_error_from_fine_set(array, new_shape, sample_theta=True, sampl
     d1, d2, d3 = array.shape
     new_d1, new_d2 = new_shape
 
-    if not (sample_theta or sample_phi):
-        raise ValueError("At least one sampling mode (sample_theta or sample_phi) must be True.")
+    # if not (sample_theta or sample_phi):
+    #     raise ValueError("At least one sampling mode (sample_theta or sample_phi) must be True.")
 
     # Define output array
     output = np.zeros((new_d1, new_d2, d3), dtype=array.dtype)
