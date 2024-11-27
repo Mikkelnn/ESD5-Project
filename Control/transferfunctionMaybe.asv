@@ -1,0 +1,24 @@
+% Define constants
+Kp = 20; % Example value for Kp
+Ki = 0; % Example value for Ki
+Kd = 10; % Example value for Kd
+
+% Define numerator and denominator coefficients
+numerator = [Kd*0.5, Kp*0.5, Ki*0.5];
+denominator = [1, Kd*0.5, Kp*0.5, Ki*0.5];
+
+% Create transfer function
+sys = tf(numerator, denominator);
+
+% Plot Bode diagram
+figure;
+bode(sys);
+grid on;
+title('Bode Plot of the Transfer Function');
+
+% Find poles of the system
+poles = pole(sys);
+
+% Display poles
+disp('Poles of the system:');
+disp(poles);
