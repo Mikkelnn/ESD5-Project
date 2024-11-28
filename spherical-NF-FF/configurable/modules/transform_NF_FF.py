@@ -1046,6 +1046,9 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
             
 def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transpose_dist):
+
+    if (transpose_dist < meas_dist):
+        raise ValueError(f"Inwards/Reverse transform is not implemented")
     
     #This part is based on pysnf by rcutshall
     nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
@@ -1064,7 +1067,7 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
 
     PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, dist = transpose_dist)
 
-    # Perform (4.126)
+    # Perform (4.127)
     temp = np.fft.ifft(nf_data_double, axis=1)
 
     # Reorganize such that m runs from -m_max to m_max
@@ -1078,7 +1081,7 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
     elif num_ph/2.0 > m_max:
         w_th_m_mu[:, :, :] = temp[:, int(num_ph/2-m_max):int(num_ph/2+m_max+1), :]
 
-    # Perform (4.127)
+    # Perform (4.128)
     temp = np.fft.ifft(w_th_m_mu, axis=0)
 
     # Reorganize such that n runs from -n_max to n_max
