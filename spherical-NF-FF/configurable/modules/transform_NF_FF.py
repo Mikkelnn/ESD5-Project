@@ -1045,28 +1045,24 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
             
-def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 10e3, nf_meas_dist2 = 3.2, N = 3, M = 3):
+def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transpose_dist):
     
     #This part is based on pysnf by rcutshall
     nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
     nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
     nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
 
-    #nf_data_double[0:nf_data.shape[0],:,0] = nf_data[:,:,0]
-    #nf_data_double[nf_data.shape[0]:,:,0] = nf_data[:,:,0]
-    #nf_data_double[0:nf_data.shape[0],:,1] = nf_data[:,:,1]
-    #nf_data_double[nf_data.shape[0]:,:,1] = nf_data[:,:,1]
-
     num_th = nf_data_double.shape[0]
     num_ph = nf_data_double.shape[1]
 
     n_max = int(num_th/2)   # This works because num_th should always be even after
                             # the singlesphere2doublesphere function
-    #m_max = int(num_ph/2)   # This works because num_ph should always be even after
-                            # the singlesphere2doublesphere function
-    m_max = n_max # Since m is not allowed to be higher than n.
+    if (n_max > int(num_ph/2)):
+        m_max = int(num_ph/2)   # This works because num_ph should always be even after
+    else:                        # the singlesphere2doublesphere function
+        m_max = n_max # Since m is not allowed to be higher than n.
 
-    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, nf_meas_dist = nf_meas_dist2)
+    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, nf_meas_dist = transpose_dist)
 
     # Perform (4.127)
     temp = np.fft.ifft(nf_data_double, axis=1)
@@ -1161,7 +1157,7 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     q_n_m_s[:, :, 0] = (p_n_neg1_2*w_n_m_mu[:, :, 1] - p_n_pos1_2*w_n_m_mu[:, :, 0])/determinant
     q_n_m_s[:, :, 1] = (p_n_pos1_1*w_n_m_mu[:, :, 0] - p_n_neg1_1*w_n_m_mu[:, :, 1])/determinant
 
-    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, nf_meas_dist)
+    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, meas_dist)
 
     ffData = np.zeros(nf_data.shape, dtype=complex)
     ffData[:, :, 0] = theta
@@ -1169,7 +1165,5 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 
     #Flip the array:
     ffData = np.flip(ffData, 0)
-    #Roll 2
-    #ffData = np.roll(ffData, 1, axis=0)
 
     return ffData

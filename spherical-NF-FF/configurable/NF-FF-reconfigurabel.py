@@ -94,8 +94,8 @@ nfData_sum = HansenPreProcessing(nfData)
 nfData_sum_error = HansenPreProcessing(nfDataError)
 
 # transform NF to FF
-ffData = spherical_far_field_transform_gigacook(nfData_sum, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters, N=max_l, M=M)
-ffDataError = spherical_far_field_transform_gigacook(nfData_sum_error, theta_rad, phi_rad, theta_step_rad, phi_step_rad, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters, N=max_l, M=M)
+ffData = spherical_far_field_transform_SNIFT(nfData_sum, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters)
+ffDataError = spherical_far_field_transform_SNIFT(nfData_sum_error, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters)
 
 # post-process FF
 farfieldData = sum_NF_poles_sqrt(ffData)
