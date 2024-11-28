@@ -4,13 +4,13 @@
 c = 3e8;
 f = 10e9;
 lam = c/f;
-r_nf = lam*10;
+r_nf = 0.3;
 N_1 = 100;
 [X, Y, Z] = sphere(N_1);
 Points_nf = [X(:), Y(:), Z(:)].'*r_nf;
 N = N_1 + 1;
 
-r_ff = r_nf*10000;%1000
+r_ff = 1000000;%1000
 Points_ff = [X(:), Y(:), Z(:)].'*r_ff;
 
 %--[x,y,z] = sph2cart(azimuth,elevation,r) transforms corresponding elements of the spherical coordinate arrays azimuth, elevation, and r to Cartesian, or xyz, coordinates.
