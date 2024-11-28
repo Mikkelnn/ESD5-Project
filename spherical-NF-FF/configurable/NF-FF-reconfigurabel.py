@@ -94,8 +94,8 @@ nfData_sum = HansenPreProcessing(nfData)
 nfData_sum_error = HansenPreProcessing(nfDataError)
 
 # transform NF to FF
-ffData = spherical_far_field_transform_SNIFT(nfData_sum, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters)
-ffDataError = spherical_far_field_transform_SNIFT(nfData_sum_error, frequency_Hz, transform_to_dist_meters, transform_from_dist_meters)
+ffData = spherical_far_field_transform_SNIFT(nfData_sum, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
+ffDataError = spherical_far_field_transform_SNIFT(nfData_sum_error, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
 
 # post-process FF
 farfieldData = sum_NF_poles_sqrt(ffData)
@@ -127,8 +127,8 @@ dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
-plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
+plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
+plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
 #calculate_print_hpbw(data1, theta_deg_center)
 
 #plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
