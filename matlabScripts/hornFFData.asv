@@ -63,9 +63,9 @@ fprintf(fileID_nf, 'r(m), theta(rad), phi(rad), E(Re), E(Im), H(Re), H(Im)\n');
 for idx = 1:size(E_nf, 2) % Iterate over columns (points in space)
     % Extract real and imaginary parts of E
     E_real = sqrt(real(E_nf(1,idx))^2+real(E_nf(2,idx))^2+real(E_nf(3,idx))^2);
-    E_imag = sqrt(abs(imag(E_nf(1,idx)))^2+abs(imag(E_nf(2,idx)))^2+abs(imag(E_nf(3,idx)))^2);
-    H_real = sqrt(real(H_nf(1,idx))^2+real(H_nf(2,idx))^2+real(H_nf(3,idx))^2);
-    H_imag = sqrt(abs(imag(H_nf(1,idx)))^2+abs(imag(H_nf(2,idx)))^2+abs(imag(H_nf(3,idx)))^2);
+    E_imag = imag(E_nf(idx));
+    H_real = real(H_nf(idx));
+    H_imag = imag(H_nf(idx));
     % Write data to file
     fprintf(fileID_nf, '%f, %f, %f, %f, %f, %f, %f\n', ...
         r(idx), spherical_theta(idx), spherical_phi(idx), E_real, E_imag, H_real, H_imag);
@@ -84,10 +84,10 @@ fileID_ff = fopen('simData\E_ff_reflector_spherical.txt', 'w');
 fprintf(fileID_ff, 'r(m), theta(rad), phi(rad), E(Re), E(Im), H(Re), H(Im\n');
 for idx = 1:size(E_ff, 2) % Iterate over columns (points in space)
     % Extract real and imaginary parts of E
-    E_real = sqrt(real(E_ff(1,idx))^2+real(E_ff(2,idx))^2+real(E_ff(3,idx))^2);
-    E_imag = sqrt(abs(imag(E_ff(1,idx)))^2+abs(imag(E_ff(2,idx)))^2+abs(imag(E_ff(3,idx)))^2);
-    H_real = sqrt(real(H_ff(1,idx))^2+real(H_ff(2,idx))^2+real(H_ff(3,idx))^2);
-    H_imag = sqrt(abs(imag(H_ff(1,idx)))^2+abs(imag(H_ff(2,idx)))^2+abs(imag(H_ff(3,idx)))^2);
+    E_real = real(E_ff(idx));
+    E_imag = imag(E_ff(idx));
+    H_real = real(H_ff(idx));
+    H_imag = imag(H_ff(idx));
     % Write data to file
     fprintf(fileID_ff, '%f, %f, %f, %f, %f, %f, %f\n', ...
         r_ff(idx), spherical_theta_ff(idx), spherical_phi_ff(idx), E_real, E_imag, H_real, H_imag);
