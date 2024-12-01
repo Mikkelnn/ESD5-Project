@@ -29,5 +29,5 @@ def zero_pad_theta(nfData, theta_step_deg):
 
     # Add the zero rows to the array
     result = np.vstack((nfData, zero_rows))
-    return result, full_theta_range
+    return result, full_theta_range, num_zero_rows
 

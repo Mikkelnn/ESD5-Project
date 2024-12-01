@@ -51,9 +51,8 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 #nfData = simulate_NF_dipole_array()
 
 # zero-pad before converting theta, phi values
-
-nfData, theta_deg = zero_pad_theta(nfData, theta_step_deg)
-ffData_loaded, theta_deg = zero_pad_theta(ffData_loaded, theta_step_deg)
+nfData, theta_deg2, num_zero_nfData = zero_pad_theta(nfData, theta_step_deg)
+ffData_loaded, theta_deg2, num_zero_ffData = zero_pad_theta(ffData_loaded, theta_step_deg)
 
 # Determine theta and phi sizes from the nf_data shape
 # Define theta and phi ranges for far-field computation
@@ -67,7 +66,6 @@ phi_step_rad = np.deg2rad(phi_step_deg)
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
-
 
 ##############################################################################################################
 # 2. Introduction of errors in the NF
@@ -107,6 +105,10 @@ ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
 farfieldData = farfieldData / np.max(np.abs(farfieldData))
 farfieldDataError = farfieldDataError / np.max(np.abs(farfieldDataError))
 
+# Remove original zero padding
+ffData_loaded2 = removeXFromEnd(ffData_loaded, int(num_zero_nfData))
+farfieldData2 = removeXFromEnd(farfieldData, int(num_zero_nfData))
+farfieldDataError2 = removeXFromEnd(farfieldDataError, int(num_zero_nfData))
 
 ##############################################################################################################
 # 4. Select far field at angle and smooth data
@@ -117,18 +119,17 @@ phi_select_angle = 0 # the angle of witch to represent h-plane plot in degrees
 #farfieldDataError_20log10 = 20 * np.log10(farfieldDataError)
 #farfieldDataDiff = 20 * np.log10(abs(farfieldDataError - farfieldData) / farfieldData)
 
-dataLoaded = select_data_at_angle(ffData_loaded, phi_deg_loaded, phi_select_angle)
+dataLoaded = select_data_at_angle(ffData_loaded2, phi_deg_loaded, phi_select_angle)
 
-data1 = select_data_at_angle(farfieldData, phi_deg, phi_select_angle)
-dataError = select_data_at_angle(farfieldDataError, phi_deg, phi_select_angle)
+data1 = select_data_at_angle(farfieldData2, phi_deg, phi_select_angle)
+dataError = select_data_at_angle(farfieldDataError2, phi_deg, phi_select_angle)
 #dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
-
 
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataLoaded, theta_deg_center, 'Error compare')
-plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
+plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
+plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
 #calculate_print_hpbw(data1, theta_deg_center)
 
 #plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
@@ -157,5 +158,10 @@ plot_dif(data1, dataLoaded, theta_deg_center, 'Dif Radiation plot')
 #plot_copolar2(dataError, theta_deg_center2, 'Transformed FF copolar with Error')
 
 # show all figures
+print(f"Max error e-plane: {calculate_max_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
+print(f"Mean error e-plane: {calculate_mean_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
+print(f"Max error h-plane: {calculate_max_indexed_error(data1.h_plane_data_original, dataError.h_plane_data_original)}")
+print(f"Mean error h-plane: {calculate_mean_indexed_error(data1.h_plane_data_original, dataError.h_plane_data_original)}")
+
 show_figures()
 
