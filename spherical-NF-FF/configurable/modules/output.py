@@ -56,8 +56,8 @@ def plot_dif(data, data2, theta_f_deg, figure_title):
 
     ax1 = fig.add_subplot(grid[0, 0])
     #ax1.plot(theta_f_deg, abs(h_plane_data_smooth - h_plane_data_smooth2) / np.max(h_plane_data_smooth) , label=f'Dif plot', alpha=0.7)  
-    ax1.plot(theta_f_deg, abs(h_plane_data_original - h_plane_data_original2) / np.max(h_plane_data_original) , label=f'Dif plot - original', alpha=0.7)  
-    ax1.set_title(f'Far-field Pattern H-plane Phi = {h_plane_plot_angle}')
+    ax1.plot(theta_f_deg, abs(h_plane_data_original - h_plane_data_original2) / np.max(h_plane_data_original) , label=f'Dif plot ', alpha=0.7)  
+    ax1.set_title(f'{figure_title} H-plane (Phi = {h_plane_plot_angle})')
     ax1.set_xlabel('Theta')
     ax1.grid()
     ax1.legend()
@@ -65,7 +65,7 @@ def plot_dif(data, data2, theta_f_deg, figure_title):
     ax2 = fig.add_subplot(grid[1, 0])
     #ax2.plot(theta_f_deg, abs(e_plane_data_smooth - e_plane_data_smooth2) / np.max(e_plane_data_smooth) , label=f'Dif plot', alpha=0.7)  
     ax2.plot(theta_f_deg, abs(e_plane_data_original - e_plane_data_original2) / np.max(e_plane_data_original) , label=f'Dif plot', alpha=0.7)  
-    ax2.set_title(f'Far-field Pattern E-plane Phi = {e_plane_plot_angle}')
+    ax2.set_title(f'{figure_title} E-plane (Phi = {e_plane_plot_angle})')
     ax2.set_xlabel('Theta')
     ax2.grid()
     ax2.legend()
@@ -94,9 +94,9 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
     ax1 = fig.add_subplot(grid[0, 0])
     #ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
     #ax1.plot(theta_f_deg, h_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)    
-    ax1.plot(theta_f_deg, h_plane_data_original , label=f'Radiation plot without errors - original', alpha=0.7)
-    ax1.plot(theta_f_deg, h_plane_data_original2, label=f'Radiation plot with errors - original', alpha=0.7)    
-    ax1.set_title(f'Far-field Pattern H-plane Phi = {h_plane_plot_angle}')
+    ax1.plot(theta_f_deg, h_plane_data_original , label=f'Radiation plot without errors', alpha=0.7)
+    ax1.plot(theta_f_deg, h_plane_data_original2, label=f'Radiation plot with errors', alpha=0.7)    
+    ax1.set_title(f'{figure_title} H-plane Phi = {h_plane_plot_angle}')
     ax1.set_xlabel('Theta')
     ax1.grid()
     ax1.legend()
@@ -104,9 +104,9 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
     ax2 = fig.add_subplot(grid[1, 0])
     #ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
     #ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)   
-    ax2.plot(theta_f_deg, e_plane_data_original , label=f'Radiation plot without errors - original', alpha=0.7)
-    ax2.plot(theta_f_deg, e_plane_data_original2, label=f'Radiation plot with errors - original', alpha=0.7)    
-    ax2.set_title(f'Far-field Pattern E-plane Phi = {e_plane_plot_angle}')
+    ax2.plot(theta_f_deg, e_plane_data_original , label=f'Radiation plot without errors', alpha=0.7)
+    ax2.plot(theta_f_deg, e_plane_data_original2, label=f'Radiation plot with errors', alpha=0.7)    
+    ax2.set_title(f'{figure_title} E-plane Phi = {e_plane_plot_angle}')
     ax2.set_xlabel('Theta')
     ax2.grid()
     ax2.legend()
@@ -314,7 +314,6 @@ def calculate_hpbw_linear_approx(data, angles):
 
     return np.round(hpbw, 2)
 
-
 def calculate_print_hpbw(data, theta_deg_center):
     h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
     h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
@@ -330,6 +329,17 @@ def calculate_print_hpbw(data, theta_deg_center):
     print(f"H-plane (original) HPBW: {h_plane_hpbw_original} deg")
     print(f"E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
+def calculate_mean_indexed_error(data1, data2):
+    # Compute the absolute differences at each index
+    differences = np.abs(data1 - data2)
+
+    # Return the mean value
+    return np.mean(differences)
 
 
-
+def calculate_max_indexed_error(data1, data2):
+    # Compute the absolute differences at each index
+    differences = np.abs(data1 - data2)
+    
+    # Return the maximum difference
+    return np.max(differences)

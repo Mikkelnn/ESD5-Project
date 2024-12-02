@@ -40,13 +40,13 @@ def parse_csv_header(header_text):
         "phi_values": phi_values
     }
 
-# Function to load the data and return a two-dimensional array of complex numbers
+# Function to load the data and return a three-dimensional array of complex numbers
 def load_data_lab_measurements(file_path):
     # Load the data, skipping the non-data rows
     header_text = load_header(file_path, num_lines=13)
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header=None)
     
-    # determine theta. phi angles and step sizes from the header data
+    # determine the theta, phi angles and step sizes from the header data
     headerData = parse_csv_header(header_text)
 
     # Calculate theta and phi sizes
@@ -67,6 +67,7 @@ def load_data_lab_measurements(file_path):
             k += 1
 
     return (complex_field_data, headerData["theta_values"], headerData["phi_values"], headerData["theta_stepSize"], headerData["phi_stepSize"])
+
 
 def load_data_cst(file_path):
     # Load the data, skipping the row with dashes (assumed to be the second row)
@@ -93,10 +94,10 @@ def load_data_cst(file_path):
             e_theta_phase = np.deg2rad(nf_data.iloc[k, 4]) # Convert degrees to radians
             e_phi_magnitude = nf_data.iloc[k, 5]
             e_phi_phase = np.deg2rad(nf_data.iloc[k, 6]) # Convert degrees to radians
-
+            
             # Construct the complex electric field components
-            complex_field_data[i, j, 0] = e_theta_magnitude * np.cos(e_theta_phase) + 1j * e_theta_magnitude * np.sin(e_theta_phase)
-            complex_field_data[i, j, 1] = e_phi_magnitude * np.cos(e_phi_phase) + 1j * e_phi_magnitude * np.sin(e_phi_phase)
+            complex_field_data[i, j, 0] = e_theta_magnitude + 1j * np.sin(e_theta_phase)
+            complex_field_data[i, j, 1] = e_phi_magnitude + 1j * np.sin(e_phi_phase)
             k += 1
 
     return (complex_field_data, theta_values, phi_values, theta_stepSize, phi_stepSize)
