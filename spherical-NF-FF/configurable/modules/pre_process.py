@@ -17,7 +17,7 @@ def pad_theta(nfData, theta_step_deg):
     # calculate the row padding count
     num_padding_rows = len(full_theta_range) - nfData.shape[0]
     if (num_padding_rows == 0):
-        return nfData
+        return nfData, full_theta_range, num_padding_rows
 
     # copy the last row as padding
     padding_rows = np.repeat([nfData[-1]], num_padding_rows, axis=0)
