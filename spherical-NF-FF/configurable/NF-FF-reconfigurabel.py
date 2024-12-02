@@ -71,11 +71,13 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 # 2. Introduction of errors in the NF
 # Comment out if no errors should be present
 ##############################################################################################################
-
+phaseError = 0.4
+ampError = 0.8
+deviationFactor = 0.8
 nfDataError = np.copy(nfData)
 #amplitude_same_errors_uniform(nfDataError,0.8)
-#amplitude_errors_correlated(nfDataError, 0.5, 0.95)
-#phase_errors_correlated(nfDataError, 0.0, 0.0)
+amplitude_errors_correlated_rev(nfDataError, deviationFactor, ampError)
+phase_errors_correlated_rev(nfDataError, deviationFactor, phaseError)
 #fixed_phase_error(nfDataError, 0.4)
 
 
@@ -128,8 +130,8 @@ dataError = select_data_at_angle(farfieldDataError2, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_error_compare(data1, dataError, theta_deg_center, 'Error compare')
-plot_dif(data1, dataError, theta_deg_center, 'Dif Radiation plot')
+plot_error_compare(data1, dataError, theta_deg_center, f'Error compare combined correlation reverse dev({deviationFactor}) amp({ampError}) phase({phaseError})')
+plot_dif(data1, dataError, theta_deg_center, f'Dif Radiation combined correlation reverse dev({deviationFactor}) amp({ampError}) phase({phaseError})')
 #calculate_print_hpbw(data1, theta_deg_center)
 
 #plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
