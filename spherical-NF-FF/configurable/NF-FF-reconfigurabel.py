@@ -39,7 +39,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # data from lab-measurements:
 #file_path = './NF-FF-data/SH800_CBC_006000.CSV' # use relative path! i.e. universal :)
-frequency_Hz = 10e9 # 10GHz
 file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
@@ -51,18 +50,11 @@ ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measuremen
 #nfData = simulate_NF_dipole_array()
 
 # zero-pad before converting theta, phi values
-nfData, theta_deg2, num_zero_nfData = zero_pad_theta(nfData, theta_step_deg)
-ffData_loaded, theta_deg2, num_zero_ffData = zero_pad_theta(ffData_loaded, theta_step_deg)
+nfData, theta_deg2, num_zero_nfData = pad_theta(nfData, theta_step_deg)
+ffData_loaded, theta_deg2, num_zero_ffData = pad_theta(ffData_loaded, theta_step_deg)
 
-# Determine theta and phi sizes from the nf_data shape
-# Define theta and phi ranges for far-field computation
-# convert to radians
-phi_rad =  np.deg2rad(phi_deg)
-theta_rad = np.deg2rad(theta_deg)
 
-theta_step_rad = np.deg2rad(theta_step_deg)
-phi_step_rad = np.deg2rad(phi_step_deg)
-
+# Define theta and phi ranges for far-field plotting
 # get zero in center
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
@@ -84,8 +76,7 @@ phase_errors_correlated_rev(nfDataError, deviationFactor, phaseError)
 ##############################################################################################################
 # 3. Transform data - most likely static...
 ##############################################################################################################
-max_l = 20  # Maximum order of spherical harmonics
-M = 10
+frequency_Hz = 10e9 # 10GHz
 transform_from_dist_meters = 0.3 # The distance you want the transform from.
 transform_to_dist_meters = 10e6 # the distance you want the transform to!
 

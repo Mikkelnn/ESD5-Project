@@ -40,12 +40,13 @@ def parse_csv_header(header_text):
         "phi_values": phi_values
     }
 
-# Function to load the data and return a two-dimensional array of complex numbers
+# Function to load the data and return a three-dimensional array of complex numbers
 def load_data_lab_measurements(file_path):
     # Load the data, skipping the non-data rows
     header_text = load_header(file_path, num_lines=13)
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header=None)
     
+    # determine the theta, phi angles and step sizes from the header data
     headerData = parse_csv_header(header_text)
 
     # Calculate theta and phi sizes

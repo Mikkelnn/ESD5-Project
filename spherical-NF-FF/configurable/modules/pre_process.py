@@ -9,25 +9,20 @@ def HansenPreProcessing(nfData): # Implementation of eq 4.126
 
     return nfDataNew
 
-def zero_pad_theta(nfData, theta_step_deg):
-
+def pad_theta(nfData, theta_step_deg):
+    # calculate the number of theta values from 0 -> pi
     count = int(180 / theta_step_deg) + 1
     full_theta_range = np.linspace(0, 180, count)
 
-    num_zero_rows = len(full_theta_range) - nfData.shape[0]
-    # num_zero_rows = len(theta_deg) - nfData.shape[0]
-    if (num_zero_rows == 0):
+    # calculate the row padding count
+    num_padding_rows = len(full_theta_range) - nfData.shape[0]
+    if (num_padding_rows == 0):
         return nfData
 
-    # Create zero rows with the same number of columns as the original array
-    # shape = list(nfData.shape)
-    # shape[0] = num_zero_rows
-    # zero_rows = np.full(tuple(shape), 0)
-
-    # copy the last roe as padding
-    zero_rows = np.repeat([nfData[-1]], num_zero_rows, axis=0)
+    # copy the last row as padding
+    padding_rows = np.repeat([nfData[-1]], num_padding_rows, axis=0)
 
     # Add the zero rows to the array
-    result = np.vstack((nfData, zero_rows))
-    return result, full_theta_range, num_zero_rows
+    result = np.vstack((nfData, padding_rows))
+    return result, full_theta_range, num_padding_rows
 
