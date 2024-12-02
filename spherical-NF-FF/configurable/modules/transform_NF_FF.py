@@ -173,16 +173,16 @@ def delta_pyramid(n_max):
     m_array = np.reshape(m_vec, (1, 1, 2*m_max+1))
 
     # Compute Region II using symmetry relation [1],(A2.32)
-    temp1 = ((-1)**(n_array + mp_array[:, get_mp_index(0):, :]) *
+    mmin2max = ((-1)**(n_array + mp_array[:, get_mp_index(0):, :]) *
              deltas[:, get_mp_index(0):, get_m_index(1):])
-    temp1 = temp1[:, :, ::-1]
-    deltas[:, get_mp_index(0):, 0:get_m_index(0)] = temp1
+    mmin2max = mmin2max[:, :, ::-1]
+    deltas[:, get_mp_index(0):, 0:get_m_index(0)] = mmin2max
 
     # Compute Region III using symmetry relation [1],(A2.28)
-    temp2 = ((-1)**(n_array + m_array[:, :, get_m_index(0):]) *
+    nmin2max = ((-1)**(n_array + m_array[:, :, get_m_index(0):]) *
              deltas[:, get_mp_index(1):, get_m_index(0):])
-    temp2 = temp2[:, ::-1, :]
-    deltas[:, 0:get_mp_index(0), get_m_index(0):] = temp2
+    nmin2max = nmin2max[:, ::-1, :]
+    deltas[:, 0:get_mp_index(0), get_m_index(0):] = nmin2max
 
     # Compute Region IV using symmetry relation [1],(A2.30)
     temp3 = deltas[:, get_mp_index(1):, get_m_index(1):]
@@ -208,7 +208,7 @@ def pi_wiggle(n_max):
 
     return pi_wig
 
-def Phertzian(frequency_Hz, n_max, nf_meas_dist):
+def Phertzian(frequency_Hz, n_max, dist):
     # calculate relevant constants
     c = 3e8 # light speed [m/s]
     λ = c / frequency_Hz # wavelength [m]
@@ -218,7 +218,7 @@ def Phertzian(frequency_Hz, n_max, nf_meas_dist):
     g_radial_function = np.zeros((n_max, 2), dtype=complex)
     PHertzian = np.zeros((n_max, 2, 2), dtype=complex)
     for n_idx, n in enumerate(range(1, n_max+1)):
-        z = β * nf_meas_dist
+        z = β * dist
         g_radial_function[n_idx, 0] = sci_sp.spherical_jn(n, z, derivative=False) + 1j*sci_sp.spherical_yn(n, z, derivative=False) # equaivalent to R^3 s = 1
         g_radial_function[n_idx, 1] = ((1/z) * g_radial_function[n_idx, 0]) + (sci_sp.spherical_jn(n, z, derivative=True) - 1j*sci_sp.spherical_yn(n, z, derivative=True)) # equvalent to R^3 s = 2
         #Calculating P for Hertzian dipole
@@ -244,7 +244,7 @@ def b_wiggle(b_l_m_mu):
 
     return b_l_m_mu_wiggle
 
-def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, nf_meas_dist):
+def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, dist):
     # Taken from pysnf by rcutshall
     # Determine n_max and m_max from q_n_m_s
     n_max, m_max, s_max = np.shape(q_n_m_s)
@@ -256,7 +256,7 @@ def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, nf_m
 
     # Get the dipole probe response constants
     # (N x 2 x 2, where dim 0 = n, dim 1 = mu, dim 2 = s)
-    p_n_mu_s = Phertzian(frequency_Hz=frequency, n_max=n_max, nf_meas_dist=nf_meas_dist)
+    p_n_mu_s = Phertzian(frequency_Hz=frequency, n_max=n_max, dist=dist)
 
     # Copy out the mu==1, s==1 probe response constants
     p_n = np.reshape(p_n_mu_s[:, 0, 0], (n_max,1,1))  # N x M x Theta
@@ -335,9 +335,9 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
     # of m (to ease future calculations), but set the arrays
     # such that legendre_norm of -m is equal to legendre_norm of m.
     # Also remove the n == 0 part of the array.
-    temp1 = int(2*m_max+1)
-    temp2 = int(2*n_max+1)
-    lpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    mmin2max = int(2*m_max+1)
+    nmin2max = int(2*n_max+1)
+    lpmn_norm_extended = np.zeros((n_max, mmin2max, len(thetas)))
     lpmn_norm_extended[:, 0:m_max, :] = np.fliplr(legendre_norm[1:, 1:, :])
     lpmn_norm_extended[:, m_max:, :] = legendre_norm[1:, :, :]
 
@@ -345,12 +345,12 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
     # of m (to ease future calculations), but set the arrays
     # such that legendre_norm of -m is equal to legendre_norm of m.
     # Also remove the n == 0 part of the array.
-    dlpmn_norm_extended = np.zeros((n_max, temp1, len(thetas)))
+    dlpmn_norm_extended = np.zeros((n_max, mmin2max, len(thetas)))
     dlpmn_norm_extended[:, 0:m_max, :] = np.fliplr(dlegendre_norm[1:, 1:, :])
     dlpmn_norm_extended[:, m_max:, :] = dlegendre_norm[1:, :, :]
 
     # Initialize the matrix that will hold the rotation coefficients
-    d = np.zeros((n_max, 3, temp1, len(thetas)))
+    d = np.zeros((n_max, 3, mmin2max, len(thetas)))
 
     # Create arrays that hold the n, m, and mu indices. Also promote
     # the thetas to a 4-dimensional array. This will come in handy
@@ -380,8 +380,8 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
     d_0 = c1[:, 0, :, :]*lpmn_norm_extended
 
     # Initialize the d_plus1 and d_minus1 arrays
-    d_plus1 = np.zeros([n_max, temp1, len(thetas)])
-    d_minus1 = np.zeros([n_max, temp1, len(thetas)])
+    d_plus1 = np.zeros([n_max, mmin2max, len(thetas)])
+    d_minus1 = np.zeros([n_max, mmin2max, len(thetas)])
 
     # Calculate the mu==-1 and mu==1 rotation coefficients by
     # solving for d_-1 and d_+1 using equations (A2.18) and (A2.19).
@@ -410,7 +410,7 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
         d_temp = d
 
         # Output shaped like this: (n,mu,m,theta)
-        d = np.zeros((n_max, int(2*mu_max+1), temp1, len(thetas)))
+        d = np.zeros((n_max, int(2*mu_max+1), mmin2max, len(thetas)))
 
         # Define a helper function
         def get_mu_index(mu_): return mu_max + mu_
@@ -422,8 +422,8 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
         deltas = delta_pyramid(n_max)
 
         # Create the mp and m vectors
-        mp_vec = np.linspace(-n_max, n_max, temp2)
-        m_vec = np.linspace(-m_max, m_max, temp1)
+        mp_vec = np.linspace(-n_max, n_max, nmin2max)
+        m_vec = np.linspace(-m_max, m_max, mmin2max)
 
         # Remove the extra m values from the delta pyramid, if necessary
         extra = (len(mp_vec)-len(m_vec))/2
@@ -431,7 +431,7 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
             deltas = deltas[:, :, extra:-extra]
 
         # promote mp_vec to 4 dimensions
-        mp_array = np.reshape(mp_vec, (1, temp2, 1, 1))
+        mp_array = np.reshape(mp_vec, (1, nmin2max, 1, 1))
 
         # Assign len(thetas) to a variable before we promote it to 4 dimensions
         numthetas = len(thetas)
@@ -443,13 +443,13 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
         deltas = np.delete(deltas, 0, 0)
 
         # promote the deltas to 4 dimensions
-        deltas4d = np.reshape(deltas, (n_max, temp2, temp1, 1))
+        deltas4d = np.reshape(deltas, (n_max, nmin2max, mmin2max, 1))
 
         # Calculate the exponent matrix
         expon = np.exp(-1j*mp_array*thetas)
 
         # promote the m_vec to 2 dimensions
-        m_array = np.reshape(m_vec, (1, temp1))
+        m_array = np.reshape(m_vec, (1, mmin2max))
 
         # define a helper function
         def get_m_index(m_): return m_max + m_
@@ -460,7 +460,7 @@ def rotation_coefficients(n_max, m_max, mu_max, thetas):
         for mu in mu_vec:
             ## print 'Calculating rotation coefficients for mu =', mu
             # Calculate the kernel
-            temp = np.reshape(deltas4d[:, :, get_m_index(mu), :], (n_max, temp2, 1, 1))
+            temp = np.reshape(deltas4d[:, :, get_m_index(mu), :], (n_max, nmin2max, 1, 1))
             kernel = temp*deltas4d
             for nt in range(numthetas):
                 d[:, get_mu_index(mu), :, nt] = ((1j**(mu-m_array))*np.sum(kernel[:, :, :, 0] *
@@ -517,9 +517,9 @@ def lpmn_norm(n_max, m_max, thetas):
         for n in range(tempn):
             if m > n:
                 continue
-            temp1 = math.factorial(n-m)
-            temp2 = math.factorial(n+m)
-            temp3 = fractions.Fraction(temp1, temp2)
+            mmin2max = math.factorial(n-m)
+            nmin2max = math.factorial(n+m)
+            temp3 = fractions.Fraction(mmin2max, nmin2max)
             normfactor[m, n, 0] = (-1)**m*math.sqrt((2*n+1)/2.0*float(temp3))
 
     # Multiply the associate Legendre function values by the
@@ -1045,36 +1045,35 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
             
-def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, frequency_Hz, nf_meas_dist = 10e3, nf_meas_dist2 = 3.2, N = 3, M = 3):
+def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transpose_dist):
+
+    if (transpose_dist < meas_dist):
+        raise ValueError(f"Inwards/Reverse transform is not implemented")
     
     #This part is based on pysnf by rcutshall
     nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
     nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
     nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
 
-    #nf_data_double[0:nf_data.shape[0],:,0] = nf_data[:,:,0]
-    #nf_data_double[nf_data.shape[0]:,:,0] = nf_data[:,:,0]
-    #nf_data_double[0:nf_data.shape[0],:,1] = nf_data[:,:,1]
-    #nf_data_double[nf_data.shape[0]:,:,1] = nf_data[:,:,1]
-
     num_th = nf_data_double.shape[0]
     num_ph = nf_data_double.shape[1]
 
     n_max = int(num_th/2)   # This works because num_th should always be even after
                             # the singlesphere2doublesphere function
-    #m_max = int(num_ph/2)   # This works because num_ph should always be even after
-                            # the singlesphere2doublesphere function
-    m_max = n_max # Since m is not allowed to be higher than n.
+    if (n_max > int(num_ph/2)):
+        m_max = int(num_ph/2)   # This works because num_ph should always be even after
+    else:                       # the singlesphere2doublesphere function
+        m_max = n_max           # Since m is not allowed to be higher than n.
 
-    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, nf_meas_dist = nf_meas_dist2)
+    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, dist = transpose_dist)
 
     # Perform (4.127)
     temp = np.fft.ifft(nf_data_double, axis=1)
 
     # Reorganize such that m runs from -m_max to m_max
-    temp1 = int((m_max * 2) + 1)
-    temp2 = int((n_max * 2) + 1)
-    w_th_m_mu = np.zeros((num_th, temp1, 2), dtype=complex)
+    mmin2max = int((m_max * 2) + 1)
+    nmin2max = int((n_max * 2) + 1)
+    w_th_m_mu = np.zeros((num_th, mmin2max, 2), dtype=complex)
     temp = np.fft.fftshift(temp, axes=(1,))
     if num_ph/2.0 == m_max:
         w_th_m_mu[:, :-1, :] = temp
@@ -1086,13 +1085,13 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     temp = np.fft.ifft(w_th_m_mu, axis=0)
 
     # Reorganize such that n runs from -n_max to n_max
-    b_l_m_mu = np.zeros((temp2, temp1, 2), dtype=complex)
+    b_l_m_mu = np.zeros((nmin2max, mmin2max, 2), dtype=complex)
     temp = np.fft.fftshift(temp, axes=(0,))
     if num_th/2.0 == n_max:
         b_l_m_mu[:-1, :, :] = temp
         b_l_m_mu[-1, :, :] = temp[0, :, :]
     elif num_th/2.0 > n_max:
-        b_l_m_mu[:, :, :] = temp[num_th/2-n_max:num_th/temp2, :, :]
+        b_l_m_mu[:, :, :] = temp[num_th/2-n_max:num_th/nmin2max, :, :]
 
     # Calculate the pi_wiggle array with [1],(4.84) and [1],(4.86)
     pi_wig = pi_wiggle(n_max)
@@ -1110,18 +1109,18 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 
     # Keep only the values of k_mp where -n_max <= m' <= n_max.
     # This is required prior to the evaluation of [1],(4.92)
-    temp = np.zeros((temp2, temp1, 2), dtype=complex)
+    temp = np.zeros((nmin2max, mmin2max, 2), dtype=complex)
     temp[0:n_max, :, :] = k_mp[3*n_max:, :, :]
     temp[n_max:, :, :] = k_mp[0:n_max+1, :, :]
     k_mp = temp
 
     # Pull out k_mp for mu == -1 and mu == +1
-    k_mp_m1 = np.reshape(k_mp[:, :, 0], (1, temp2, temp1))
-    k_mp_p1 = np.reshape(k_mp[:, :, 1], (1, temp2, temp1))
+    k_mp_m1 = np.reshape(k_mp[:, :, 0], (1, nmin2max, mmin2max))
+    k_mp_p1 = np.reshape(k_mp[:, :, 1], (1, nmin2max, mmin2max))
 
     # Initialize the n and m arrays
     n_array = np.reshape(np.linspace(1, n_max, n_max), (n_max, 1))
-    m_array = np.reshape(np.linspace(-m_max, m_max, temp1), (1, temp1))
+    m_array = np.reshape(np.linspace(-m_max, m_max, mmin2max), (1, mmin2max))
 
     # Initialize a delta pyramid helper function
     def get_mi(m_): return m_ + n_max  # This returns the m index of the deltas
@@ -1131,11 +1130,11 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     deltas = deltas[1:, :, get_mi(-m_max):get_mi(m_max)+1]
 
     # Get the deltas for only mu == -1 or 1
-    deltas_mu_m1 = np.reshape(deltas[:, :, get_mi(-1)], (n_max, temp2, 1))
-    deltas_mu_p1 = np.reshape(deltas[:, :, get_mi(+1)], (n_max, temp2, 1))
+    deltas_mu_m1 = np.reshape(deltas[:, :, get_mi(-1)], (n_max, nmin2max, 1))
+    deltas_mu_p1 = np.reshape(deltas[:, :, get_mi(+1)], (n_max, nmin2max, 1))
 
     # Calculate w_n_m_mu as shown in [1],(4.92). Same as 4.132, if with both polarizations as this is.
-    w_n_m_mu = np.zeros((n_max, temp1, 2), dtype=complex)
+    w_n_m_mu = np.zeros((n_max, mmin2max, 2), dtype=complex)
     w_n_m_mu[:, :, 0] = (
         (2.0*n_array+1.0)/2.0 *
         1j**(-1-m_array) *
@@ -1148,7 +1147,7 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     )
 
     # Initialize the wave coefficient matrix
-    q_n_m_s = np.zeros((n_max, temp1, 2), dtype='complex')
+    q_n_m_s = np.zeros((n_max, mmin2max, 2), dtype='complex')
 
     # Pull out and reshape the necessary values of the probe response constants
     p_n_neg1_1 = np.reshape(PHertzian[:, 0, 0], (n_max,1))  # mu = -1 , s = 1
@@ -1161,7 +1160,7 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
     q_n_m_s[:, :, 0] = (p_n_neg1_2*w_n_m_mu[:, :, 1] - p_n_pos1_2*w_n_m_mu[:, :, 0])/determinant
     q_n_m_s[:, :, 1] = (p_n_pos1_1*w_n_m_mu[:, :, 0] - p_n_neg1_1*w_n_m_mu[:, :, 1])/determinant
 
-    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, nf_meas_dist)
+    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, meas_dist)
 
     ffData = np.zeros(nf_data.shape, dtype=complex)
     ffData[:, :, 0] = theta
@@ -1169,7 +1168,5 @@ def spherical_far_field_transform_gigacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
 
     #Flip the array:
     ffData = np.flip(ffData, 0)
-    #Roll 2
-    #ffData = np.roll(ffData, 1, axis=0)
 
     return ffData

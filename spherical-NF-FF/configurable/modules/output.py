@@ -314,7 +314,6 @@ def calculate_hpbw_linear_approx(data, angles):
 
     return np.round(hpbw, 2)
 
-
 def calculate_print_hpbw(data, theta_deg_center):
     h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
     h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
@@ -330,6 +329,17 @@ def calculate_print_hpbw(data, theta_deg_center):
     print(f"H-plane (original) HPBW: {h_plane_hpbw_original} deg")
     print(f"E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
+def calculate_mean_indexed_error(data1, data2):
+    # Compute the absolute differences at each index
+    differences = np.abs(data1 - data2)
+
+    # Return the mean value
+    return np.mean(differences)
 
 
-
+def calculate_max_indexed_error(data1, data2):
+    # Compute the absolute differences at each index
+    differences = np.abs(data1 - data2)
+    
+    # Return the maximum difference
+    return np.max(differences)

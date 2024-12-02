@@ -12,7 +12,6 @@ def sum_NF_poles_sqrt(nfData):
     # calculate the length between the two polarities
     return (abs(nfData[:, :, 0])**2 + abs(nfData[:, :, 1])**2)**0.5
 
-
 def select_data_at_angle_old(ffData, theta_f_deg, phi_f_deg, theta_select_angle=0, phi_select_angle=0):
   # variabels used for smoothing
   window_size = 9 # Choose an odd window size
@@ -82,3 +81,7 @@ def select_data_at_angle(ffData, phi_f_deg, phi_select_angle=0):
       e_plane_data_original,
       e_plane_data_smooth
   )
+
+def removeXFromEnd(data, removeAmount):
+    newData = data[0:data.shape[0]-removeAmount, :]
+    return newData
