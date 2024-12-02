@@ -41,6 +41,7 @@ def phase_errors_uniform(data, max_error):
             data[i, j, 0] *= np.exp(1j * phase_error_theta)
             data[i, j, 1] *= np.exp(1j * phase_error_phi)
 
+
 # Function to introduce amplitude errors (modifies data in place)
 def amplitude_same_errors_normal(data, standard_deviation):
     for i in range(data.shape[0]):
@@ -76,6 +77,7 @@ def phase_same_errors_uniform(data, max_error):
             phase_error = 2*np.pi * np.random.uniform(1-max_error, 1+max_error)
             data[i, j, 0] *= np.exp(1j * phase_error)
             data[i, j, 1] *= np.exp(1j * phase_error)
+
 
 def phase_errors_correlated(data, deviation_factor, max_error):
     if(max_error > 1):
@@ -162,6 +164,7 @@ def fixed_phase_error(data, error):
             phase_error_phi = random.choice([-1, 1]) * error
             data[i, j, 0] *= np.exp(1j * phase_error_theta)
             data[i, j, 1] *= np.exp(1j * phase_error_phi)
+
 
 def combine_data_for_position_error(dataArr):
 
