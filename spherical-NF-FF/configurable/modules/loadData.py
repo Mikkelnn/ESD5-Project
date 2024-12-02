@@ -46,6 +46,7 @@ def load_data_lab_measurements(file_path):
     header_text = load_header(file_path, num_lines=13)
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=13, header=None)
     
+    # determine theta. phi angles and step sizes from the header data
     headerData = parse_csv_header(header_text)
 
     # Calculate theta and phi sizes
