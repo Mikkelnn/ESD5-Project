@@ -108,9 +108,9 @@ def amplitude_errors_correlated(data, deviation_factor, max_error):
         for j in range(data.shape[1]):
             upOrDown = np.random.randint(0,2)
             if (upOrDown == 1):
-                error = error * (max / error) * deviation_factor
+                error += error * (max / error) * deviation_factor
             else:
-                error = error * (min / error) * (1/deviation_factor)
+                error -= error * (min / error) * deviation_factor
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
