@@ -60,8 +60,7 @@ phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
 
 ##############################################################################################################
-# 2. Introduction of errors in the NF
-# Comment out if no errors should be present
+# 2. Introduction of errors in the NF, comment out if no errors should be present
 ##############################################################################################################
 phaseError = 0.4
 ampError = 0.8
