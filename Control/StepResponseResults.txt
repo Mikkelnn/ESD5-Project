@@ -1,0 +1,6 @@
+Step Response Characteristics:
+--------------------------------
+Rise Time: 2.5099 seconds
+Settling Time: 8.3006 seconds
+Overshoot: 11.59 %
+Peak Time: 5.4111 seconds
