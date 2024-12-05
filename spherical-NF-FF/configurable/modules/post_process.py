@@ -83,5 +83,4 @@ def select_data_at_angle(ffData, phi_f_deg, phi_select_angle=0):
   )
 
 def removeXFromEnd(data, removeAmount):
-    newData = data[0:data.shape[0]-removeAmount, :]
-    return newData
+    return data[0:data.shape[0]-removeAmount, :]
