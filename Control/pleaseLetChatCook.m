@@ -2,7 +2,7 @@
 
 % Define the PD Controller Parameters
 Kp = 20;  % Proportional gain
-%Ki = 0.1; % Integral gain
+Ki = 0.1; % Integral gain
 Kd = 10;  % Derivative gain
 
 % Define the Plant Transfer Function (0.5/s^2)
@@ -11,7 +11,7 @@ denominator_plant = [1,0,0]; % s^2
 Plant = tf(numerator_plant, denominator_plant);
 
 % PD Controller Transfer Function
-numerator_PD = [Kd Kp Ki]; % Kd*s + Kp
+numerator_PD = [Kd Ki Kp]; % Kd*s + Kp
 denominator_PD = [1,0];     % PD controller doesn't add poles
 PD_Controller = tf(numerator_PD, denominator_PD);
 
