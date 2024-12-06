@@ -125,29 +125,9 @@ plot_dif(data1, dataError, theta_deg_center, f'Dif Radiation amplitude correlati
 #calculate_print_hpbw(data1, theta_deg_center)
 
 #plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
-#plot_copolar(data, theta_deg_center, phi_deg_center, 'Transformed NF (FF) copolar')
-#plot_copolar2(data, theta_deg_center, 'Transformed NF (FF) copolar')
+#plot_copolar(data, theta_deg_center, 'Transformed NF (FF) copolar')
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
 
-
-#theta_deg_center2 = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
-#theta_rad2 = np.linspace(-(5/6)*np.pi, (5/6)*np.pi, len(theta_deg_center2))
-
-#data_loaded = select_data_at_angle2(ffData, theta_deg, phi_deg, phi_select_angle=0)
-#plot_heatmap(ffData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
-#plot_copolar2(data_loaded, theta_deg_center2, 'Transformed NF (FF) copolar')
-#plot_polar2(data_loaded, theta_rad2, , 'Transformed NF (FF) polar')
-
-#plot_polar2(data_loaded, theta_rad2, 'Loaded FF polar')
-
-#plot_heatmap(ffData_loaded, theta_deg_loaded, phi_deg_loaded, 'Loaded FF heatmap')
-#plot_heatmap(farfieldData, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap')
-#plot_heatmap(farfieldDataError, theta_deg_loaded, phi_deg_loaded, 'Transformed FF heatmap with Error')
-#plot_heatmap(abs(farfieldDataError - farfieldData) / farfieldData, theta_deg_loaded, phi_deg_loaded, 'Dif error heatmap')
-
-#plot_copolar2(data_loaded, theta_deg_center2, 'Loaded FF copolar')
-#plot_copolar2(data1, theta_deg_center2, 'Transformed FF copolar')
-#plot_copolar2(dataError, theta_deg_center2, 'Transformed FF copolar with Error')
 
 # show all figures
 print(f"Max error e-plane: {calculate_max_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
