@@ -3,6 +3,8 @@ import random
 
 # Function to introduce amplitude errors (modifies data in place)
 def amplitude_errors_normal(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply amplitude error to both components (E_theta and E_phi)
@@ -10,9 +12,16 @@ def amplitude_errors_normal(data, standard_deviation):
             amplitude_error_phi = 1 + np.random.normal(0, standard_deviation)
             data[i, j, 0] *= abs(amplitude_error_theta)
             data[i, j, 1] *= abs(amplitude_error_phi)
+            
+            applyedError[i, j, 0] = abs(amplitude_error_theta)
+            applyedError[i, j, 1] = abs(amplitude_error_phi)
+    
+    return applyedError
 
 # Function to introduce phase errors (modifies data in place)
 def phase_errors_normal(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply phase error to both components (E_theta and E_phi)
@@ -20,9 +29,16 @@ def phase_errors_normal(data, standard_deviation):
             phase_error_phi = 2*np.pi * np.random.normal(0, standard_deviation)
             data[i, j, 0] *= np.exp(1j * phase_error_theta)
             data[i, j, 1] *= np.exp(1j * phase_error_phi)
+            
+            applyedError[i, j, 0] = np.exp(1j * phase_error_theta)
+            applyedError[i, j, 1] = np.exp(1j * phase_error_phi)
+    
+    return applyedError
 
 # Function to introduce amplitude errors (modifies data in place)
 def amplitude_errors_uniform(data, max_error):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply amplitude error to both components (E_theta and E_phi)
@@ -31,8 +47,15 @@ def amplitude_errors_uniform(data, max_error):
             data[i, j, 0] *= abs(amplitude_error_theta)
             data[i, j, 1] *= abs(amplitude_error_phi)
 
+            applyedError[i, j, 0] = abs(amplitude_error_theta)
+            applyedError[i, j, 1] = abs(amplitude_error_phi)
+    
+    return applyedError
+
 # Function to introduce phase errors (modifies data in place)
 def phase_errors_uniform(data, max_error):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply phase error to both components (E_theta and E_phi)
@@ -40,10 +63,17 @@ def phase_errors_uniform(data, max_error):
             phase_error_phi = 2*np.pi * np.random.uniform(1-max_error, 1+max_error)
             data[i, j, 0] *= np.exp(1j * phase_error_theta)
             data[i, j, 1] *= np.exp(1j * phase_error_phi)
+            
+            applyedError[i, j, 0] = np.exp(1j * phase_error_theta)
+            applyedError[i, j, 1] = np.exp(1j * phase_error_phi)
+    
+    return applyedError
 
 
 # Function to introduce amplitude errors (modifies data in place)
 def amplitude_same_errors_normal(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply amplitude error to both components (E_theta and E_phi)
@@ -51,8 +81,15 @@ def amplitude_same_errors_normal(data, standard_deviation):
             data[i, j, 0] *= abs(amplitude_error)
             data[i, j, 1] *= abs(amplitude_error)
 
+            applyedError[i, j, 0] = abs(amplitude_error)
+            applyedError[i, j, 1] = abs(amplitude_error)
+    
+    return applyedError
+
 # Function to introduce phase errors (modifies data in place)
 def phase_same_errors_normal(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply phase error to both components (E_theta and E_phi)
@@ -60,23 +97,42 @@ def phase_same_errors_normal(data, standard_deviation):
             data[i, j, 0] *= np.exp(1j * phase_error)
             data[i, j, 1] *= np.exp(1j * phase_error)
 
+            applyedError[i, j, 0] = np.exp(1j * phase_error)
+            applyedError[i, j, 1] = np.exp(1j * phase_error)
+    
+    return applyedError
+
 # Function to introduce amplitude errors (modifies data in place)
 def amplitude_same_errors_uniform(data, max_error):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply amplitude error to both components (E_theta and E_phi)
             amplitude_error = np.random.uniform(1-max_error, 1+max_error)
             data[i, j, 0] *= abs(amplitude_error)
-            data[i, j, 1] *= abs(amplitude_error)
+            data[i, j, 1] *= abs(amplitude_error)            
+
+            applyedError[i, j, 0] = abs(amplitude_error)
+            applyedError[i, j, 1] = abs(amplitude_error)
+    
+    return applyedError
 
 # Function to introduce phase errors (modifies data in place)
 def phase_same_errors_uniform(data, max_error):
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply phase error to both components (E_theta and E_phi)
             phase_error = 2*np.pi * np.random.uniform(1-max_error, 1+max_error)
             data[i, j, 0] *= np.exp(1j * phase_error)
             data[i, j, 1] *= np.exp(1j * phase_error)
+            
+            applyedError[i, j, 0] = np.exp(1j * phase_error)
+            applyedError[i, j, 1] = np.exp(1j * phase_error)
+    
+    return applyedError
 
 
 def phase_errors_correlated(data, deviation_factor, max_error):
@@ -87,6 +143,9 @@ def phase_errors_correlated(data, deviation_factor, max_error):
     max = 1 + max_error
     min = 1 - max_error
     error = 1
+
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             upOrDown = np.random.randint(0,2)
@@ -97,6 +156,11 @@ def phase_errors_correlated(data, deviation_factor, max_error):
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= np.exp(1j * error)
             data[i, j, 1] *= np.exp(1j * error)
+            
+            applyedError[i, j, 0] = np.exp(1j * error)
+            applyedError[i, j, 1] = np.exp(1j * error)
+    
+    return applyedError
 
 def amplitude_errors_correlated(data, deviation_factor, max_error):
     if(max_error >= 1):
@@ -106,6 +170,9 @@ def amplitude_errors_correlated(data, deviation_factor, max_error):
     max = 1 + max_error
     min = 1 - max_error
     error = 1
+
+    applyedError = np.zeros(data.shape)
+
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             upOrDown = np.random.randint(0,2)
@@ -116,6 +183,11 @@ def amplitude_errors_correlated(data, deviation_factor, max_error):
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
+            
+            applyedError[i, j, 0] = error
+            applyedError[i, j, 1] = error
+    
+    return applyedError
 
 def phase_errors_correlated_rev(data, deviation_factor, max_error):
     if(max_error > 1):
@@ -125,6 +197,9 @@ def phase_errors_correlated_rev(data, deviation_factor, max_error):
     max = 1 + max_error
     min = 1 - max_error
     error = 1
+
+    applyedError = np.zeros(data.shape)
+
     for j in range(data.shape[1]):
         for i in range(data.shape[0]):
             upOrDown = np.random.randint(0,2)
@@ -135,6 +210,11 @@ def phase_errors_correlated_rev(data, deviation_factor, max_error):
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= np.exp(1j * error)
             data[i, j, 1] *= np.exp(1j * error)
+            
+            applyedError[i, j, 0] = np.exp(1j * error)
+            applyedError[i, j, 1] = np.exp(1j * error)
+    
+    return applyedError
 
 def amplitude_errors_correlated_rev(data, deviation_factor, max_error):
     if(max_error >= 1):
@@ -144,6 +224,9 @@ def amplitude_errors_correlated_rev(data, deviation_factor, max_error):
     max = 1 + max_error
     min = 1 - max_error
     error = 1
+
+    applyedError = np.zeros(data.shape)
+
     for j in range(data.shape[1]):
         for i in range(data.shape[0]):
             upOrDown = np.random.randint(0,2)
@@ -154,6 +237,11 @@ def amplitude_errors_correlated_rev(data, deviation_factor, max_error):
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
+
+            applyedError[i, j, 0] = error
+            applyedError[i, j, 1] = error
+    
+    return applyedError
 
 
 def fixed_phase_error(data, error):

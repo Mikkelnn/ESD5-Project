@@ -15,12 +15,12 @@ def plot_polar(data, theta_f, figure_title):
 
     # E-plane polar plot
     ax1 = fig.add_subplot(grid[0, 0], projection='polar')
-    ax1.plot(theta_f, e_plane_magnitude)
+    ax1.plot(np.deg2rad(theta_f), e_plane_magnitude)
     ax1.set_title(f'E-Plane (Phi = {e_plane_plot_angle})')
 
     # H-plane polar plot
     ax2 = fig.add_subplot(grid[0, 1], projection='polar')
-    ax2.plot(theta_f, h_plane_magnitude)
+    ax2.plot(np.deg2rad(theta_f), h_plane_magnitude)
     ax2.set_title(f'H-Plane (Phi = {h_plane_plot_angle})')
 
 def plot_copolar(data, theta_f_deg, figure_title):
@@ -58,11 +58,11 @@ def plot_heatmap(ffData, theta_f_deg, phi_f_deg, figure_title):
     plt.figure(figure_title)
     ax3 = plt.subplot(1, 1, 1)
     cax = ax3.imshow(ffData, cmap='hot', aspect='auto')
-    ax3.set_title('Far-Field Radiation Pattern Heatmap')
+    ax3.set_title(figure_title)
 
-    plt.colorbar(cax, ax=ax3, label='Far-field amplitude (normalized)')
+    plt.colorbar(cax, ax=ax3, label='Amplitude')
 
-    ax3.set_xlabel('Phi')
+    ax3.set_xlabel('Phi °')
     ax3.set_ylabel('Theta °')
     
     # Set x-ticks and y-ticks with a reduced number of labels
@@ -256,14 +256,14 @@ def calculate_print_hpbw(data, theta_deg_center):
     e_plane_hpbw_smooth = calculate_hpbw(data.e_plane_data_smooth, theta_deg_center)
     e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
 
-    #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
-    #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth} deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
+    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
     #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")
     #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg")
 
-    print(f"H-plane (original) HPBW: {h_plane_hpbw_original} deg")
-    print(f"E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+    # print(f"H-plane (original) HPBW: {h_plane_hpbw_original} deg")
+    # print(f"E-plane (original) HPBW: {e_plane_hpbw_original} deg")
 
 
 def calculate_mean_indexed_error(data1, data2):
@@ -343,3 +343,27 @@ def plot_copolar_old(data, theta_f_deg, phi_f_deg, figure_title):
     ax2.set_xlabel('Theta')
     ax2.grid()
     ax2.legend()
+
+
+
+def save_data_txt(data, theta, phi, filePath, header):
+    dataText = header + '\n'
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            sel_data = data[i, j]
+            if hasattr(sel_data, "__len__"):
+                str = ''
+                for elm in sel_data:
+                    str += f'{elm} '
+                sel_data = str.removesuffix(' ')
+
+            dataText += f'{theta[i]} {phi[j]} {sel_data}\n'
+    
+    write_file(dataText, filePath)
+
+
+def write_file(textData, filePath):
+    f = open(filePath, "w")
+    f.write(textData)
+    f.close()

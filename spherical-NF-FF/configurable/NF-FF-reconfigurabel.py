@@ -62,15 +62,22 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 ##############################################################################################################
 # 2. Introduction of errors in the NF, comment out if no errors should be present
 ##############################################################################################################
+TEST_NAME = 'interference_both_pol_same_error' # used to determine folder to output files
+PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
+# ensure folder exist
+from pathlib import Path
+Path(PATH_PREFIX).mkdir(parents=False, exist_ok=True)
+
 #phaseError = 0.4
 ampError = 0.8
 deviationFactor = 0.8
 nfDataError = np.copy(nfData)
-#amplitude_same_errors_uniform(nfDataError,0.8)
-amplitude_errors_correlated_rev(nfDataError, deviationFactor, ampError)
-#phase_errors_correlated_rev(nfDataError, deviationFactor, phaseError)
-#fixed_phase_error(nfDataError, 0.4)
+#appliedError = amplitude_same_errors_uniform(nfDataError,0.8)
+appliedError = amplitude_errors_correlated_rev(nfDataError, deviationFactor, ampError)
+#appliedError = phase_errors_correlated_rev(nfDataError, deviationFactor, phaseError)
+#appliedError = fixed_phase_error(nfDataError, 0.4)
 
+appliedError = removeXFromEnd(appliedError, int(num_zero_nfData))
 
 ##############################################################################################################
 # 3. Transform data - most likely static...
@@ -120,14 +127,44 @@ dataError = select_data_at_angle(farfieldDataError2, phi_deg, phi_select_angle)
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
+plot_copolar(dataError, theta_deg_center, 'Transformed NF (FF) copolar')
+plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
+
+plot_polar(dataError, theta_deg_center, 'Transformed NF (FF) polar')
+plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_polar.svg', bbox_inches='tight')
+
+plot_heatmap(farfieldDataError2, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.svg', bbox_inches='tight')
+save_data_txt(farfieldDataError2, theta_deg, phi_deg, PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.txt', 'Theta Phi E_field')
+
+plot_heatmap(appliedError[:,:,0], theta_deg, phi_deg, 'Applied NF error heatmap of polarity 0')
+plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_0.svg', bbox_inches='tight')
+
+plot_heatmap(appliedError[:,:,1], theta_deg, phi_deg, 'Applied NF error heatmap of polarity 1')
+plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_1.svg', bbox_inches='tight')
+
+save_data_txt(appliedError, theta_deg, phi_deg, PATH_PREFIX + 'aplied_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
+
+# compare/dif plots
 plot_error_compare(data1, dataError, theta_deg_center, f'Error compare amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
+plt.savefig(PATH_PREFIX + 'compare_amplitude_correlation_reverse.svg', bbox_inches='tight')
+
 plot_dif(data1, dataError, theta_deg_center, f'Dif Radiation amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
+plt.savefig(PATH_PREFIX + 'dif_amplitude_correlation_reverse.svg', bbox_inches='tight')
+
+plot_heatmap(farfieldData - farfieldDataError, theta_deg, phi_deg, 'Diff ideal and error heatmap')
+plt.savefig(PATH_PREFIX + 'diff_ideal_and_error_heatmap.svg', bbox_inches='tight')
+
 #calculate_print_hpbw(data1, theta_deg_center)
 
-#plot_heatmap(farfieldData, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
-#plot_copolar(data, theta_deg_center, 'Transformed NF (FF) copolar')
+
 #plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
 
+### save metrics data in txt (HPBW, mean, max)
+
+#HPBW
+calculate_print_hpbw(dataLoaded, theta_deg_center)
+calculate_print_hpbw(data1, theta_deg_center)
 
 # show all figures
 print(f"Max error e-plane: {calculate_max_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
