@@ -91,86 +91,91 @@ nfData_sum = HansenPreProcessing(nfData)
 nfData_sum_error = HansenPreProcessing(nfDataError)
 
 # transform NF to FF
-ffData = spherical_far_field_transform_SNIFT(nfData_sum, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
-ffDataError = spherical_far_field_transform_SNIFT(nfData_sum_error, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
+ffData_no_error = spherical_far_field_transform_SNIFT(nfData_sum, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
+ffData_error = spherical_far_field_transform_SNIFT(nfData_sum_error, frequency_Hz, transform_from_dist_meters, transform_to_dist_meters)
 
 # post-process FF
-farfieldData = sum_NF_poles_sqrt(ffData)
-farfieldDataError = sum_NF_poles_sqrt(ffDataError)
-ffData_loaded = sum_NF_poles_sqrt(ffData_loaded)
+ffData_no_error_2D = sum_NF_poles_sqrt(ffData_no_error)
+ffData_error_2D = sum_NF_poles_sqrt(ffData_error)
+# ffData_loaded = sum_NF_poles_sqrt(ffData_loaded)
 
 # Normalize plots
-ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
-farfieldData = farfieldData / np.max(np.abs(farfieldData))
-farfieldDataError = farfieldDataError / np.max(np.abs(farfieldDataError))
+# ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
+ffData_no_error_2D = ffData_no_error_2D / np.max(np.abs(ffData_no_error_2D))
+ffData_error_2D = ffData_error_2D / np.max(np.abs(ffData_error_2D))
 
 # Remove original zero padding
-ffData_loaded2 = removeXFromEnd(ffData_loaded, int(num_zero_nfData))
-farfieldData2 = removeXFromEnd(farfieldData, int(num_zero_nfData))
-farfieldDataError2 = removeXFromEnd(farfieldDataError, int(num_zero_nfData))
+# ffData_loaded2 = removeXFromEnd(ffData_loaded, int(num_zero_nfData))
+ffData_no_error_2D = removeXFromEnd(ffData_no_error_2D, int(num_zero_nfData))
+ffData_error_2D = removeXFromEnd(ffData_error_2D, int(num_zero_nfData))
 
 ##############################################################################################################
 # 4. Select far field at angle and smooth data
 ##############################################################################################################
 phi_select_angle = 0 # the angle of witch to represent h-plane plot in degrees
 
-#farfieldData_20log10 = 20 * np.log10(farfieldData)
-#farfieldDataError_20log10 = 20 * np.log10(farfieldDataError)
-#farfieldDataDiff = 20 * np.log10(abs(farfieldDataError - farfieldData) / farfieldData)
+ffData_no_error_2D = 20 * np.log10(ffData_no_error_2D)
+ffData_error_2D = 20 * np.log10(ffData_error_2D)
 
-dataLoaded = select_data_at_angle(ffData_loaded2, phi_deg_loaded, phi_select_angle)
+# dataLoaded = select_data_at_angle(ffData_loaded2, phi_deg_loaded, phi_select_angle)
 
-data1 = select_data_at_angle(farfieldData2, phi_deg, phi_select_angle)
-dataError = select_data_at_angle(farfieldDataError2, phi_deg, phi_select_angle)
+selected_ffData_no_error = select_data_at_angle(ffData_no_error_2D, phi_deg, phi_select_angle)
+selected_ffData_error = select_data_at_angle(ffData_error_2D, phi_deg, phi_select_angle)
 #dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
 
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_copolar(dataError, theta_deg_center, 'Transformed NF (FF) copolar')
+plot_copolar(selected_ffData_error, theta_deg_center, 'Transformed NF (FF) copolar')
 plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
 
-plot_polar(dataError, theta_deg_center, 'Transformed NF (FF) polar')
+plot_polar(selected_ffData_error, theta_deg_center, 'Transformed NF (FF) polar')
 plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_polar.svg', bbox_inches='tight')
 
-plot_heatmap(farfieldDataError2, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
+plot_heatmap(ffData_error_2D, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
 plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.svg', bbox_inches='tight')
-save_data_txt(farfieldDataError2, theta_deg, phi_deg, PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.txt', 'Theta Phi E_field')
+save_data_txt(ffData_error_2D, theta_deg, phi_deg, PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.txt', 'Theta Phi E_field')
 
+# applied errors
 plot_heatmap(appliedError[:,:,0], theta_deg, phi_deg, 'Applied NF error heatmap of polarity 0')
 plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_0.svg', bbox_inches='tight')
-
 plot_heatmap(appliedError[:,:,1], theta_deg, phi_deg, 'Applied NF error heatmap of polarity 1')
 plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_1.svg', bbox_inches='tight')
-
 save_data_txt(appliedError, theta_deg, phi_deg, PATH_PREFIX + 'aplied_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
 
 # compare/dif plots
-plot_error_compare(data1, dataError, theta_deg_center, f'Error compare amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
+plot_error_compare(selected_ffData_no_error, selected_ffData_error, theta_deg_center, f'Error compare amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
 plt.savefig(PATH_PREFIX + 'compare_amplitude_correlation_reverse.svg', bbox_inches='tight')
 
-plot_dif(data1, dataError, theta_deg_center, f'Dif Radiation amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
+plot_dif(selected_ffData_no_error, selected_ffData_error, theta_deg_center, f'Dif Radiation amplitude correlation reverse dev({deviationFactor}) amp({ampError})')
 plt.savefig(PATH_PREFIX + 'dif_amplitude_correlation_reverse.svg', bbox_inches='tight')
 
-plot_heatmap(farfieldData - farfieldDataError, theta_deg, phi_deg, 'Diff ideal and error heatmap')
+diffData = ffData_no_error_2D - ffData_error_2D
+plot_heatmap(diffData, theta_deg, phi_deg, 'Diff ideal and error heatmap')
 plt.savefig(PATH_PREFIX + 'diff_ideal_and_error_heatmap.svg', bbox_inches='tight')
-
-#calculate_print_hpbw(data1, theta_deg_center)
-
-
-#plot_polar(data, theta_rad, phi_rad, 'Transformed NF (FF) polar')
+save_data_txt(diffData, theta_deg, phi_deg, PATH_PREFIX + 'diff_ideal_and_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
 
 ### save metrics data in txt (HPBW, mean, max)
+metricsTxt = ''
 
 #HPBW
-calculate_print_hpbw(dataLoaded, theta_deg_center)
-calculate_print_hpbw(data1, theta_deg_center)
+metricsTxt += f'NF transformed data (FF) no errors:\n{calculate_print_hpbw(selected_ffData_no_error, theta_deg_center)}\n'
+metricsTxt += f'\nNF transformed data (FF) with errors:\n{calculate_print_hpbw(selected_ffData_error, theta_deg_center)}\n'
+
+# mean, max (selected data)
+metricsTxt += '\nMean and Max errors between selected data with errors and selected data no errors\n'
+metricsTxt += f"Max error e-plane: {calculate_max_indexed_error(selected_ffData_no_error.e_plane_data_original, selected_ffData_error.e_plane_data_original)}\n" 
+metricsTxt += f"Max error h-plane: {calculate_max_indexed_error(selected_ffData_no_error.h_plane_data_original, selected_ffData_error.h_plane_data_original)}\n"
+metricsTxt += f"Mean error e-plane: {calculate_mean_indexed_error(selected_ffData_no_error.e_plane_data_original, selected_ffData_error.e_plane_data_original)}\n"
+metricsTxt += f"Mean error h-plane: {calculate_mean_indexed_error(selected_ffData_no_error.h_plane_data_original, selected_ffData_error.h_plane_data_original)}\n"
+
+# mean, max (all data)
+metricsTxt += '\nMean and Max errors between data with errors and data no errors (2D array)\n'
+metricsTxt += f"Max error (all data): {calculate_max_indexed_error(ffData_no_error_2D, ffData_error_2D)}\n" 
+metricsTxt += f"Mean error (all data): {calculate_mean_indexed_error(ffData_no_error_2D, ffData_error_2D)}\n"
+
+write_file(metricsTxt, PATH_PREFIX + 'metrics.txt')
 
 # show all figures
-print(f"Max error e-plane: {calculate_max_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
-print(f"Mean error e-plane: {calculate_mean_indexed_error(data1.e_plane_data_original, dataError.e_plane_data_original)}")
-print(f"Max error h-plane: {calculate_max_indexed_error(data1.h_plane_data_original, dataError.h_plane_data_original)}")
-print(f"Mean error h-plane: {calculate_mean_indexed_error(data1.h_plane_data_original, dataError.h_plane_data_original)}")
-
 show_figures()
 

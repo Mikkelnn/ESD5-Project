@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 def plot_polar(data, theta_f, figure_title):
     # select data and roll back, roll ensures center of main lobe is at 0 deg
     h_plane_plot_angle = data.h_plane_plot_angle
-    h_plane_magnitude = 20 * np.log10(data.h_plane_data_smooth)
+    # h_plane_magnitude = 20 * np.log10(data.h_plane_data_smooth)
+    h_plane_magnitude = data.h_plane_data_smooth
 
     e_plane_plot_angle = data.e_plane_plot_angle
-    e_plane_magnitude = 20 * np.log10(data.e_plane_data_smooth)
+    # e_plane_magnitude = 20 * np.log10(data.e_plane_data_smooth)
+    e_plane_magnitude = data.e_plane_data_smooth
     
     # Create the figure and the gridspec
     fig = plt.figure(figure_title)
@@ -176,7 +178,8 @@ def calculate_hpbw(data, angles):
     max_value = data[max_index]
 
     # Calculate the half-power level (-3 dB point)
-    half_power_level = max_value / 2.0
+    # half_power_level = max_value / 2.0
+    half_power_level = max_value * 0.707
 
     # Find the indices where data crosses the half-power level on both sides of max
     left_index = np.where(data[:max_index] <= half_power_level)[0]
@@ -218,7 +221,8 @@ def calculate_hpbw_linear_approx(data, angles):
     max_value = data[max_index]
 
     # Calculate the half-power level (-3 dB point)
-    half_power_level = max_value / 2.0
+    half_power_level = max_value - 3.0
+    # half_power_level = max_value * 0.707
 
     # Helper function for linear interpolation
     def interpolate(x1, y1, x2, y2, target_y):
@@ -226,21 +230,25 @@ def calculate_hpbw_linear_approx(data, angles):
         return x1 + (target_y - y1) * (x2 - x1) / (y2 - y1)
 
     # Find the crossing point on the left
-    left_index = np.where(data[:max_index] > half_power_level)[0][-1]  # Last point above
+    left_index = np.where(data[:max_index] > half_power_level)[0][0]  # Last point above
     left_angle = interpolate(
+        angles[left_index - 1], data[left_index - 1],
         angles[left_index], data[left_index],
-        angles[left_index + 1], data[left_index + 1],
         half_power_level
     )
 
     # Find the crossing point on the right
-    right_index = max_index + np.where(data[max_index:] > half_power_level)[0][0]  # First point above
+    right_index = max_index + np.where(data[max_index:] > half_power_level)[0][-1]  # First point above
     right_angle = interpolate(
-        angles[right_index - 1], data[right_index - 1],
         angles[right_index], data[right_index],
+        angles[right_index + 1], data[right_index + 1],
         half_power_level
     )
 
+    # print(f'l_idx: {left_index}; r:idx: {right_index}')
+    # print('data:')
+    # print(data)
+    
     # Calculate the HPBW
     hpbw = np.abs(right_angle - left_angle)
 
@@ -251,14 +259,19 @@ def calculate_hpbw_linear_approx(data, angles):
     return np.round(hpbw, 2)
 
 def calculate_print_hpbw(data, theta_deg_center):
-    h_plane_hpbw_smooth = calculate_hpbw(data.h_plane_data_smooth, theta_deg_center)
-    h_plane_hpbw_original = calculate_hpbw(data.h_plane_data_original, theta_deg_center)
-    e_plane_hpbw_smooth = calculate_hpbw(data.e_plane_data_smooth, theta_deg_center)
-    e_plane_hpbw_original = calculate_hpbw(data.e_plane_data_original, theta_deg_center)
+    h_plane_hpbw_smooth = calculate_hpbw_linear_approx(data.h_plane_data_smooth, theta_deg_center)
+    h_plane_hpbw_original = calculate_hpbw_linear_approx(data.h_plane_data_original, theta_deg_center)
+    e_plane_hpbw_smooth = calculate_hpbw_linear_approx(data.e_plane_data_smooth, theta_deg_center)
+    e_plane_hpbw_original = calculate_hpbw_linear_approx(data.e_plane_data_original, theta_deg_center)
 
-    print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth} deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg")
-    print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg")
+    hPlane = f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth} deg; H-plane (original) HPBW: {h_plane_hpbw_original} deg"
+    ePlane = f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg; E-plane (original) HPBW: {e_plane_hpbw_original} deg"
+    
+    results = f'{hPlane}\n{ePlane}'
 
+    print(results)
+
+    return results
     #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")
     #print(f"E-plane (smoothed) HPBW: {e_plane_hpbw_smooth} deg")
 

@@ -51,7 +51,7 @@ def select_data_at_angle_old(ffData, theta_f_deg, phi_f_deg, theta_select_angle=
 def select_data_at_angle(ffData, phi_f_deg, phi_select_angle=0):
   # variabels used for smoothing
   window_size = 5 # Choose an odd window size
-  poly_order = 2    # Polynomial order for smoothing
+  poly_order = 2  # Polynomial order for smoothing
 
   # deterimne sample number corresponding to plot angles
   phi_index_0 = np.absolute(phi_f_deg - phi_select_angle).argmin()
@@ -60,12 +60,12 @@ def select_data_at_angle(ffData, phi_f_deg, phi_select_angle=0):
   phi_index_90 = np.absolute(phi_f_deg - ((phi_select_angle + 90) % 360)).argmin()
   phi_index_270 = np.absolute(phi_f_deg - ((phi_select_angle + 270) % 360)).argmin()
   
-  h_plane_plot_angle = phi_f_deg[phi_index_0]
-  e_plane_plot_angle = phi_f_deg[phi_index_90]
+  e_plane_plot_angle = phi_f_deg[phi_index_0]
+  h_plane_plot_angle = phi_f_deg[phi_index_90]
 
   # Select data
-  h_plane_data_original = np.concatenate((np.flip(ffData[:, phi_index_0]), ffData[1:, phi_index_180]))
-  e_plane_data_original = np.concatenate((np.flip(ffData[:, phi_index_90]), ffData[1:, phi_index_270]))
+  e_plane_data_original = np.concatenate((np.flip(ffData[:, phi_index_0]), ffData[1:, phi_index_180]))
+  h_plane_data_original = np.concatenate((np.flip(ffData[:, phi_index_90]), ffData[1:, phi_index_270]))
 
   # Apply Savitzky-Golay filter for smoothing
   h_plane_data_smooth = savgol_filter(h_plane_data_original, window_size, poly_order) 
