@@ -126,15 +126,15 @@ selected_ffData_error = select_data_at_angle(ffData_error_2D, phi_deg, phi_selec
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_copolar(selected_ffData_error, theta_deg_center, 'Transformed NF (FF) copolar')
+plot_copolar(selected_ffData_error, theta_deg_center, 'Transformed NF-FF copolar (with errors)')
 plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
 
-plot_polar(selected_ffData_error, theta_deg_center, 'Transformed NF (FF) polar')
+plot_polar(selected_ffData_error, theta_deg_center, 'Transformed NF-FF polar (with errors)')
 plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_polar.svg', bbox_inches='tight')
 
-plot_heatmap(ffData_error_2D, theta_deg, phi_deg, 'Transformed NF (FF) heatmap')
-plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.svg', bbox_inches='tight')
-save_data_txt(ffData_error_2D, theta_deg, phi_deg, PATH_PREFIX + 'error_transformed_NF_(FF)_heatmap.txt', 'Theta Phi E_field')
+plot_heatmap(ffData_error_2D, theta_deg, phi_deg, 'Transformed NF-FF heatmap (with errors)')
+plt.savefig(PATH_PREFIX + 'error_transformed_NF_FF_heatmap.svg', bbox_inches='tight')
+save_data_txt(ffData_error_2D, theta_deg, phi_deg, PATH_PREFIX + 'error_transformed_NF_FF_heatmap.txt', 'Theta Phi E_field')
 
 # applied errors
 plot_heatmap(appliedError[:,:,0], theta_deg, phi_deg, 'Applied NF error heatmap of polarity 0')
@@ -151,9 +151,12 @@ plot_dif(selected_ffData_no_error, selected_ffData_error, theta_deg_center, f'Di
 plt.savefig(PATH_PREFIX + 'dif_amplitude_correlation_reverse.svg', bbox_inches='tight')
 
 diffData = ffData_no_error_2D - ffData_error_2D
-plot_heatmap(diffData, theta_deg, phi_deg, 'Diff ideal and error heatmap')
-plt.savefig(PATH_PREFIX + 'diff_ideal_and_error_heatmap.svg', bbox_inches='tight')
-save_data_txt(diffData, theta_deg, phi_deg, PATH_PREFIX + 'diff_ideal_and_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
+plot_heatmap(diffData, theta_deg, phi_deg, 'Diff no error and error heatmap')
+plt.savefig(PATH_PREFIX + 'diff_no_error_and_error_heatmap.svg', bbox_inches='tight')
+save_data_txt(diffData, theta_deg, phi_deg, PATH_PREFIX + 'diff_no_error_and_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
+
+plot_heatmap(ffData_error_2D, theta_deg, phi_deg, 'Transformed NF-FF heatmap (no errors)')
+plt.savefig(PATH_PREFIX + 'no_error_transformed_NF_FF_heatmap.svg', bbox_inches='tight')
 
 ### save metrics data in txt (HPBW, mean, max)
 metricsTxt = ''
@@ -171,7 +174,7 @@ metricsTxt += f"Mean error h-plane: {calculate_mean_indexed_error(selected_ffDat
 
 # mean, max (all data)
 metricsTxt += '\nMean and Max errors between data with errors and data no errors (2D array)\n'
-metricsTxt += f"Max error (all data): {calculate_max_indexed_error(ffData_no_error_2D, ffData_error_2D)}\n" 
+metricsTxt += f"Max absolute error (all data): {calculate_max_indexed_error(ffData_no_error_2D, ffData_error_2D)}\n" 
 metricsTxt += f"Mean error (all data): {calculate_mean_indexed_error(ffData_no_error_2D, ffData_error_2D)}\n"
 
 write_file(metricsTxt, PATH_PREFIX + 'metrics.txt')
