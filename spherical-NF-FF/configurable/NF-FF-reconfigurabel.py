@@ -43,15 +43,15 @@ file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
+# file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
+# ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
 
 # simulate data
 #nfData = simulate_NF_dipole_array()
 
 # zero-pad before converting theta, phi values
 nfData, theta_deg2, num_zero_nfData = pad_theta(nfData, theta_step_deg)
-ffData_loaded, theta_deg2, num_zero_ffData = pad_theta(ffData_loaded, theta_step_deg)
+# ffData_loaded, theta_deg2, num_zero_ffData = pad_theta(ffData_loaded, theta_step_deg)
 
 
 # Define theta and phi ranges for far-field plotting
@@ -73,7 +73,7 @@ ampError = 0.8
 deviationFactor = 0.8
 nfDataError = np.copy(nfData)
 #appliedError = amplitude_same_errors_uniform(nfDataError,0.8)
-appliedError = amplitude_errors_correlated_rev(nfDataError, deviationFactor, ampError)
+appliedError = amplitude_errors_correlated_rev_same(nfDataError, deviationFactor, ampError)
 #appliedError = phase_errors_correlated_rev(nfDataError, deviationFactor, phaseError)
 #appliedError = fixed_phase_error(nfDataError, 0.4)
 

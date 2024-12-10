@@ -135,24 +135,31 @@ def phase_same_errors_uniform(data, max_error):
     return applyedError
 
 
-def phase_errors_correlated(data, deviation_factor, max_error):
+def nextError(current, max_error, deviation_factor):
+    max = 1 + max_error
+    min = 1 - max_error
+
+    upOrDown = np.random.randint(0,2)
+    if (upOrDown == 1):
+        return current + (max-current) * deviation_factor
+    else:
+        return current + (min-current) * deviation_factor
+    
+
+
+def phase_errors_correlated_phi_same(data, deviation_factor, max_error):
     if(max_error > 1):
         raise ValueError(f"To large value for max_error, this value may not exceed 1!")
     if(deviation_factor > 1):
         raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
-    max = 1 + max_error
-    min = 1 - max_error
+
     error = 1
 
     applyedError = np.zeros(data.shape)
 
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            upOrDown = np.random.randint(0,2)
-            if (upOrDown == 1):
-                error += (max-error) * deviation_factor
-            else:
-                error += (min-error) * deviation_factor
+            error = nextError(error, max_error, deviation_factor)
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= np.exp(1j * error)
             data[i, j, 1] *= np.exp(1j * error)
@@ -162,24 +169,18 @@ def phase_errors_correlated(data, deviation_factor, max_error):
     
     return applyedError
 
-def amplitude_errors_correlated(data, deviation_factor, max_error):
+def amplitude_errors_correlated_phi_same(data, deviation_factor, max_error):
     if(max_error >= 1):
         raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
     if(deviation_factor >= 1):
         raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
-    max = 1 + max_error
-    min = 1 - max_error
-    error = 1
 
+    error = 1
     applyedError = np.zeros(data.shape)
 
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            upOrDown = np.random.randint(0,2)
-            if (upOrDown == 1):
-                error += (max-error) * deviation_factor
-            else:
-                error += (min-error) * deviation_factor
+            error = nextError(error, max_error, deviation_factor)
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
@@ -189,24 +190,18 @@ def amplitude_errors_correlated(data, deviation_factor, max_error):
     
     return applyedError
 
-def phase_errors_correlated_rev(data, deviation_factor, max_error):
+def phase_errors_correlated_theta_same(data, deviation_factor, max_error):
     if(max_error > 1):
         raise ValueError(f"To large value for max_error, this value may not exceed 1!")
     if(deviation_factor > 1):
         raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
-    max = 1 + max_error
-    min = 1 - max_error
-    error = 1
 
+    error = 1
     applyedError = np.zeros(data.shape)
 
     for j in range(data.shape[1]):
         for i in range(data.shape[0]):
-            upOrDown = np.random.randint(0,2)
-            if (upOrDown == 1):
-                error += (max-error) * deviation_factor
-            else:
-                error += (min-error) * deviation_factor
+            error = nextError(error, max_error, deviation_factor)
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= np.exp(1j * error)
             data[i, j, 1] *= np.exp(1j * error)
@@ -216,24 +211,18 @@ def phase_errors_correlated_rev(data, deviation_factor, max_error):
     
     return applyedError
 
-def amplitude_errors_correlated_rev(data, deviation_factor, max_error):
+def amplitude_errors_correlated_theta_same(data, deviation_factor, max_error):
     if(max_error >= 1):
         raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
     if(deviation_factor >= 1):
         raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
-    max = 1 + max_error
-    min = 1 - max_error
-    error = 1
 
+    error = 1
     applyedError = np.zeros(data.shape)
 
     for j in range(data.shape[1]):
         for i in range(data.shape[0]):
-            upOrDown = np.random.randint(0,2)
-            if (upOrDown == 1):
-                error += (max-error) * deviation_factor
-            else:
-                error += (min-error) * deviation_factor
+            error = nextError(error, max_error, deviation_factor)
             # Apply phase error to both components (E_theta and E_phi)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
@@ -242,6 +231,184 @@ def amplitude_errors_correlated_rev(data, deviation_factor, max_error):
             applyedError[i, j, 1] = error
     
     return applyedError
+
+
+def phase_errors_correlated_phi_independent(data, deviation_factor, max_error):
+    if(max_error > 1):
+        raise ValueError(f"To large value for max_error, this value may not exceed 1!")
+    if(deviation_factor > 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
+
+    error1 = 1
+    error2 = 1
+
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            error1 = nextError(error1, max, min)
+            error2 = nextError(error2, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= np.exp(1j * error1)
+            data[i, j, 1] *= np.exp(1j * error2)
+            
+            applyedError[i, j, 0] = np.exp(1j * error1)
+            applyedError[i, j, 1] = np.exp(1j * error2)
+    
+    return applyedError
+
+def amplitude_errors_correlated_phi_independent(data, deviation_factor, max_error):
+    if(max_error >= 1):
+        raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
+    if(deviation_factor >= 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
+
+    error1 = 1
+    error2 = 1
+
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            error1 = nextError(error1, max_error, deviation_factor)
+            error2 = nextError(error2, max_error, deviation_factor)
+
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= error1
+            data[i, j, 1] *= error2
+            
+            applyedError[i, j, 0] = error1
+            applyedError[i, j, 1] = error2
+    
+    return applyedError
+
+def phase_errors_correlated_theta_independent(data, deviation_factor, max_error):
+    if(max_error > 1):
+        raise ValueError(f"To large value for max_error, this value may not exceed 1!")
+    if(deviation_factor > 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
+
+    error1 = 1
+    error2 = 1
+
+    applyedError = np.zeros(data.shape)
+
+    for j in range(data.shape[1]):
+        for i in range(data.shape[0]):
+            error1 = nextError(error1, max_error, deviation_factor)
+            error2 = nextError(error2, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= np.exp(1j * error1)
+            data[i, j, 1] *= np.exp(1j * error2)
+            
+            applyedError[i, j, 0] = np.exp(1j * error1)
+            applyedError[i, j, 1] = np.exp(1j * error2)
+ 
+    return applyedError
+
+def amplitude_errors_correlated_theta_independent(data, deviation_factor, max_error):
+    if(max_error >= 1):
+        raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
+    if(deviation_factor >= 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
+
+    error1 = 1
+    error2 = 1
+
+    applyedError = np.zeros(data.shape)
+
+    for j in range(data.shape[1]):
+        for i in range(data.shape[0]):
+            error1 = nextError(error1, max_error, deviation_factor)
+            error2 = nextError(error2, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= error1
+            data[i, j, 1] *= error2
+
+            applyedError[i, j, 0] = error1
+            applyedError[i, j, 1] = error2
+    
+    return applyedError
+
+
+def phase_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
+    if(max_error > 1):
+        raise ValueError(f"To large value for max_error, this value may not exceed 1!")
+    if(deviation_factor > 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
+
+    error = 1
+
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            error = nextError(error, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= np.exp(1j * error)
+            
+            applyedError[i, j, 0] = np.exp(1j * error)
+    
+    return applyedError
+
+def amplitude_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
+    if(max_error >= 1):
+        raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
+    if(deviation_factor >= 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
+
+    error = 1
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            error = nextError(error, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= error
+            
+            applyedError[i, j, 0] = error
+    
+    return applyedError
+
+def phase_errors_correlated_theta_one_pol(data, deviation_factor, max_error):
+    if(max_error > 1):
+        raise ValueError(f"To large value for max_error, this value may not exceed 1!")
+    if(deviation_factor > 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not exceed 1!")
+
+    error = 1
+    applyedError = np.zeros(data.shape)
+
+    for j in range(data.shape[1]):
+        for i in range(data.shape[0]):
+            error = nextError(error, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= np.exp(1j * error)
+            
+            applyedError[i, j, 0] = np.exp(1j * error)
+    
+    return applyedError
+
+def amplitude_errors_correlated_theta_one_pol(data, deviation_factor, max_error):
+    if(max_error >= 1):
+        raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
+    if(deviation_factor >= 1):
+        raise ValueError(f"To large value for deviation_factor, this value may not be equal to or exceed 1!")
+
+    error = 1
+    applyedError = np.zeros(data.shape)
+
+    for j in range(data.shape[1]):
+        for i in range(data.shape[0]):
+            error = nextError(error, max_error, deviation_factor)
+            # Apply phase error to both components (E_theta and E_phi)
+            data[i, j, 0] *= error
+
+            applyedError[i, j, 0] = error
+    
+    return applyedError
+
+
 
 
 def fixed_phase_error(data, error):
