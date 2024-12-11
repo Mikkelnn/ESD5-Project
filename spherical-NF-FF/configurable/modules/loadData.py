@@ -101,3 +101,29 @@ def load_data_cst(file_path):
             k += 1
 
     return (complex_field_data, theta_values, phi_values, theta_stepSize, phi_stepSize)
+
+
+def load_FF_data_own_output(file_path):
+    # Load the data, skipping the row with dashes (assumed to be the second row)
+    nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=1, header=None)
+
+    # Calculate theta and phi sizes
+    theta_values = sorted(list(set(nf_data.iloc[:, 0]))) # distinct (deduplicate) theta values
+    theta_size = len(theta_values)
+    theta_stepSize = (np.max(theta_values) - np.min(theta_values)) / (theta_size - 1)
+
+    phi_values = sorted(list(set(nf_data.iloc[:, 1]))) # distinct (deduplicate) phi values
+    phi_size = len(phi_values)
+    phi_stepSize = (np.max(phi_values) - np.min(phi_values)) / (phi_size - 1)
+
+    # Initialize the total electric fields in the near field
+    ff_data = np.zeros((theta_size, phi_size), dtype=float)
+
+    # Fill in the electric field arrays with complex numbers
+    k = 0
+    for i in range(theta_size):
+        for j in range(phi_size):
+            ff_data[i, j] = nf_data.iloc[k, 3]
+            k += 1
+
+    return (ff_data, theta_values, phi_values, theta_stepSize, phi_stepSize)
