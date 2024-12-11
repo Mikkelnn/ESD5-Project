@@ -108,11 +108,11 @@ def load_FF_data_own_output(file_path):
     nf_data = pd.read_csv(file_path, delim_whitespace=True, skiprows=1, header=None)
 
     # Calculate theta and phi sizes
-    theta_values = sorted(list(set(nf_data.iloc[:, 0]))) # distinct (deduplicate) theta values
+    theta_values = np.array(sorted(list(set(nf_data.iloc[:, 0])))) # distinct (deduplicate) theta values
     theta_size = len(theta_values)
     theta_stepSize = (np.max(theta_values) - np.min(theta_values)) / (theta_size - 1)
 
-    phi_values = sorted(list(set(nf_data.iloc[:, 1]))) # distinct (deduplicate) phi values
+    phi_values = np.array(sorted(list(set(nf_data.iloc[:, 1])))) # distinct (deduplicate) phi values
     phi_size = len(phi_values)
     phi_stepSize = (np.max(phi_values) - np.min(phi_values)) / (phi_size - 1)
 
@@ -123,7 +123,7 @@ def load_FF_data_own_output(file_path):
     k = 0
     for i in range(theta_size):
         for j in range(phi_size):
-            ff_data[i, j] = nf_data.iloc[k, 3]
+            ff_data[i, j] = nf_data.iloc[k, 2]
             k += 1
 
     return (ff_data, theta_values, phi_values, theta_stepSize, phi_stepSize)
