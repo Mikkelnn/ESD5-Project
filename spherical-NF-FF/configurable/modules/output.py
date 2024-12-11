@@ -229,8 +229,12 @@ def calculate_hpbw_linear_approx(data, angles):
         """Linear interpolation to find x for a given y."""
         return x1 + (target_y - y1) * (x2 - x1) / (y2 - y1)
 
+    # print(f'half_level: {half_power_level}; l_idx: {np.where(data[:max_index+1] > half_power_level)}')
+    # print('data:')
+    # print(data)
+
     # Find the crossing point on the left
-    left_index = np.where(data[:max_index] > half_power_level)[0][0]  # Last point above
+    left_index = np.where(data[:max_index+1] > half_power_level)[0][0]  # Last point above
     left_angle = interpolate(
         angles[left_index - 1], data[left_index - 1],
         angles[left_index], data[left_index],
@@ -245,9 +249,6 @@ def calculate_hpbw_linear_approx(data, angles):
         half_power_level
     )
 
-    # print(f'l_idx: {left_index}; r:idx: {right_index}')
-    # print('data:')
-    # print(data)
     
     # Calculate the HPBW
     hpbw = np.abs(right_angle - left_angle)
