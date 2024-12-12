@@ -63,8 +63,8 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 # 2. Introduction of errors in the NF, comment out if no errors should be present
 ##############################################################################################################
 
-def calcPercent(distErrorCm):
-    return distErrorCm/0.03 # 10GHz wavelength
+def calcPercent(distErrorM):
+    return distErrorM/0.03 # 10GHz wavelength
 test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
 
 for TEST in test_params:
