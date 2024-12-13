@@ -59,18 +59,33 @@ nfData, theta_deg2, num_zero_nfData = pad_theta(nfData, theta_step_deg)
 phi_deg_center = np.floor(phi_deg - (np.max(phi_deg) / 2))
 theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
 
+
 ##############################################################################################################
 # 2. Introduction of errors in the NF, comment out if no errors should be present
 ##############################################################################################################
 
-def calcPercent(distErrorM):
-    return (distErrorM/0.03)/2 # 10GHz wavelength
-test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
+# POSITION: normal distribution
+# def calcPercent(distErrorM):
+#     return (distErrorM/0.03)/2 # 10GHz wavelength
+# test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
+
+# POSITION: uniform, correlated theta, correlated phi
+# def calcPercent(distErrorM):
+#     return (distErrorM/0.03) # 10GHz wavelength
+# test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
+
+# NOISE: normaldistribution for same for both pol. and independen/only one
+def calcPercent(SNR):
+    firstSidelobeNF = 1.3675165240369127
+    n = (firstSidelobeNF / math.pow(10, (SNR/20)))
+    return np.sqrt((n)) # 10GHz wavelength
+test_params = [[calcPercent(100), '100dB'], [calcPercent(90), '90dB'], [calcPercent(80), '80dB'], [calcPercent(70), '70dB'], [calcPercent(60), '60dB'], [calcPercent(50), '50dB'], [calcPercent(40), '40dB'], [calcPercent(30), '30dB'], [calcPercent(20), '20dB'], [calcPercent(10), '10dB'], [calcPercent(0), '0dB']]
+
 
 for TEST in test_params:
 
     print(f'STARTED: {TEST[1]}')
-    TEST_NAME = 'position_both_pol_same_error_normal' # used to determine folder to output files
+    TEST_NAME = 'noise/amplitude_same_errors_normal' # used to determine folder to output files
     PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/{TEST[1]}/'
     # ensure folder exist
     from pathlib import Path
@@ -78,9 +93,9 @@ for TEST in test_params:
 
     #phaseError = 0.4
     # ampError = 0.8
-    deviationFactor = 0.5
+    # deviationFactor = 0.5
     nfDataError = np.copy(nfData)
-    appliedError = phase_same_errors_normal(nfDataError, TEST[0])
+    appliedError = amplitude_same_errors_normal_noise(nfDataError, TEST[0])
     # appliedError = phase_errors_correlated_theta_same(nfDataError, deviationFactor, TEST[0])
     #appliedError = fixed_phase_error(nfDataError, 0.4)
 
@@ -166,7 +181,7 @@ for TEST in test_params:
     plt.savefig(PATH_PREFIX + 'no_error_transformed_NF_FF_heatmap.svg', bbox_inches='tight')
 
     ### save metrics data in txt (HPBW, mean, max)
-    metricsTxt = f'TEST_PARAMS: {TEST[1]} {TEST[0]}; DeviationFactor: {deviationFactor}\n'
+    metricsTxt = f'TEST_PARAMS: {TEST[1]} {TEST[0]}\n' #; DeviationFactor: {deviationFactor}
 
     #HPBW
     metricsTxt += f'NF transformed data (FF) no errors:\n{calculate_print_hpbw(selected_ffData_no_error, theta_deg_center)}\n'
@@ -187,5 +202,5 @@ for TEST in test_params:
     write_file(metricsTxt, PATH_PREFIX + 'metrics.txt')
 
     # show all figures
-    # show_figures()s
+    # show_figures()
 
