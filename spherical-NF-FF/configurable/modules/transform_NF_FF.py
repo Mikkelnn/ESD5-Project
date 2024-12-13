@@ -1045,7 +1045,7 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
 
-def step2 (nf_data_double, m_max, mmin2max):
+def step2 (nf_data_double, m_max, mmin2max, num_ph, num_th):
     # Perform (4.127)
     temp = np.fft.ifft(nf_data_double, axis=1)
 
@@ -1061,7 +1061,7 @@ def step2 (nf_data_double, m_max, mmin2max):
     
     return w_th_m_mu
 
-def step3 (w_th_m_mu, n_max, nmin2max):
+def step3 (w_th_m_mu, n_max, nmin2max, mmin2max, num_th):
         # Perform (4.128)
     temp = np.fft.ifft(w_th_m_mu, axis=0)
 
@@ -1078,7 +1078,7 @@ def step3 (w_th_m_mu, n_max, nmin2max):
     
     return b_l_m_mu_wiggle
 
-def step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max)
+def step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max, n_max):
     # Calculate k_mp with fast convolution via FFT methods as explained in [1],(4.89).
     # However, note that [1],(4.89) has a typo. If correct, [1],(4.89) should read:
     #
@@ -1100,7 +1100,7 @@ def step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max)
 
     return (k_mp_m1, k_mp_p1)
 
-def step5(n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1):
+def step5 (n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1):
     # Initialize the n and m arrays
     n_array = np.reshape(np.linspace(1, n_max, n_max), (n_max, 1))
     m_array = np.reshape(np.linspace(-m_max, m_max, mmin2max), (1, mmin2max))
@@ -1119,7 +1119,7 @@ def step5(n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k
 
     return w_n_m_mu
 
-def step6(n_max, m_max, nmin2max):
+def step6 (n_max, m_max, nmin2max):
         # Initialize a delta pyramid helper function
     def get_mi(m_): return m_ + n_max  # This returns the m index of the deltas
 
@@ -1133,7 +1133,7 @@ def step6(n_max, m_max, nmin2max):
 
     return deltas, deltas_mu_m1, deltas_mu_p1
 
-def step7(n_max, mmin2max, PHertzian, w_n_m_mu):
+def step7 (n_max, mmin2max, PHertzian, w_n_m_mu):
         # Initialize the wave coefficient matrix
     q_n_m_s = np.zeros((n_max, mmin2max, 2), dtype='complex')
 
@@ -1173,23 +1173,23 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
     mmin2max = int((m_max * 2) + 1)
     nmin2max = int((n_max * 2) + 1)
 
-    w_th_m_mu = step2 (nf_data_double, m_max, n_max)
+    w_th_m_mu = step2 (nf_data_double, m_max, mmin2max, num_ph, num_th)
 
-    b_l_m_mu_wiggle = step3 (w_th_m_mu, n_max, nmin2max)
+    b_l_m_mu_wiggle = step3 (w_th_m_mu, n_max, nmin2max, mmin2max, num_th)
 
     # Calculate the pi_wiggle array with [1],(4.84) and [1],(4.86)
-    pi_wig = step12(n_max)
+    pi_wig = step12 (n_max)
     
-    k_mp_m1, k_mp_p1 = step4(pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max)
+    k_mp_m1, k_mp_p1 = step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max, n_max)
     
-    deltas, deltas_mu_m1, deltas_mu_p1 = step6(n_max, m_max, nmin2max)
+    deltas, deltas_mu_m1, deltas_mu_p1 = step6 (n_max, m_max, nmin2max)
 
-    w_n_m_mu = step5(n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1)
+    w_n_m_mu = step5 (n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1)
 
     #Compute the probe constants for input probe step 13
-    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, dist = meas_dist)
+    PHertzian = Phertzian (frequency_Hz=frequency_Hz, n_max=n_max, dist = meas_dist)
 
-    q_n_m_s = step7(n_max, mmin2max, PHertzian, w_n_m_mu)
+    q_n_m_s = step7 (n_max, mmin2max, PHertzian, w_n_m_mu)
 
     #This function represents steps 8-11
     theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, transpose_dist)
