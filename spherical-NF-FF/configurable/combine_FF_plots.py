@@ -46,7 +46,7 @@ def plot_error_compare(noError, dataErrorArr, errorTxt, theta_f_deg, figure_titl
     ax2.grid()
     ax2.legend()
 
-def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, figure_title):
+def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, figure_title, errorType='Error', errorTitle='error'):
     h_plane_plot_angle = noError.h_plane_plot_angle
     e_plane_plot_angle = noError.e_plane_plot_angle
 
@@ -70,17 +70,17 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     ax_h1.set_title(f'H-plane | Phi = {h_plane_plot_angle}')
 
     # Plot "no error" data
-    ax_h1.plot(theta_f_deg, noError.h_plane_data_original, label='No Error', alpha=0.7, linewidth=2)
+    ax_h1.plot(theta_f_deg, noError.h_plane_data_original, label=f'No {errorTitle}', alpha=0.7, linewidth=2)
 
     # Plot data with errors (Group 1)
     for idx, data in enumerate(dataErrorArr_group1):
         ax_h1.plot(theta_f_deg, data.h_plane_data_original, 
-                   label=f'Error: {errorTxt_group1[idx]}', alpha=0.7)
+                   label=f'{errorType}: {errorTxt_group1[idx]}', alpha=0.7)
 
     ax_h1.set_xlabel('Theta')
     ax_h1.set_ylabel('Amplitude')
     ax_h1.grid()
-    ax_h1.legend()
+    ax_h1.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0)
 
     ###
     # H-plane Group 2 Plot
@@ -89,17 +89,17 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     ax_h2.set_title(f'H-plane | Phi = {h_plane_plot_angle}')
 
     # Plot "no error" data
-    ax_h2.plot(theta_f_deg, noError.h_plane_data_original, label='No Error', alpha=0.7, linewidth=2)
+    ax_h2.plot(theta_f_deg, noError.h_plane_data_original, label=f'No {errorTitle}', alpha=0.7, linewidth=2)
 
     # Plot data with errors (Group 2)
     for idx, data in enumerate(dataErrorArr_group2):
         ax_h2.plot(theta_f_deg, data.h_plane_data_original, 
-                   label=f'Error: {errorTxt_group2[idx]}', alpha=0.7)
+                   label=f'{errorType}: {errorTxt_group2[idx]}', alpha=0.7)
 
     ax_h2.set_xlabel('Theta')
     ax_h2.set_ylabel('Amplitude')
     ax_h2.grid()
-    ax_h2.legend()
+    ax_h2.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0)
 
     ###
     # E-plane Group 1 Plot
@@ -108,17 +108,17 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     ax_e1.set_title(f'E-plane | Phi = {e_plane_plot_angle}')
 
     # Plot "no error" data
-    ax_e1.plot(theta_f_deg, noError.e_plane_data_original, label='No Error', alpha=0.7, linewidth=2)
+    ax_e1.plot(theta_f_deg, noError.e_plane_data_original, label=f'No {errorTitle}', alpha=0.7, linewidth=2)
 
     # Plot data with errors (Group 1)
     for idx, data in enumerate(dataErrorArr_group1):
         ax_e1.plot(theta_f_deg, data.e_plane_data_original, 
-                   label=f'Error: {errorTxt_group1[idx]}', alpha=0.7)
+                   label=f'{errorType}: {errorTxt_group1[idx]}', alpha=0.7)
 
     ax_e1.set_xlabel('Theta')
     ax_e1.set_ylabel('Amplitude')
     ax_e1.grid()
-    ax_e1.legend()
+    ax_e1.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0)
 
     ###
     # E-plane Group 2 Plot
@@ -127,17 +127,17 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     ax_e2.set_title(f'E-plane | Phi = {e_plane_plot_angle}')
 
     # Plot "no error" data
-    ax_e2.plot(theta_f_deg, noError.e_plane_data_original, label='No Error', alpha=0.7, linewidth=2)
+    ax_e2.plot(theta_f_deg, noError.e_plane_data_original, label=f'No {errorTitle}', alpha=0.7, linewidth=2)
 
     # Plot data with errors (Group 2)
     for idx, data in enumerate(dataErrorArr_group2):
         ax_e2.plot(theta_f_deg, data.e_plane_data_original, 
-                   label=f'Error: {errorTxt_group2[idx]}', alpha=0.7)
+                   label=f'{errorType}: {errorTxt_group2[idx]}', alpha=0.7)
 
     ax_e2.set_xlabel('Theta')
     ax_e2.set_ylabel('Amplitude')
     ax_e2.grid()
-    ax_e2.legend()
+    ax_e2.legend(bbox_to_anchor=(1, 1), loc=1, borderaxespad=0)
 
     # Adjust layout for better visualization
     fig.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
@@ -158,11 +158,11 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 
 # Extract the numeric part of the folder name and sort paths
 def extract_numeric_key(path):
-    match = re.search(r'/(\d+)mm/', path)  # Find a number followed by "mm" in the path
+    match = re.search(r'/(\d+)(mm|dB)/', path)  # Find a number followed by "mm" in the path
     return int(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 # Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key)
+matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=True)
 
 # matching_files = sort(matching_files)
 for file_path in matching_files:
@@ -171,7 +171,7 @@ for file_path in matching_files:
     data = select_data_at_angle(ffData, phi_deg, phi_select_angle)
     plotData.append(data)
 
-plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o error')
+plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o noise', f'SNR', f'Noise')
 plt.savefig(PATH_PREFIX + 'compare_all_original.svg', bbox_inches='tight')
 
 # plt.tight_layout()

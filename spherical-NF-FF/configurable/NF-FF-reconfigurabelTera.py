@@ -42,6 +42,10 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
 nfData, theta_deg, phi_deg, theta_step_deg, phi_step_deg = load_data_lab_measurements(file_path)
 
+
+# load no error
+ffData_no_error_loaded, _, _, _, _ = load_FF_data_own_output(f'./spherical-NF-FF/testResults/FF_data_no_error.txt')
+
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 # file_path2 = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
 # ffData_loaded, theta_deg_loaded, phi_deg_loaded, _, _ = load_data_lab_measurements(file_path2)
@@ -119,10 +123,14 @@ selected_ffData_no_error = select_data_at_angle(ffData_no_error_2D, phi_deg, phi
 #selected_ffData_error = select_data_at_angle(ffData_error_2D, phi_deg, phi_select_angle)
 #dataDif = select_data_at_angle(farfieldDataDiff, phi_deg, phi_select_angle)
 
+plot_ffData_no_error = select_data_at_angle(ffData_no_error_loaded, phi_deg, phi_select_angle)
+
 ##############################################################################################################
 # 5. Output FF - plot or write to file
 ##############################################################################################################
-plot_copolar(selected_ffData_no_error, theta_deg_center, 'Transformed NF-FF copolar (with errors)')
+plot_copolar(selected_ffData_no_error, theta_deg_center, '(new) Transformed NF-FF copolar')
+plot_copolar(plot_ffData_no_error, theta_deg_center, '(old) Transformed NF-FF copolar')
+
 #plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
 
 # show all figures

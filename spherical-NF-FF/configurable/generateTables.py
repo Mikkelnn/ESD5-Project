@@ -60,7 +60,7 @@ def generate_latex_row(data):
             f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
 
 
-TEST_NAME = 'position_both_pol_same_error_normal' # used to determine folder to output files
+TEST_NAME = 'noise/amplitude_same_errors_normal' # used to determine folder to output files
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/metrics.txt'
 

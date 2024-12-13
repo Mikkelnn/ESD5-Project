@@ -39,7 +39,7 @@ def plot_copolar(data, theta_f_deg, figure_title):
     grid = fig.add_gridspec(2, 1, height_ratios=[1, 1], width_ratios=[1])
 
     ax1 = fig.add_subplot(grid[0, 0])
-    # ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
+    ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
     ax1.plot(theta_f_deg, h_plane_data_original, label=f'no smoothing', alpha=0.7)    
     ax1.set_title(f'Far-field Pattern H-plane Phi = {h_plane_plot_angle}')
     ax1.set_xlabel('Theta')
@@ -47,7 +47,7 @@ def plot_copolar(data, theta_f_deg, figure_title):
     ax1.legend()
 
     ax2 = fig.add_subplot(grid[1, 0])
-    # ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
+    ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'smoothed with Savitzky-Golay filter', alpha=0.7)
     ax2.plot(theta_f_deg, e_plane_data_original, label=f'no smoothing', alpha=0.7)    
     ax2.set_title(f'Far-field Pattern E-plane Phi = {e_plane_plot_angle}')
     ax2.set_xlabel('Theta')

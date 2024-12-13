@@ -9,8 +9,8 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
-# file_path = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV'
-file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV'
+file_path = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV' # FF-data
+# file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV' # NF-data
 ffData_loaded, theta_deg, phi_deg, _, _ = load_data_lab_measurements(file_path)
 
 
@@ -22,11 +22,13 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 
 ffData_error_2D = sum_NF_poles_sqrt(ffData_loaded)
 ffData_loaded_2D = ffData_error_2D / np.max(np.abs(ffData_error_2D))
+
+# ffData_loaded_2D = 20 * np.log10(ffData_loaded_2D)
+
 selected_ffData_loaded = select_data_at_angle(ffData_error_2D, phi_deg, 0)
 
-print(f'First sidelobe val: {selected_ffData_loaded.e_plane_data_original[33]}')
-
-exit()
+# print(f'First sidelobe val: {selected_ffData_loaded.e_plane_data_original[33]}')
+# exit()
 
 def find_first_sidelobe(data):
     # Identify the main lobe (global maximum)
