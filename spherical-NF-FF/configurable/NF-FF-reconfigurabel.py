@@ -64,13 +64,13 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 ##############################################################################################################
 
 def calcPercent(distErrorM):
-    return distErrorM/0.03 # 10GHz wavelength
+    return (distErrorM/0.03)/2 # 10GHz wavelength
 test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
 
 for TEST in test_params:
 
     print(f'STARTED: {TEST[1]}')
-    TEST_NAME = 'position_both_pol_same_error_correlated_theta' # used to determine folder to output files
+    TEST_NAME = 'position_both_pol_same_error_normal' # used to determine folder to output files
     PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/{TEST[1]}/'
     # ensure folder exist
     from pathlib import Path
@@ -80,8 +80,8 @@ for TEST in test_params:
     # ampError = 0.8
     deviationFactor = 0.5
     nfDataError = np.copy(nfData)
-    # appliedError = phase_same_errors_normal(nfDataError, TEST[0])
-    appliedError = phase_errors_correlated_theta_same(nfDataError, deviationFactor, TEST[0])
+    appliedError = phase_same_errors_normal(nfDataError, TEST[0])
+    # appliedError = phase_errors_correlated_theta_same(nfDataError, deviationFactor, TEST[0])
     #appliedError = fixed_phase_error(nfDataError, 0.4)
 
     appliedError = removeXFromEnd(appliedError, int(num_zero_nfData))

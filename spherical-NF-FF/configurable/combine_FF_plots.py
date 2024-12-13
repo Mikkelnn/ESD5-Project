@@ -143,7 +143,7 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     fig.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
 
     
-TEST_NAME = 'position_both_pol_same_error_uniform' # used to determine folder to output files
+TEST_NAME = 'position_both_pol_same_error_normal' # used to determine folder to output files
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/error_transformed_NF_FF_heatmap.txt'
 

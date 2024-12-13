@@ -53,14 +53,14 @@ def parse_file(filename):
 
 # Generate LaTeX row for the extracted data
 def generate_latex_row(data):
-    return (f"{data['param_name']} {data['param_percent']:.1f}\\%   & "
+    return (f"{data['param_name']} & {data['param_percent']:.1f}   & "
             f"{data['max_error_e_plane']:.2f}  & {data['mean_error_e_plane']:.2f} & "
             f"{data['max_error_h_plane']:.2f}  & {data['mean_error_h_plane']:.2f} & "
             f"{data['max_absolute_error']:.2f}  & {data['mean_absolute_error']:.2f} & "
             f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
 
 
-TEST_NAME = 'position_both_pol_same_error_correlated_theta' # used to determine folder to output files
+TEST_NAME = 'position_both_pol_same_error_normal' # used to determine folder to output files
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/metrics.txt'
 

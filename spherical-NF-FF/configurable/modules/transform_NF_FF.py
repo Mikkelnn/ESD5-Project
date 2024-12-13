@@ -273,7 +273,7 @@ def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, dist
     # Reshape the spherical wave coefficients to get ready for multiplication
     q_n_m_s = np.reshape(q_n_m_s, (n_max,int(2*m_max+1),s_max,1))  # N x M x S x Theta
 
-    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    # Perform the N summation as detailed in [1], (4.135)
     temp = p_n*(q_n_m_s[:, :, 0, :]*dp1_plus_dm1 + q_n_m_s[:, :, 1, :]*dp1_minus_dm1)  # N x M x Theta
     n_sum_chi_0 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
 
@@ -284,7 +284,7 @@ def wavecoeffs2farfield_uniform(q_n_m_s, thetapoints, phipoints, frequency, dist
     temp[:,int(numphis-m_max):] = n_sum_chi_0[:,int(m_max+1):]
     theta_pol = np.fft.fft(temp, axis=1)
 
-    # Perform the N summation as detailed in [1], (4.135), AND A FUTURE BLOG POST
+    # Perform the N summation as detailed in [1], (4.135)
     temp = 1j*p_n*(q_n_m_s[:, :, 0, :]*dp1_minus_dm1 + q_n_m_s[:, :, 1, :]*dp1_plus_dm1)  # N x M x Theta
     n_sum_chi_90 = np.swapaxes(np.sum(temp, 0), 0, 1)  # Theta x M
 
