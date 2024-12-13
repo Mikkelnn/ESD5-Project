@@ -192,7 +192,7 @@ def delta_pyramid(n_max):
     # Return the deltas from the function
     return deltas
 
-def pi_wiggle(n_max):
+def step12(n_max):
 
     jj = np.linspace(-2*n_max+1, 2*n_max, 4*n_max)
 
@@ -1044,35 +1044,13 @@ def spherical_far_field_transform_megacook(nf_data, theta_f, phi_f, Δθ, Δφ, 
             w_n_uA2 *= w_n_uA_const
             T2[m_idx, n_idx] = ((w_n_uA2[n_idx, m_idx] * PHertzian[n_idx,0,0]) - (w_n_uA1[n_idx, m_idx] * PHertzian[n_idx, 0, 1])) / ((PHertzian[n_idx, 0, 0] * PHertzian[n_idx, 1, 1]) - (PHertzian[n_idx, 1, 0] * PHertzian[n_idx, 0, 1]))
             T1[m_idx, n_idx] = ((-T2[m_idx, n_idx]) * PHertzian[n_idx, 1, 0] + w_n_uA1[n_idx, m_idx]) / PHertzian[n_idx, 0, 0]
-            
-def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transpose_dist):
 
-    if (transpose_dist < meas_dist):
-        raise ValueError(f"Inwards/Reverse transform is not implemented")
-    
-    #This part is based on pysnf by rcutshall
-    nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
-    nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
-    nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
-
-    num_th = nf_data_double.shape[0]
-    num_ph = nf_data_double.shape[1]
-
-    n_max = int(num_th/2)   # This works because num_th should always be even after
-                            # the singlesphere2doublesphere function
-    if (n_max > int(num_ph/2)):
-        m_max = int(num_ph/2)   # This works because num_ph should always be even after
-    else:                       # the singlesphere2doublesphere function
-        m_max = n_max           # Since m is not allowed to be higher than n.
-
-    PHertzian = Phertzian(frequency_Hz=frequency_Hz, n_max=n_max, dist = transpose_dist)
-
+def step2 (nf_data_double, m_max, mmin2max, num_ph, num_th):
     # Perform (4.127)
     temp = np.fft.ifft(nf_data_double, axis=1)
 
     # Reorganize such that m runs from -m_max to m_max
-    mmin2max = int((m_max * 2) + 1)
-    nmin2max = int((n_max * 2) + 1)
+
     w_th_m_mu = np.zeros((num_th, mmin2max, 2), dtype=complex)
     temp = np.fft.fftshift(temp, axes=(1,))
     if num_ph/2.0 == m_max:
@@ -1080,8 +1058,11 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
         w_th_m_mu[:, -1, :] = temp[:, 0, :]
     elif num_ph/2.0 > m_max:
         w_th_m_mu[:, :, :] = temp[:, int(num_ph/2-m_max):int(num_ph/2+m_max+1), :]
+    
+    return w_th_m_mu
 
-    # Perform (4.128)
+def step3 (w_th_m_mu, n_max, nmin2max, mmin2max, num_th):
+        # Perform (4.128)
     temp = np.fft.ifft(w_th_m_mu, axis=0)
 
     # Reorganize such that n runs from -n_max to n_max
@@ -1092,13 +1073,12 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
         b_l_m_mu[-1, :, :] = temp[0, :, :]
     elif num_th/2.0 > n_max:
         b_l_m_mu[:, :, :] = temp[num_th/2-n_max:num_th/nmin2max, :, :]
-
-    # Calculate the pi_wiggle array with [1],(4.84) and [1],(4.86)
-    pi_wig = pi_wiggle(n_max)
     
-    # Calculate the b_l_m_mu_wiggle array from b_l_m_mu using [1],(4.87)
     b_l_m_mu_wiggle = b_wiggle(b_l_m_mu)
+    
+    return b_l_m_mu_wiggle
 
+def step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max, n_max):
     # Calculate k_mp with fast convolution via FFT methods as explained in [1],(4.89).
     # However, note that [1],(4.89) has a typo. If correct, [1],(4.89) should read:
     #
@@ -1118,21 +1098,12 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
     k_mp_m1 = np.reshape(k_mp[:, :, 0], (1, nmin2max, mmin2max))
     k_mp_p1 = np.reshape(k_mp[:, :, 1], (1, nmin2max, mmin2max))
 
+    return (k_mp_m1, k_mp_p1)
+
+def step5 (n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1):
     # Initialize the n and m arrays
     n_array = np.reshape(np.linspace(1, n_max, n_max), (n_max, 1))
     m_array = np.reshape(np.linspace(-m_max, m_max, mmin2max), (1, mmin2max))
-
-    # Initialize a delta pyramid helper function
-    def get_mi(m_): return m_ + n_max  # This returns the m index of the deltas
-
-    # Get the deltas for 1 <= n <= n_max and -m_max <= m <= m_max
-    deltas = delta_pyramid(n_max)
-    deltas = deltas[1:, :, get_mi(-m_max):get_mi(m_max)+1]
-
-    # Get the deltas for only mu == -1 or 1
-    deltas_mu_m1 = np.reshape(deltas[:, :, get_mi(-1)], (n_max, nmin2max, 1))
-    deltas_mu_p1 = np.reshape(deltas[:, :, get_mi(+1)], (n_max, nmin2max, 1))
-
     # Calculate w_n_m_mu as shown in [1],(4.92). Same as 4.132, if with both polarizations as this is.
     w_n_m_mu = np.zeros((n_max, mmin2max, 2), dtype=complex)
     w_n_m_mu[:, :, 0] = (
@@ -1146,7 +1117,24 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
         np.sum(deltas_mu_p1*deltas*k_mp_p1, axis=1)
     )
 
-    # Initialize the wave coefficient matrix
+    return w_n_m_mu
+
+def step6 (n_max, m_max, nmin2max):
+        # Initialize a delta pyramid helper function
+    def get_mi(m_): return m_ + n_max  # This returns the m index of the deltas
+
+    # Get the deltas for 1 <= n <= n_max and -m_max <= m <= m_max
+    deltas = delta_pyramid(n_max)
+    deltas = deltas[1:, :, get_mi(-m_max):get_mi(m_max)+1]
+
+    # Get the deltas for only mu == -1 or 1
+    deltas_mu_m1 = np.reshape(deltas[:, :, get_mi(-1)], (n_max, nmin2max, 1))
+    deltas_mu_p1 = np.reshape(deltas[:, :, get_mi(+1)], (n_max, nmin2max, 1))
+
+    return deltas, deltas_mu_m1, deltas_mu_p1
+
+def step7 (n_max, mmin2max, PHertzian, w_n_m_mu):
+        # Initialize the wave coefficient matrix
     q_n_m_s = np.zeros((n_max, mmin2max, 2), dtype='complex')
 
     # Pull out and reshape the necessary values of the probe response constants
@@ -1160,7 +1148,51 @@ def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transp
     q_n_m_s[:, :, 0] = (p_n_neg1_2*w_n_m_mu[:, :, 1] - p_n_pos1_2*w_n_m_mu[:, :, 0])/determinant
     q_n_m_s[:, :, 1] = (p_n_pos1_1*w_n_m_mu[:, :, 0] - p_n_neg1_1*w_n_m_mu[:, :, 1])/determinant
 
-    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, meas_dist)
+    return q_n_m_s
+
+def spherical_far_field_transform_SNIFT(nf_data, frequency_Hz, meas_dist, transpose_dist):
+
+    if (transpose_dist < meas_dist):
+        raise ValueError(f"Inwards/Reverse transform is not implemented")
+    
+    #This part is based on pysnf by rcutshall
+    nf_data_double = np.zeros((2*nf_data.shape[0]-2, nf_data.shape[1], 2), dtype=complex)
+    nf_data_double[:,:,0] = singlesphere2doublesphere(nf_data[:,:,0])
+    nf_data_double[:,:,1] = singlesphere2doublesphere(nf_data[:,:,1])
+
+    num_th = nf_data_double.shape[0]
+    num_ph = nf_data_double.shape[1]
+
+    n_max = int(num_th/2)   # This works because num_th should always be even after
+                            # the singlesphere2doublesphere function
+    if (n_max > int(num_ph/2)):
+        m_max = int(num_ph/2)   # This works because num_ph should always be even after
+    else:                       # the singlesphere2doublesphere function
+        m_max = n_max           # Since m is not allowed to be higher than n.
+    
+    mmin2max = int((m_max * 2) + 1)
+    nmin2max = int((n_max * 2) + 1)
+
+    w_th_m_mu = step2 (nf_data_double, m_max, mmin2max, num_ph, num_th)
+
+    b_l_m_mu_wiggle = step3 (w_th_m_mu, n_max, nmin2max, mmin2max, num_th)
+
+    # Calculate the pi_wiggle array with [1],(4.84) and [1],(4.86)
+    pi_wig = step12 (n_max)
+    
+    k_mp_m1, k_mp_p1 = step4 (pi_wig, b_l_m_mu_wiggle, nmin2max, mmin2max, n_max)
+    
+    deltas, deltas_mu_m1, deltas_mu_p1 = step6 (n_max, m_max, nmin2max)
+
+    w_n_m_mu = step5 (n_max, m_max, mmin2max, deltas, deltas_mu_m1, deltas_mu_p1, k_mp_m1, k_mp_p1)
+
+    #Compute the probe constants for input probe step 13
+    PHertzian = Phertzian (frequency_Hz=frequency_Hz, n_max=n_max, dist = meas_dist)
+
+    q_n_m_s = step7 (n_max, mmin2max, PHertzian, w_n_m_mu)
+
+    #This function represents steps 8-11
+    theta, phi = wavecoeffs2farfield_uniform(q_n_m_s, nf_data.shape[0], nf_data.shape[1], frequency_Hz, transpose_dist)
 
     ffData = np.zeros(nf_data.shape, dtype=complex)
     ffData[:, :, 0] = theta
