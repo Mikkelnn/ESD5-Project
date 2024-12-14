@@ -60,17 +60,17 @@ def generate_latex_row(data):
             f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
 
 
-TEST_NAME = 'noise/amplitude_same_errors_normal' # used to determine folder to output files
+TEST_NAME = 'noise/amplitude_single_pol_errors_normal' # used to determine folder to output files
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/metrics.txt'
 
 # Extract the numeric part of the folder name and sort paths
 def extract_numeric_key(path):
-    match = re.search(r'/(\d+)mm/', path)  # Find a number followed by "mm" in the path
+    match = re.search(r'/(\d+)(mm|dB)/', path)  # Find a number followed by "mm" in the path
     return int(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 # Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key)
+matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=True)
 
 # matching_files = sort(matching_files)
 for file_path in matching_files:

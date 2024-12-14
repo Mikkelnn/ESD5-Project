@@ -102,6 +102,40 @@ def amplitude_same_errors_normal_noise(data, standard_deviation):
     
     return applyedError
 
+# Function to introduce amplitude errors (modifies data in place)
+def amplitude_independent_errors_normal_noise(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            # Apply amplitude error to both components (E_theta and E_phi)
+            amplitude_error_pol_0 = np.random.normal(0, standard_deviation)
+            amplitude_error_pol_1 = np.random.normal(0, standard_deviation)
+            data[i, j, 0] += amplitude_error_pol_0
+            data[i, j, 1] += amplitude_error_pol_1
+
+            applyedError[i, j, 0] = amplitude_error_pol_0
+            applyedError[i, j, 1] = amplitude_error_pol_1
+    
+    return applyedError
+
+# Function to introduce amplitude errors (modifies data in place)
+def amplitude_single_pol_errors_normal_noise(data, standard_deviation):
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            # Apply amplitude error to both components (E_theta and E_phi)
+            amplitude_error_pol_0 = np.random.normal(0, standard_deviation)
+            amplitude_error_pol_1 = 0
+            data[i, j, 0] += amplitude_error_pol_0
+            data[i, j, 1] += amplitude_error_pol_1
+
+            applyedError[i, j, 0] = amplitude_error_pol_0
+            applyedError[i, j, 1] = amplitude_error_pol_1
+    
+    return applyedError
+
 
 # Function to introduce phase errors (modifies data in place)
 def phase_same_errors_normal(data, standard_deviation):

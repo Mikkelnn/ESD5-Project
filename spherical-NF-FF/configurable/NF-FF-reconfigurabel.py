@@ -85,7 +85,7 @@ test_params = [[calcPercent(100), '100dB'], [calcPercent(90), '90dB'], [calcPerc
 for TEST in test_params:
 
     print(f'STARTED: {TEST[1]}')
-    TEST_NAME = 'noise/amplitude_same_errors_normal' # used to determine folder to output files
+    TEST_NAME = 'noise/amplitude_single_pol_errors_normal' # used to determine folder to output files
     PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/{TEST[1]}/'
     # ensure folder exist
     from pathlib import Path
@@ -95,7 +95,7 @@ for TEST in test_params:
     # ampError = 0.8
     # deviationFactor = 0.5
     nfDataError = np.copy(nfData)
-    appliedError = amplitude_same_errors_normal_noise(nfDataError, TEST[0])
+    appliedError = amplitude_single_pol_errors_normal_noise(nfDataError, TEST[0])
     # appliedError = phase_errors_correlated_theta_same(nfDataError, deviationFactor, TEST[0])
     #appliedError = fixed_phase_error(nfDataError, 0.4)
 
