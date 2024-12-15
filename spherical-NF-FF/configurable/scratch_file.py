@@ -9,6 +9,32 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters for the simulation
+max_error = 0.1          # Maximum error (e.g., ±10%)
+deviation_factor = 0.05  # How much the error deviates in each step
+initial_error = 1.0      # Starting value
+num_points = 100         # Number of points to generate
+
+# Generate the sequence of errors
+errors = [initial_error]
+for _ in range(1, num_points):
+    errors.append(nextError(errors[-1], max_error, deviation_factor))
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(errors, marker=None, linestyle='-', color='blue', label='Error values')
+plt.title(f'Line Chart of Error Progression, max_error = {max_error}; deviation_factor = {deviation_factor}')
+plt.xlabel('Step')
+plt.ylabel('Error Value')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+
+exit()
 
 import numpy as np
 import matplotlib.pyplot as plt

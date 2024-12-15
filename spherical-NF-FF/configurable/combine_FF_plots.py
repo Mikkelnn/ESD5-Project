@@ -143,7 +143,7 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     fig.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
 
     
-TEST_NAME = 'gimbal_errors_uniform' # used to determine folder to output files
+TEST_NAME = 'noise/amplitude_single_pol_errors_normal' # used to determine folder to output files
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/error_transformed_NF_FF_heatmap.txt'
 
@@ -162,7 +162,7 @@ def extract_numeric_key(path):
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 # Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=False)
+matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=True)
 
 for file_path in matching_files:
     errorTxt.append(extract_numeric_key(file_path))
@@ -171,7 +171,7 @@ for file_path in matching_files:
     data = select_data_at_angle(ffData, phi_deg, phi_select_angle)
     plotData.append(data)
 
-plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o noise', f'Degree', f'Noise')
+plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o noise', f'SNR', f'noise')
 plt.savefig(PATH_PREFIX + 'compare_all_original.svg', bbox_inches='tight')
 
 # plt.tight_layout()
