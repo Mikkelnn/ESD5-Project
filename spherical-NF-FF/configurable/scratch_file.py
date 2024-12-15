@@ -9,6 +9,44 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the HPBW (Half-Power Beamwidth)
+HPBW = 40
+
+# Define angles (theta) in degrees
+theta = np.linspace(-90, 90, 1000)  # From -90 to 90 degrees
+
+# Gaussian Function
+def gaussian(theta, HPBW):
+    return np.exp(-np.log(2) * (2 * theta / HPBW)**2)
+
+
+# Calculate the functions
+gaussian_values = gaussian(theta, HPBW)
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+
+# Gaussian Plot
+plt.plot(theta, gaussian_values, label='Radiation pattern', color='blue')
+
+# Add labels, legend, and grid
+plt.title(f'Approximated probe radiation pattern, HPBW = {HPBW} Degrees')
+plt.xlabel('Angle (Degrees)')
+plt.ylabel('Amplitude')
+plt.axhline(0.5, color='gray', linestyle=':', label='Half-Power (-3 dB)')
+plt.grid(True)
+plt.legend()
+
+# Show the plot
+plt.show()
+
+
+exit()
+
 file_path = './NF-FF-Data-2/Flann16240-20_CBC_FF_dir_010000.CSV' # FF-data
 # file_path = './NF-FF-Data-2/16240-20CBCFF_dir_30_010000.CSV' # NF-data
 ffData_loaded, theta_deg, phi_deg, _, _ = load_data_lab_measurements(file_path)

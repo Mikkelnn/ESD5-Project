@@ -75,17 +75,20 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 # test_params = [[calcPercent(0.001), '1mm'], [calcPercent(0.005), '5mm'], [calcPercent(0.01), '10mm'], [calcPercent(0.02), '20mm'], [calcPercent(0.03), '30mm'], [calcPercent(0.05), '50mm']]
 
 # NOISE: normaldistribution for same for both pol. and independen/only one
-def calcPercent(SNR):
-    firstSidelobeNF = 1.3675165240369127
-    n = (firstSidelobeNF / math.pow(10, (SNR/20)))
-    return np.sqrt((n)) # 10GHz wavelength
-test_params = [[calcPercent(100), '100dB'], [calcPercent(90), '90dB'], [calcPercent(80), '80dB'], [calcPercent(70), '70dB'], [calcPercent(60), '60dB'], [calcPercent(50), '50dB'], [calcPercent(40), '40dB'], [calcPercent(30), '30dB'], [calcPercent(20), '20dB'], [calcPercent(10), '10dB'], [calcPercent(0), '0dB']]
+# def calcPercent(SNR):
+#     firstSidelobeNF = 1.3675165240369127
+#     n = (firstSidelobeNF / math.pow(10, (SNR/20)))
+#     return np.sqrt((n)) # 10GHz wavelength
+# test_params = [[calcPercent(100), '100dB'], [calcPercent(90), '90dB'], [calcPercent(80), '80dB'], [calcPercent(70), '70dB'], [calcPercent(60), '60dB'], [calcPercent(50), '50dB'], [calcPercent(40), '40dB'], [calcPercent(30), '30dB'], [calcPercent(20), '20dB'], [calcPercent(10), '10dB'], [calcPercent(0), '0dB']]
+
+# GIMBAL: 
+test_params = [[0.02, '2E-2'], [0.1, '1E-1'], [0.5, '5E-1'], [1, '1'], [5, '5'], [10, '10']]
 
 
 for TEST in test_params:
 
     print(f'STARTED: {TEST[1]}')
-    TEST_NAME = 'noise/amplitude_single_pol_errors_normal' # used to determine folder to output files
+    TEST_NAME = 'gimbal_errors_uniform' # used to determine folder to output files
     PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/{TEST[1]}/'
     # ensure folder exist
     from pathlib import Path
@@ -95,7 +98,8 @@ for TEST in test_params:
     # ampError = 0.8
     # deviationFactor = 0.5
     nfDataError = np.copy(nfData)
-    appliedError = amplitude_single_pol_errors_normal_noise(nfDataError, TEST[0])
+    appliedError = gimbal_error_uniform(nfDataError, TEST[0])
+    # appliedError = amplitude_single_pol_errors_normal_noise(nfDataError, TEST[0])
     # appliedError = phase_errors_correlated_theta_same(nfDataError, deviationFactor, TEST[0])
     #appliedError = fixed_phase_error(nfDataError, 0.4)
 

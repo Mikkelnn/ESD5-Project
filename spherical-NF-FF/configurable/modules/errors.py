@@ -185,6 +185,25 @@ def phase_same_errors_uniform(data, max_error):
     
     return applyedError
 
+def gimbal_error_uniform(data, angleAccuracy):
+    # Gaussian Function
+    def gaussian(theta, HPBW):
+        return np.exp(-np.log(2) * (2 * theta / HPBW)**2)
+    
+    applyedError = np.zeros(data.shape)
+
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            # Apply phase error to both components (E_theta and E_phi)
+            error =  gaussian(np.random.uniform(-angleAccuracy, angleAccuracy), HPBW=40)
+            data[i, j, 0] *= error
+            data[i, j, 1] *= error
+            
+            applyedError[i, j, 0] = error
+            applyedError[i, j, 1] = error
+    
+    return applyedError
+
 
 def nextError(current, max_error, deviation_factor):
     max = 1 + max_error
