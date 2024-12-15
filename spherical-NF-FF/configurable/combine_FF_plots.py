@@ -158,15 +158,15 @@ theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta
 
 # Extract the numeric part of the folder name and sort paths
 def extract_numeric_key(path):
-    match = re.search(r'/([\dE+-]+)(mm|dB|\/)/', path)  # Find a number followed by "mm" in the path
+    match = re.search(r'[\\/]+([\dE+-]+)(mm|dB)?[\\/]', path)  # Find a number followed by "mm" in the path
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 # Find and sort all matching file paths
 matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=False)
 
-# matching_files = sort(matching_files)
 for file_path in matching_files:
-    errorTxt.append(file_path.removeprefix(PATH_PREFIX).split('/')[0])
+    errorTxt.append(extract_numeric_key(file_path))
+    # errorTxt.append(file_path.removeprefix(PATH_PREFIX).split('/')[0])
     ffData, _, _, _, _ = load_FF_data_own_output(file_path)
     data = select_data_at_angle(ffData, phi_deg, phi_select_angle)
     plotData.append(data)

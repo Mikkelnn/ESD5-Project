@@ -133,6 +133,8 @@ plot_copolar(plot_ffData_no_error, theta_deg_center, '(old) Transformed NF-FF co
 
 #plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
 
+# save_data_txt(ffData_no_error_2D, theta_deg, phi_deg, f'./spherical-NF-FF/testResults/FF_data_no_error.txt', 'Theta Phi E_total')
+
 # show all figures
 show_figures()
 
