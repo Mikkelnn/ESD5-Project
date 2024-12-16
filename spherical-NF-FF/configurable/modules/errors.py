@@ -185,7 +185,7 @@ def phase_same_errors_uniform(data, max_error):
     
     return applyedError
 
-def gimbal_error_uniform(data, angleAccuracy):
+def gimbal_error_uniform(data, angle_accuracy, HPBW=40):
     # Gaussian Function
     def gaussian(theta, HPBW):
         return np.exp(-np.log(2) * (2 * theta / HPBW)**2)
@@ -195,7 +195,7 @@ def gimbal_error_uniform(data, angleAccuracy):
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             # Apply phase error to both components (E_theta and E_phi)
-            error =  gaussian(np.random.uniform(-angleAccuracy, angleAccuracy), HPBW=40)
+            error =  gaussian(np.random.uniform(-angle_accuracy, angle_accuracy), HPBW)
             data[i, j, 0] *= error
             data[i, j, 1] *= error
             
@@ -401,7 +401,7 @@ def amplitude_errors_correlated_theta_independent(data, deviation_factor, max_er
     return applyedError
 
 
-def phase_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
+def phase_errors_correlated_phi_single_pol(data, deviation_factor, max_error):
     # if(max_error > 1):
     #     raise ValueError(f"To large value for max_error, this value may not exceed 1!")
     if(deviation_factor > 1):
@@ -421,7 +421,7 @@ def phase_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
     
     return applyedError
 
-def amplitude_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
+def amplitude_errors_correlated_phi_single_pol(data, deviation_factor, max_error):
     # if(max_error >= 1):
     #     raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
     if(deviation_factor >= 1):
@@ -440,7 +440,7 @@ def amplitude_errors_correlated_phi_one_pol(data, deviation_factor, max_error):
     
     return applyedError
 
-def phase_errors_correlated_theta_one_pol(data, deviation_factor, max_error):
+def phase_errors_correlated_theta_single_pol(data, deviation_factor, max_error):
     # if(max_error > 1):
     #     raise ValueError(f"To large value for max_error, this value may not exceed 1!")
     if(deviation_factor > 1):
@@ -459,7 +459,7 @@ def phase_errors_correlated_theta_one_pol(data, deviation_factor, max_error):
     
     return applyedError
 
-def amplitude_errors_correlated_theta_one_pol(data, deviation_factor, max_error):
+def amplitude_errors_correlated_theta_single_pol(data, deviation_factor, max_error):
     # if(max_error >= 1):
     #     raise ValueError(f"To large value for max_error, this value may not be equal to or exceed 1!")
     if(deviation_factor >= 1):
@@ -477,8 +477,6 @@ def amplitude_errors_correlated_theta_one_pol(data, deviation_factor, max_error)
             applyedError[i, j, 0] = error
     
     return applyedError
-
-
 
 
 def fixed_phase_error(data, error):
