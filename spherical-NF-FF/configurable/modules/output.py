@@ -139,8 +139,10 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
     ax1 = fig.add_subplot(grid[0, 0])
     #ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
     #ax1.plot(theta_f_deg, h_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)    
-    ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'Loaded radiation from TICRA', alpha=0.7) # 'Radiation plot without errors'
-    ax1.plot(theta_f_deg, h_plane_data_smooth2, label=f'Transformed radiation (SNIFT)', alpha=0.7) # 'Radiation plot with errors'    
+    # ax1.plot(theta_f_deg, h_plane_data_smooth , label=f'Loaded radiation from TICRA', alpha=0.7)
+    # ax1.plot(theta_f_deg, h_plane_data_smooth2, label=f'Transformed radiation (SNIFT)', alpha=0.7)
+    ax1.plot(theta_f_deg, h_plane_data_original , label=f'Radiation plot without errors', alpha=0.7)
+    ax1.plot(theta_f_deg, h_plane_data_original2, label=f'Radiation plot with errors', alpha=0.7)    
     ax1.set_title(f'{figure_title} H-plane Phi = {h_plane_plot_angle}')
     ax1.set_xlabel('Theta')
     ax1.grid()
@@ -148,9 +150,11 @@ def plot_error_compare(data, data2, theta_f_deg, figure_title):
 
     ax2 = fig.add_subplot(grid[1, 0])
     #ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'Radiation plot without errors', alpha=0.7)
-    #ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)   
-    ax2.plot(theta_f_deg, e_plane_data_smooth , label=f'Loaded radiation from TICRA', alpha=0.7) # 'Radiation plot without errors'
-    ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Transformed radiation (SNIFT)', alpha=0.7) # 'Radiation plot with errors'    
+    # #ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Radiation plot with errors', alpha=0.7)   
+    # ax2.plot(theta_f_deg, e_plane_data_smooth, label=f'Loaded radiation from TICRA', alpha=0.7)
+    # ax2.plot(theta_f_deg, e_plane_data_smooth2, label=f'Transformed radiation (SNIFT)', alpha=0.7)  
+    ax2.plot(theta_f_deg, e_plane_data_original, label=f'Radiation plot without errors', alpha=0.7)
+    ax2.plot(theta_f_deg, e_plane_data_original2, label=f'Radiation plot with errors', alpha=0.7)    
     ax2.set_title(f'{figure_title} E-plane Phi = {e_plane_plot_angle}')
     ax2.set_xlabel('Theta')
     ax2.grid()

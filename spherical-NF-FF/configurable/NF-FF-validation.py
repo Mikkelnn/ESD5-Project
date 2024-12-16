@@ -113,7 +113,7 @@ calculate_print_hpbw(selected_data_loaded, theta_deg_center)
 print("Transformed NF-FF:")
 calculate_print_hpbw(selected_ffData_no_error, theta_deg_center)
 
-# plot_error_compare(selected_data_loaded, selected_ffData_no_error, theta_deg_center, f'Comparison plot SNIFT implementation and TICRA data (smoothed)')
+plot_error_compare(selected_data_loaded, selected_ffData_no_error, theta_deg_center, f'Comparison plot SNIFT implementation and TICRA data (smoothed)')
 
 plot_dif(selected_data_loaded, selected_ffData_no_error, theta_deg_center, f'Difference plot SNIFT implementation and TICRA data')
 
