@@ -60,7 +60,7 @@ def generate_latex_row(data):
             f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
 
 
-TEST_NAME = 'noise/amplitude_single_pol_errors_normal' # used to determine folder to output files
+TEST_NAME = 'position_both_pol_same_error_correlated_theta' # used to determine folder to output files 
 PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
 FILE_PATH_SEARCH = f'{PATH_PREFIX}*/metrics.txt'
 
@@ -70,7 +70,7 @@ def extract_numeric_key(path):
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 # Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=True)
+matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=False)
 
 # matching_files = sort(matching_files)
 for file_path in matching_files:
