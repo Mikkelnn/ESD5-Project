@@ -19,6 +19,7 @@ def pad_theta(nfData, theta_step_deg):
 
     # copy the last row as padding
     padding_rows = np.repeat([nfData[-1]], num_padding_rows, axis=0)
+    # padding_rows = np.zeros((num_padding_rows, nfData.shape[1], nfData.shape[2]))
 
     # Add the zero rows to the array
     result = np.vstack((nfData, padding_rows))
