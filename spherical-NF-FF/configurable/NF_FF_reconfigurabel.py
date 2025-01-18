@@ -124,7 +124,7 @@ class NF_FF_Transform_tester:
         # Normalize plots
         # ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
         ffData_no_error_2D = ffData_no_error_2D / np.max(np.abs(ffData_no_error_2D))
-        ffData_error_2D = ffData_error_2D / np.max(np.abs(ffData_error_2D))
+        ffData_error_2D = ffData_error_2D / np.max(np.abs(ffData_no_error_2D))
 
         # Remove original zero padding
         # ffData_loaded2 = removeXFromEnd(ffData_loaded, int(num_zero_nfData))
