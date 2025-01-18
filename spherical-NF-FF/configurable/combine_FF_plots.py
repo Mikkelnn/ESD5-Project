@@ -178,4 +178,4 @@ def generateSaveCompareImage(PATH_PREFIX, reverseOrder, phi_select_angle, compar
 
 def generateCompareImageFromTestDescriptors(rootPath, descriptors, phi_select_angle=0, compareToPath=f'./spherical-NF-FF/testResults/FF_data_no_error.txt', showProgress=True):
     for descriptor in tqdm(descriptors, disable=(not showProgress)):
-        generateSaveCompareImage(f'{rootPath}/{descriptor.testName}', descriptor.reverseTableRowOrder, phi_select_angle, compareToPath, titleSuffix=descriptor.titleSuffix, legendType=descriptor.legendType)
+        generateSaveCompareImage(f'{rootPath}/{descriptor.testName}/', descriptor.reverseTableRowOrder, phi_select_angle, compareToPath, titleSuffix=descriptor.titleSuffix, legendType=descriptor.legendType)

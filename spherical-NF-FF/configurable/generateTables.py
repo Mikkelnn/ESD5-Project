@@ -68,7 +68,7 @@ def extract_numeric_key(path):
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 def generateSaveTable(filePath, reverseRowOrder=False):
-    FILE_PATH_SEARCH = f'{filePath}*/metrics.txt'
+    FILE_PATH_SEARCH = f'{filePath}/*/metrics.txt'
     # Find and sort all matching file paths
     matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=reverseRowOrder)
 
@@ -78,7 +78,6 @@ def generateSaveTable(filePath, reverseRowOrder=False):
         parsed_data = parse_file(file_path)
         latex_row = generate_latex_row(parsed_data)
         rows += f'{latex_row}\n'
-        #print(latex_row)
     
     write_file(rows, f'{filePath}/summaryTable.txt')
 

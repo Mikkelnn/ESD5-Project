@@ -201,7 +201,7 @@ class NF_FF_Transform_tester:
         metricsTxt += f"Max absolute error (all data): {calculate_max_indexed_error(self.ffData_no_error_2D, self.ffData_error_2D)}\n" 
         metricsTxt += f"Mean error (all data): {calculate_mean_indexed_error(self.ffData_no_error_2D, self.ffData_error_2D)}\n"
 
-        write_file(metricsTxt, PATH_PREFIX + '/metrics.txt')
+        write_file(metricsTxt, PATH_PREFIX + 'metrics.txt')
 
         # show all figures
         # show_figures()
