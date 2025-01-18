@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from modules.loadData import load_FF_data_own_output
 from modules.post_process import select_data_at_angle
+from tqdm import tqdm
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -142,37 +143,39 @@ def plot_error_compare_grouped(noError, dataErrorArr, errorTxt, theta_f_deg, fig
     # Adjust layout for better visualization
     fig.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
 
-    
-TEST_NAME = 'position_both_pol_same_error_correlated_theta' # used to determine folder to output files 
-PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
-FILE_PATH_SEARCH = f'{PATH_PREFIX}*/error_transformed_NF_FF_heatmap.txt'
+def generateSaveCompareImage(PATH_PREFIX, reverseOrder, phi_select_angle, compareToPath, titleSuffix='error', legendType='Error'):
+    FILE_PATH_SEARCH = f'{PATH_PREFIX}*/error_transformed_NF_FF_heatmap.txt'
 
-phi_select_angle = 0
-errorTxt = []
-plotData = []
+    errorTxt = []
+    plotData = []
 
-# load no error
-ffData_no_error, theta_deg, phi_deg, _, _ = load_FF_data_own_output(f'./spherical-NF-FF/testResults/FF_data_no_error.txt')
-plot_ffData_no_error = select_data_at_angle(ffData_no_error, phi_deg, phi_select_angle)
-theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
+    # load no error
+    ffData_no_error, theta_deg, phi_deg, _, _ = load_FF_data_own_output(compareToPath)
+    plot_ffData_no_error = select_data_at_angle(ffData_no_error, phi_deg, phi_select_angle)
+    theta_deg_center = np.linspace(-np.max(theta_deg), np.max(theta_deg), (len(theta_deg)*2)-1)
 
-# Extract the numeric part of the folder name and sort paths
-def extract_numeric_key(path):
-    match = re.search(r'[\\/]+([\dE+-]+)(mm|dB)?[\\/]', path)  # Find a number followed by "mm" in the path
-    return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
+    # Extract the numeric part of the folder name and sort paths
+    def extract_numeric_key(path):
+        match = re.search(r'[\\/]+([\dE+-]+)(mm|dB)?[\\/]', path)  # Find a number followed by "mm" in the path
+        return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
-# Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=False)
+    # Find and sort all matching file paths
+    matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=reverseOrder)
 
-for file_path in matching_files:
-    # errorTxt.append(extract_numeric_key(file_path))
-    errorTxt.append(file_path.removeprefix(PATH_PREFIX).split('/')[0])
-    ffData, _, _, _, _ = load_FF_data_own_output(file_path)
-    data = select_data_at_angle(ffData, phi_deg, phi_select_angle)
-    plotData.append(data)
+    for file_path in matching_files:
+        # errorTxt.append(extract_numeric_key(file_path))
+        errorTxt.append(file_path.removeprefix(PATH_PREFIX).split('/')[0])
+        ffData, _, _, _, _ = load_FF_data_own_output(file_path)
+        data = select_data_at_angle(ffData, phi_deg, phi_select_angle)
+        plotData.append(data)
 
-plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o error', f'Error', f'error')
-plt.savefig(PATH_PREFIX + 'compare_all_original.svg', bbox_inches='tight')
+    plot_error_compare_grouped(plot_ffData_no_error, plotData, errorTxt, theta_deg_center, f'Radiation comparison of transform w/o {titleSuffix}', legendType, titleSuffix)
+    plt.savefig(PATH_PREFIX + 'compare_all_original.svg', bbox_inches='tight')
 
-# plt.tight_layout()
-plt.show()
+    # plt.tight_layout()
+    # plt.show()
+
+
+def generateCompareImageFromTestDescriptors(rootPath, descriptors, phi_select_angle=0, compareToPath=f'./spherical-NF-FF/testResults/FF_data_no_error.txt', showProgress=True):
+    for descriptor in tqdm(descriptors, disable=(not showProgress)):
+        generateSaveCompareImage(f'{rootPath}/{descriptor.testName}', descriptor.reverseTableRowOrder, phi_select_angle, compareToPath, titleSuffix=descriptor.titleSuffix, legendType=descriptor.legendType)

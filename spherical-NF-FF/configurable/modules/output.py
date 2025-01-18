@@ -278,7 +278,7 @@ def calculate_print_hpbw(data, theta_deg_center):
     
     results = f'{hPlane}\n{ePlane}'
 
-    print(results)
+    # print(results)
 
     return results
     #print(f"H-plane (smoothed) HPBW: {h_plane_hpbw_smooth}deg")

@@ -1,5 +1,7 @@
 import re
 import glob
+from tqdm import tqdm
+from modules.output import write_file 
 
 # Define a function to parse the file and extract relevant metrics
 def parse_file(filename):
@@ -60,20 +62,26 @@ def generate_latex_row(data):
             f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
 
 
-TEST_NAME = 'position_both_pol_same_error_correlated_theta' # used to determine folder to output files 
-PATH_PREFIX = f'./spherical-NF-FF/testResults/{TEST_NAME}/'
-FILE_PATH_SEARCH = f'{PATH_PREFIX}*/metrics.txt'
-
 # Extract the numeric part of the folder name and sort paths
 def extract_numeric_key(path):
     match = re.search(r'[\\/]+([\dE+-]+)(mm|dB)?[\\/]', path)  # Find a number followed by "mm" in the path
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
-# Find and sort all matching file paths
-matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=False)
+def generateSaveTable(filePath, reverseRowOrder=False):
+    FILE_PATH_SEARCH = f'{filePath}*/metrics.txt'
+    # Find and sort all matching file paths
+    matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=reverseRowOrder)
 
-# matching_files = sort(matching_files)
-for file_path in matching_files:
-    parsed_data = parse_file(file_path)
-    latex_row = generate_latex_row(parsed_data)
-    print(latex_row)
+    # matching_files = sort(matching_files)
+    rows = ''
+    for file_path in matching_files:
+        parsed_data = parse_file(file_path)
+        latex_row = generate_latex_row(parsed_data)
+        rows += f'{latex_row}\n'
+        #print(latex_row)
+    
+    write_file(rows, f'{filePath}/summaryTable.txt')
+
+def generateFromTestDescriptors(rootPath, descriptors, showProgress):
+    for descriptor in tqdm(descriptors, disable=(not showProgress)):
+        generateSaveTable(f'{rootPath}/{descriptor.testName}', descriptor.reverseTableRowOrder)
