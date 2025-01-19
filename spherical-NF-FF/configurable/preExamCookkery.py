@@ -123,8 +123,9 @@ class NF_FF_Transform_tester:
 
         # Normalize plots
         # ffData_loaded = ffData_loaded / np.max(np.abs(ffData_loaded))
-        ffData_no_error_2D = ffData_no_error_2D / np.max(np.abs(ffData_no_error_2D))
-        ffData_error_2D = ffData_error_2D / np.max(np.abs(ffData_no_error_2D))
+        norm_factor = np.abs(ffData_no_error_2D)
+        ffData_no_error_2D = ffData_no_error_2D / np.max(norm_factor)
+        ffData_error_2D = ffData_error_2D / np.max(norm_factor)
 
         # Remove original zero padding
         # ffData_loaded2 = removeXFromEnd(ffData_loaded, int(num_zero_nfData))
@@ -150,38 +151,7 @@ class NF_FF_Transform_tester:
     # 5. Output FF - plot or write to file
     ##############################################################################################################
     def outputResults(self, PATH_PREFIX, testParamsTxt):
-        plot_copolar(self.selected_ffData_error, self.theta_deg_center, 'Transformed NF-FF copolar (with errors)')
-        plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_copolar.svg', bbox_inches='tight')
-
-        plot_polar(self.selected_ffData_error, self.theta_deg_center, 'Transformed NF-FF polar (with errors)')
-        plt.savefig(PATH_PREFIX + 'error_transformed_NF_(FF)_polar.svg', bbox_inches='tight')
-
-        plot_heatmap(self.ffData_error_2D, self.theta_deg, self.phi_deg, 'Transformed NF-FF heatmap (with errors)')
-        plt.savefig(PATH_PREFIX + 'error_transformed_NF_FF_heatmap.svg', bbox_inches='tight')
-        save_data_txt(self.ffData_error_2D, self.theta_deg, self.phi_deg, PATH_PREFIX + 'error_transformed_NF_FF_heatmap.txt', 'Theta Phi E_field')
-
-        # applied errors
-        plot_heatmap(self.appliedError[:,:,0], self.theta_deg, self.phi_deg, 'Applied NF error heatmap of polarity 0')
-        plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_0.svg', bbox_inches='tight')
-        plot_heatmap(self.appliedError[:,:,1], self.theta_deg, self.phi_deg, 'Applied NF error heatmap of polarity 1')
-        plt.savefig(PATH_PREFIX + 'applied_NF_error_heatmap_pol_1.svg', bbox_inches='tight')
-        save_data_txt(self.appliedError, self.theta_deg, self.phi_deg, PATH_PREFIX + 'aplied_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
-
-        # compare/dif plots
-        plot_error_compare(self.selected_ffData_no_error, self.selected_ffData_error, self.theta_deg_center, f'Radiation Comparison of transform w/o error')
-        plt.savefig(PATH_PREFIX + 'compare_amplitude.svg', bbox_inches='tight')
-
-        plot_dif(self.selected_ffData_no_error, self.selected_ffData_error, self.theta_deg_center, f'Diff radiation of transform w/o error')
-        plt.savefig(PATH_PREFIX + 'dif_amplitude.svg', bbox_inches='tight')
-
-        diffData = self.ffData_no_error_2D - self.ffData_error_2D
-        plot_heatmap(diffData, self.theta_deg, self.phi_deg, 'Diff no error and error heatmap')
-        plt.savefig(PATH_PREFIX + 'diff_no_error_and_error_heatmap.svg', bbox_inches='tight')
-        save_data_txt(diffData, self.theta_deg, self.phi_deg, PATH_PREFIX + 'diff_no_error_and_error.txt', 'Theta Phi E_Pol_0 E_Pol_1')
-
-        plot_heatmap(self.ffData_error_2D, self.theta_deg, self.phi_deg, 'Transformed NF-FF heatmap (no errors)')
-        plt.savefig(PATH_PREFIX + 'no_error_transformed_NF_FF_heatmap.svg', bbox_inches='tight')
-
+        
         ### save metrics data in txt (HPBW, mean, max)
         metricsTxt = f'TEST_PARAMS: {testParamsTxt}\n'
 
