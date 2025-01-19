@@ -64,9 +64,14 @@ test_params_gimbal = [Test_Params(0.02, '2E-2'),
                       Test_Params(10, '10')]
 testDescriptions.append(Test_Descript('gimbal_errors_uniform', test_params_gimbal, gimbal_error_uniform, reverseTableRowOrder=False))
 
-
-root_path = './spherical-NF-FF/testResults_2025_01_17'
-comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
-#NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True)
+#for loop her
+for i in range (1):
+    root_path = f'./spherical-NF-FF/testResults_2025_01_17/{i}'
+    comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
+    NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True)
 generateFromTestDescriptors(root_path, testDescriptions, showProgress=True)
 generateCompareImageFromTestDescriptors(root_path, testDescriptions, phi_select_angle=0, compareToPath=comparepath, showProgress=True)
+#for loop end
+
+
+#def data to csv
