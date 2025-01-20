@@ -243,19 +243,25 @@ def calculate_hpbw_linear_approx(data, angles):
 
     # Find the crossing point on the left
     left_index = np.where(data[:max_index+1] > half_power_level)[0][0]  # Last point above
-    left_angle = interpolate(
-        angles[left_index - 1], data[left_index - 1],
-        angles[left_index], data[left_index],
-        half_power_level
-    )
+    if left_index==0:
+        left_angle = angles[left_index]
+    else:
+        left_angle = interpolate(
+            angles[left_index - 1], data[left_index - 1],
+            angles[left_index], data[left_index],
+            half_power_level
+        )
 
     # Find the crossing point on the right
     right_index = max_index + np.where(data[max_index:] > half_power_level)[0][-1]  # First point above
-    right_angle = interpolate(
-        angles[right_index], data[right_index],
-        angles[right_index + 1], data[right_index + 1],
-        half_power_level
-    )
+    if right_index == len(data)-1:
+        right_angle = angles[right_index]
+    else:
+        right_angle = interpolate(
+            angles[right_index], data[right_index],
+            angles[right_index + 1], data[right_index + 1],
+            half_power_level
+        )
 
     
     # Calculate the HPBW
