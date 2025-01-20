@@ -1,15 +1,24 @@
 # import requi9red module
 import sys
- 
-# append the path of the
-# parent directory
-sys.path.append("..")
+import os
+
+# Get the current directory (preExamCookkery)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Add the parent directory to sys.path
+parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
+sys.path.append(parent_dir)
+
+# Add the sibling 'modules' directory to sys.path
+modules_dir = os.path.join(parent_dir, "modules")
+sys.path.append(modules_dir)
 
 from preExamCookkery import NF_FF_Transform_tester, Test_Descript, Test_Params
 from modules.errors import *
 from generateTables import generateFromTestDescriptors
 from combine_FF_plots import generateCompareImageFromTestDescriptors
 import math
+from tqdm import tqdm
 
 # configure all test scenarios to testDescriptions = []
 testDescriptions = []
@@ -57,9 +66,9 @@ test_params_noise = [Test_Params(calcPercentSNR(100), '100dB'),
                      Test_Params(calcPercentSNR(20), '20dB'), 
                      Test_Params(calcPercentSNR(10), '10dB'), 
                      Test_Params(calcPercentSNR(0), '0dB')]
-testDescriptions.append(Test_Descript('noise/amplitude_same_errors_normal', test_params_noise, amplitude_same_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
-testDescriptions.append(Test_Descript('noise/amplitude_independent_errors_normal', test_params_noise, amplitude_independent_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
-testDescriptions.append(Test_Descript('noise/amplitude_single_pol_errors_normal', test_params_noise, amplitude_single_pol_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
+testDescriptions.append(Test_Descript('amplitude_same_errors_normal', test_params_noise, amplitude_same_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
+testDescriptions.append(Test_Descript('amplitude_independent_errors_normal', test_params_noise, amplitude_independent_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
+testDescriptions.append(Test_Descript('amplitude_single_pol_errors_normal', test_params_noise, amplitude_single_pol_errors_normal_noise, reverseTableRowOrder=True, titleSuffix='noise', legendType='SNR'))
 
 
 # GIMBAL: 
@@ -72,14 +81,10 @@ testDescriptions.append(Test_Descript('noise/amplitude_single_pol_errors_normal'
 # testDescriptions.append(Test_Descript('gimbal_errors_uniform', test_params_gimbal, gimbal_error_uniform, reverseTableRowOrder=False))
 
 #for loop her
-# for i in range (1):
-root_path = f'./spherical-NF-FF/testResults_2025_01_18'
-comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
-NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True)
+for i in tqdm(range(100)):
+    root_path = f'./spherical-NF-FF/testResults_2025_01_18/noise/{i}'
+    comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
+    NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True, isInloop=True)
 
 # generateFromTestDescriptors(root_path, testDescriptions, showProgress=True)
 # generateCompareImageFromTestDescriptors(root_path, testDescriptions, phi_select_angle=0, compareToPath=comparepath, showProgress=True)
-
-
-
-#def data to csv

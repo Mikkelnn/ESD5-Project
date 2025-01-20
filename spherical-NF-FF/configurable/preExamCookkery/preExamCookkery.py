@@ -183,10 +183,10 @@ class NF_FF_Transform_tester:
         # show all figures
         # show_figures()
 
-    def runTesets(self, root_path, testDescriptions, showProgress=True):
+    def runTesets(self, root_path, testDescriptions, showProgress=True, isInloop=False):
         self.loadNFData()
 
-        for testDescription in tqdm(testDescriptions, disable=(not showProgress)):            
+        for testDescription in tqdm(testDescriptions, disable=(not showProgress), leave=(not isInloop)):            
             for params in tqdm(testDescription.testParams, disable=(not showProgress), leave=False):
                 PATH_PREFIX = f'{root_path}/{testDescription.testName}/{params.name}/'
                 # print(f'STARTED: {PATH_PREFIX}')

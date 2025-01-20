@@ -1,0 +1,20 @@
+TEST_PARAMS: 20dB 0.3697994759375563
+
+NF transformed data (FF) no errors:
+H-plane (smoothed) HPBW: 18.17 deg; H-plane (original) HPBW: 18.14 deg
+E-plane (smoothed) HPBW: 18.82 deg; E-plane (original) HPBW: 18.37 deg
+
+NF transformed data (FF) with errors:
+H-plane (smoothed) HPBW: 18.3 deg; H-plane (original) HPBW: 18.52 deg
+E-plane (smoothed) HPBW: 18.37 deg; E-plane (original) HPBW: 18.66 deg
+
+Mean and Max errors between selected data with errors and selected data no errors
+Max error e-plane: 7.5779743677479985
+Max error h-plane: 6.344110908441419
+Mean error e-plane: 1.066030168929471
+Mean error h-plane: 1.4529850167759404
+
+Mean and Max errors between data with errors and data no errors (2D array)
+Max absolute error (all data): 11.80461011443338
+Mean error (all data): 1.4690869884629072
+First sidelobe error: 0.7378081146131681
