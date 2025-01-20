@@ -152,6 +152,10 @@ class NF_FF_Transform_tester:
     ##############################################################################################################
     def outputResults(self, PATH_PREFIX, testParamsTxt):
         
+
+        diff = np.abs(self.selected_ffData_no_error.e_plane_data_original - self.selected_ffData_error.e_plane_data_original)
+        ffirstSidelobeDiff = diff[19]
+
         ### save metrics data in txt (HPBW, mean, max)
         metricsTxt = f'TEST_PARAMS: {testParamsTxt}\n'
 
@@ -170,6 +174,9 @@ class NF_FF_Transform_tester:
         metricsTxt += '\nMean and Max errors between data with errors and data no errors (2D array)\n'
         metricsTxt += f"Max absolute error (all data): {calculate_max_indexed_error(self.ffData_no_error_2D, self.ffData_error_2D)}\n" 
         metricsTxt += f"Mean error (all data): {calculate_mean_indexed_error(self.ffData_no_error_2D, self.ffData_error_2D)}\n"
+
+        # extra data
+        metricsTxt += f"First sidelobe error: {ffirstSidelobeDiff}\n"
 
         write_file(metricsTxt, PATH_PREFIX + 'metrics.txt')
 
