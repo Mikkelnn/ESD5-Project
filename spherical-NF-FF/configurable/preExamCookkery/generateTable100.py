@@ -2,7 +2,8 @@ import re
 import glob
 from tqdm import tqdm
 from modules.output import write_file 
-from itertools import groupby
+import pandas as pd
+from pathlib import Path
 
 # Define a function to parse the file and extract relevant metrics
 def parse_file(filename):
@@ -38,6 +39,8 @@ def parse_file(filename):
     e_smooth = float(re.search(r'E-plane \(smoothed\) HPBW: ([\d.]+)', errors_data).group(1))
     e_orig = float(re.search(r'E-plane \(original\) HPBW: ([\d.]+)', errors_data).group(1))
 
+    firstSidelobeError = float(re.search(r'First sidelobe error: ([\d.]+)', data).group(1))
+
     return {
         'param_name': param_name,
         'param_percent': param_percent,
@@ -51,37 +54,58 @@ def parse_file(filename):
         'h_smooth': h_smooth,
         'h_orig': h_orig,
         'e_smooth': e_smooth,
-        'e_orig': e_orig
+        'e_orig': e_orig,
+        'first_sidelobe_error': firstSidelobeError
     }
 
 # Generate LaTeX row for the extracted data
 def generate_latex_row(data):
-    return (f"{data['param_name']} & {data['param_percent']:.3f}   & "
-            f"{data['max_error_e_plane']:.2f}  & {data['mean_error_e_plane']:.2f} & "
-            f"{data['max_error_h_plane']:.2f}  & {data['mean_error_h_plane']:.2f} & "
-            f"{data['max_absolute_error']:.2f}  & {data['mean_absolute_error']:.2f} & "
-            f"{data['e_orig']:.2f} & {data['h_orig']:.2f} \\\\")
+    return (f"{data["param_name"]} & "
+            f"{data["mean_maxerror_e"]:.2f}  & {data["mean_meanerror_e"]:.2f} & "
+            f"{data["mean_maxerror_h"]:.2f}  & {data["mean_meanerror_h"]:.2f} & "
+            f"{data["max_absError"]:.2f}  & {data["mean_absError"]:.2f} & "
+            f"{data["mean_firstSidelobeError"]:.2f} & {data["max_firstSidelobeError"]:.2f} \\\\")
 
 
 # Extract the numeric part of the folder name and sort paths
 def extract_numeric_key(path):
-    match = re.search(r'[\\/]+([\dE+-]+)(mm|dB)?[\\/]', path)  # Find a number followed by "mm" in the path
+    match = re.search(r'[\\\/]+([\dE+-]+)(mm|dB)?[\\\/]', path)  # Find a number followed by "mm" in the path
     return float(match.group(1)) if match else float('inf')  # Default to 'inf' if no match is found
 
 def generateSaveTable(filePath, reverseRowOrder=False):
-    FILE_PATH_SEARCH = f'{filePath}/metrics.txt'
+    FILE_PATH_SEARCH = f'{filePath}/*/metrics.txt'
     # Find and sort all matching file paths
     matching_files = sorted(glob.glob(FILE_PATH_SEARCH), key=extract_numeric_key, reverse=reverseRowOrder)
-
     # matching_files = sort(matching_files)
     rows = ''
+    parsed_data = []
     for file_path in matching_files:
-        parsed_data = parse_file(file_path)
+        parsed_data.append(parse_file(file_path))
+    
+    df = pd.DataFrame(parsed_data)
 
-        latex_row = generate_latex_row(parsed_data)
+    grouped_parsed_data = df.groupby('param_name').agg(
+        mean_maxerror_e=('max_error_e_plane','mean'),
+        mean_maxerror_h=('max_error_h_plane','mean'),
+        mean_meanerror_e=('mean_error_e_plane','mean'),
+        mean_meanerror_h=('mean_error_h_plane','mean'),
+        max_absError=('max_absolute_error','max'),
+        mean_absError=('mean_absolute_error','mean'),
+        mean_firstSidelobeError=('first_sidelobe_error','mean'),
+        max_firstSidelobeError=('first_sidelobe_error','max'),
+    ).reset_index()
+
+    grouped_parsed_data['mm_value'] = grouped_parsed_data['param_name'].str.extract(r'(\d+)').astype(int)
+    sorted_data = grouped_parsed_data.sort_values(by='mm_value',ascending=(not reverseRowOrder)).drop(columns=['mm_value'])
+
+    for index, row in sorted_data.iterrows():  
+        print(row)  
+        latex_row = generate_latex_row(row)
         rows += f'{latex_row}\n'
     
-    write_file(rows, f'{filePath}/summaryTable.txt')
+    filePathNew = filePath.replace("*","all")
+    Path(filePathNew).mkdir(parents=True, exist_ok=True)
+    write_file(rows, f'{filePathNew}/summaryTable.txt')
 
 def generateFromTestDescriptors(rootPath, descriptors, showProgress):
     for descriptor in tqdm(descriptors, disable=(not showProgress)):

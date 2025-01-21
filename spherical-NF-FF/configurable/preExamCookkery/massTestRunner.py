@@ -81,10 +81,10 @@ test_params_gimbal = [Test_Params(0.02, '2E-2'),
 testDescriptions.append(Test_Descript('gimbal/errors_uniform', test_params_gimbal, gimbal_error_uniform, reverseTableRowOrder=False))
 
 #for loop her
-for i in tqdm(range(100)):
-    root_path = f'./spherical-NF-FF/testResultsExam/{i}'
-    comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
-    NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True, isInloop=True)
-
+# for i in tqdm(range(100)):
+#     root_path = f'./spherical-NF-FF/testResultsExam/{i}'
+#     comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
+#     NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True, isInloop=True)
+root_path = f'./spherical-NF-FF/testResultsExam'
 generateFromTestDescriptors(root_path, testDescriptions, showProgress=True)
 # generateCompareImageFromTestDescriptors(root_path, testDescriptions, phi_select_angle=0, compareToPath=comparepath, showProgress=True)
