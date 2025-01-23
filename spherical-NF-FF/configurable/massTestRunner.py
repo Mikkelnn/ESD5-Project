@@ -22,16 +22,19 @@ def calcPercentPosition(distErrorM):
 
 
 # POSITION: correlated theta, correlated phi
-deviationFactor = 0.1
+deviationFactor = 0.3
 test_params_position_correlated = [Test_Params(calcPercentPosition(0.001), '1mm', deviationFactor), 
                                    Test_Params(calcPercentPosition(0.005), '5mm', deviationFactor), 
                                    Test_Params(calcPercentPosition(0.01), '10mm', deviationFactor), 
                                    Test_Params(calcPercentPosition(0.02), '20mm', deviationFactor), 
                                    Test_Params(calcPercentPosition(0.03), '30mm', deviationFactor), 
                                    Test_Params(calcPercentPosition(0.05), '50mm', deviationFactor)]
-testDescriptions.append(Test_Descript('position_both_pol_same_error_correlated_phi', test_params_position_correlated, phase_errors_correlated_phi_same, reverseTableRowOrder=False))
-testDescriptions.append(Test_Descript('position_both_pol_same_error_correlated_theta', test_params_position_correlated, phase_errors_correlated_theta_same, reverseTableRowOrder=False))
+testDescriptions.append(Test_Descript('03/position_both_pol_same_error_correlated_phi', test_params_position_correlated, phase_errors_correlated_phi_same, reverseTableRowOrder=False))
+testDescriptions.append(Test_Descript('03/position_both_pol_same_error_correlated_theta', test_params_position_correlated, phase_errors_correlated_theta_same, reverseTableRowOrder=False))
 
+deviationFactor = 0.4
+testDescriptions.append(Test_Descript('04/position_both_pol_same_error_correlated_phi', test_params_position_correlated, phase_errors_correlated_phi_same, reverseTableRowOrder=False))
+testDescriptions.append(Test_Descript('04/position_both_pol_same_error_correlated_theta', test_params_position_correlated, phase_errors_correlated_theta_same, reverseTableRowOrder=False))
 
 # NOISE: normaldistribution for same for both pol. and independen/only one
 # def calcPercentSNR(SNR):
@@ -66,7 +69,7 @@ testDescriptions.append(Test_Descript('position_both_pol_same_error_correlated_t
 
 #for loop her
 
-root_path = './spherical-NF-FF/benjamin'
+root_path = './spherical-NF-FF/deviationFactor'
 comparepath = f'./spherical-NF-FF/testResults/FF_data_no_error.txt'
 NF_FF_Transform_tester().runTesets(root_path, testDescriptions, showProgress=True)
 generateFromTestDescriptors(root_path, testDescriptions, showProgress=True)
