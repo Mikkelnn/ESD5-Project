@@ -1,5 +1,6 @@
 import re
 import glob
+import numpy as np
 from tqdm import tqdm
 from modules.output import write_file 
 import pandas as pd
@@ -61,10 +62,10 @@ def parse_file(filename):
 # Generate LaTeX row for the extracted data
 def generate_latex_row(data):
     return (f"{data["param_name"]} & "
-            f"{data["mean_maxerror_e"]:.2f}  & {data["mean_meanerror_e"]:.2f} & "
-            f"{data["mean_maxerror_h"]:.2f}  & {data["mean_meanerror_h"]:.2f} & "
-            f"{data["max_absError"]:.2f}  & {data["mean_absError"]:.2f} & "
-            f"{data["mean_firstSidelobeError"]:.2f} & {data["max_firstSidelobeError"]:.2f} \\\\")
+            f"{data["std_mean_maxerror_e"]:.2f}  & {data["std_mean_meanerror_e"]:.2f} & "
+            f"{data["std_mean_maxerror_h"]:.2f}  & {data["std_mean_meanerror_h"]:.2f} & "
+            f"{data["std_max_absError"]:.2f}  & {data["std_mean_absError"]:.2f} & "
+            f"{data["std_mean_firstSidelobeError"]:.2f} & {data["std_max_firstSidelobeError"]:.2f} \\\\")
 
 
 # Extract the numeric part of the folder name and sort paths
@@ -85,14 +86,14 @@ def generateSaveTable(filePath, reverseRowOrder=False):
     df = pd.DataFrame(parsed_data)
 
     grouped_parsed_data = df.groupby('param_name').agg(
-        mean_maxerror_e=('max_error_e_plane','mean'),
-        mean_maxerror_h=('max_error_h_plane','mean'),
-        mean_meanerror_e=('mean_error_e_plane','mean'),
-        mean_meanerror_h=('mean_error_h_plane','mean'),
-        max_absError=('max_absolute_error','max'),
-        mean_absError=('mean_absolute_error','mean'),
-        mean_firstSidelobeError=('first_sidelobe_error','mean'),
-        max_firstSidelobeError=('first_sidelobe_error','max'),
+        std_mean_maxerror_e=('max_error_e_plane','std'),
+        std_mean_maxerror_h=('max_error_h_plane','std'),
+        std_mean_meanerror_e=('mean_error_e_plane','std'),
+        std_mean_meanerror_h=('mean_error_h_plane','std'),
+        std_max_absError=('max_absolute_error','std'),
+        std_mean_absError=('mean_absolute_error','std'),
+        std_mean_firstSidelobeError=('first_sidelobe_error','std'),
+        std_max_firstSidelobeError=('first_sidelobe_error','std'),
     ).reset_index()
 
     grouped_parsed_data['mm_value'] = grouped_parsed_data['param_name'].str.extract(r'(\d+)').astype(int)
@@ -103,7 +104,7 @@ def generateSaveTable(filePath, reverseRowOrder=False):
         latex_row = generate_latex_row(row)
         rows += f'{latex_row}\n'
     
-    filePathNew = filePath.replace("*","all")
+    filePathNew = filePath.replace("*","all/std")
     Path(filePathNew).mkdir(parents=True, exist_ok=True)
     write_file(rows, f'{filePathNew}/summaryTable.txt')
 
